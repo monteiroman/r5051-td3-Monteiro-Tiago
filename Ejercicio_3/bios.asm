@@ -74,60 +74,60 @@ Modo_protegido:
         mov cr0, eax
         xchg bx, bx
 
-        jmp CS_SEL:Inicio_32bits    ;Cambio el CS al selector de modo protegido.
+        jmp dword CS_SEL:(0xFFFF0000+Inicio_32bits)     ;Cambio el CS al selector
+                                                            ;de modo protegido.
 
         BITS 32                 ;El codigo que continúa va en segmento de código
                                 ; de 32 BITS
 
 Inicio_32bits:
 
-        mov eax, DS_SEL          ;Cargo DS con el selector que apunta al
-        mov ds, eax              ;descriptor de segmento de datos flat.
+        mov ax, DS_SEL          ;Cargo DS con el selector que apunta al
+        mov ds, ax              ;descriptor de segmento de datos flat.
+        mov es,ax
+        ;xchg bx, bx
+        ;hlt
 
-        xchg bx, bx
-        hlt
-
-        mov     eax,0
-        mov     ss,eax           ;Inicio el selector de pila
-        mov     esp,0x1FFFA000   ;Cargo el registro de pila y le doy
+        mov     ax,DS_SEL
+        mov     ss,ax           ;Inicio el selector de pila
+        mov     esp,0x1FFFA000  ;Cargo el registro de pila y le doy
                                     ;direccion de inicio
 
         ;En los registros: ax (destino), bx (largo) y cx (inicio)
 
-        mov     eax,DESTINO1     ;0x00000000
-        mov     ebx,LARGO        ;Calculo el largo al final
-        mov     ecx,Copiar       ;Inicio de la copia. Copio el pedazo de
-                                    ;codigo que me interesa.
+        mov     eax,DESTINO1    ;0x00000000
+        mov     ebx,LARGO       ;Calculo el largo al final
+        mov     ecx,0xFFFF0000+Funcion_copia       ;Inicio de la copia. Copio el
+                                                        ;pedazo de codigo que me
+                                                        ;interesa.
 
         xchg    bx,bx           ;Magic breakpoint
         call Funcion_copia
-        call 0x00000000
 
-Copiar:
-        mov     eax,DESTINO2     ;0x00300000
-        mov     ebx,LARGO        ;Como se copia a si misma calculo el largo al final
-        mov     ecx,Copiar       ;En este caso se copia la funcion a si misma
+        mov     eax,DESTINO2    ;0x00300000
+        mov     ebx,LARGO       ;Como se copia a si misma calculo el largo al
+                                    ;final
+        mov     ecx,DESTINO1    ;En este caso se copia la funcion a si misma
 
-        call Funcion_copia
-        call 0x00300000
+        call ecx                ;No se porque no me funciona con "call dword DESTINO1"
 
         xchg    bx,bx           ;Magic breakpoint
         hlt                     ;pongo en halt el procesador
 
+
 Funcion_copia:
-        mov     es,eax           ;Cargo el destino en "es" (para movsb)
-        mov     esi,ecx           ;Cargo el inicio en "si" (para movsb)
-        mov     edi,0            ;Pongo "di" en cero para completar la dirección de destino
-        mov     ecx,ebx           ;Pongo el largo en "cx" (para rep)
+        mov     edi,eax         ;Pongo "edi" en cero para completar la dirección
+                                    ;de destino
+        mov     esi,ecx         ;Cargo el inicio en "esi" (para movsb)
+        mov     ecx,ebx         ;Pongo el largo en "ecx" (para rep)
         rep     cs movsb        ;Muevo los bytes
-        xchg    ebx,ebx           ;Magic breakpoint
+        xchg    bx,bx           ;Magic breakpoint
 
         ret                     ;Retorno a donde llame.
 
-        LARGO EQU ($ - Copiar)  ;Calculo el largo en base al programa actual
-                                        ;en el futuro va a ser un parametro de la
-                                        ;funcion.
-
+        LARGO EQU ($ - Funcion_copia)   ;Calculo el largo en base al programa
+                                            ;actual en el futuro va a ser un
+                                            ;parametro de la funcion.
 
 
         times 0xFFF0 - ($ - Inicio)  db 0   ;Primer relleno.
