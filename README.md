@@ -1,3 +1,3 @@
-Repositorio para la materia Tecnicas Digitales III
-Tiago Monteiro
-2020
+#Tecnicas Digitales III
+##	Tiago Monteiro (142035-5)
+	2020
