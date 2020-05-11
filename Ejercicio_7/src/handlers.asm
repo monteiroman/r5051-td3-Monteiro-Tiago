@@ -10,7 +10,6 @@ GLOBAL handler#GP
 ;Desde init32.asm
 EXTERN IDT
 EXTERN CS_SEL
-EXTERN CS_SEL_ROM
 
 USE32
 
@@ -64,7 +63,7 @@ IDT_handler_loader:
 
     ;+2;   Lo lleno en el siguiente Paso
     ;+3:   Pongo el selector de codigo.
-        mov     ax, CS_SEL_ROM
+        mov     ax, CS_SEL
         mov     [esi+ecx+2], ax     ;Sumo 2 para pararme en el byte 2 (estoy llenando ambos bytes).
 
     ;+4:    CERO
