@@ -41,8 +41,11 @@ section .saved_digits_table nobits
 ;En este buffer se van a ir guardando los numeros hasta que se presione enter,
 ;luego los copio a la tabla de guardados.
 section .round_buffer nobits
+    round_buffer_index:
+        resb 1
     round_buffer:
         resb 9                        ; Reservo los bytes del buffer circular.
+        round_buffer_end:
 
  ;________________________________________
  ; Tabla para identificar los digitos
@@ -74,10 +77,10 @@ keyboard_fill_lookup_table:
         mov word        [ebp+0x0B],             0x0
         mov word        [ebp+0x21],             0xF
 
-        mov word        [ebp+0x15],             0x00    ;Y
-        mov word        [ebp+0x16],             0x06    ;U
-        mov word        [ebp+0x17],             0x08    ;I
-        mov word        [ebp+0x18],             0x0D    ;O
+        ;mov word        [ebp+0x15],             0x00    ;Y
+        ;mov word        [ebp+0x16],             0x06    ;U
+        ;mov word        [ebp+0x17],             0x08    ;I
+        ;mov word        [ebp+0x18],             0x0D    ;O
 
         ret
 
@@ -120,8 +123,73 @@ keyboard_routine:
         cmp     al, 0x02
         jl      exit
 
-        jmp     save_key        ;es un numero -> lo guardo
+        jmp     save_number        ;es un numero -> lo guardo
 
+
+    save_number:
+
+        mov     ebp, table           ;Busco la direccion de la tabla de inspeccion.
+
+        ;Inicio los punteros de las tablas de guardado de los caracteres.
+        xor     ebx, ebx
+        mov     bl, [round_buffer_index]
+        mov     edx, round_buffer_end
+
+        ;Ya puedo guardar el valor de la tecla en la tabla.
+        ;En "al" ya tenia el valor que presionaron, si le sumo ebp obtengo,
+        ;desde la lookup table, el valor de la tecla que apretaron.
+        xor     ecx,ecx
+        mov     cl, [ebp+eax]
+BKPT
+        ;Chequeo si estoy por sobrepasar el buffer
+        mov     edi, round_buffer           ;Guardo el inicio del buffer en edi
+        xor     ebx,ebx
+        xor     eax,eax
+        mov     bl, 0x2
+        mov     eax, [round_buffer_index]
+        div     bl
+        add     eax, ebx                    ;sumo eax y ebx para tener la posicion exacta en el buffer
+        cmp     eax, edx
+        jnz     round_buffer_not_overflow   ;Si no hizo overflow salto la proxima instruccion que
+        mov     bx,0                        ; pone al indice en cero
+
+        ;Incremento el indice y guardo el valor de "cl" (que es el que se obtenia
+        ;de la lookup table) en el inicio de la tabla + edi (que seria el puntero
+        ;de la tabla de guardado).
+        round_buffer_not_overflow:
+
+        xor     ebx, ebx
+        mov     bl, [round_buffer_index]
+        ;BKPT
+        xor     eax, eax
+        xor     edx, edx
+        mov     ax, bx          ;Divido ax por dos, en la parte baja guardo el resultado,
+        mov     dl, 0x2         ; en la parte alta el resto.
+        div     dl
+
+        and     ah, 0x01                ;Me fijo en el ultimo bit de la parte alta de ax, me dice si el indice es par o impar
+        cmp     ah, 0x01                ; si el indice es impar lo tengo que guardar un nible corrido
+        jz      not_even_index
+            xor     edx, edx
+            mov     dl, al
+            mov     [round_buffer + edx], cl
+            jmp     saving_end
+        not_even_index:
+            xor     dx, dx
+            mov     dl, al
+            shl     cx, 4
+            add     [round_buffer + edx], cx
+
+        saving_end:
+        inc     bx
+        mov     [round_buffer_index], bl     ;guardo el indice
+
+        jmp     exit
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;; esta guarda en la tabla. por ahora la dejo aca
     save_key:
         mov     ebp, table           ;Busco la direccion de la tabla de inspeccion.
 

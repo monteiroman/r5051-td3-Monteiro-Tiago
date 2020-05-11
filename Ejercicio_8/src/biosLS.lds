@@ -72,12 +72,8 @@ SECTIONS
 
     .saved_digits_table 0x00210000 :                  /* tabla de digitos guardados*/
         {
-            __SAVED_DIGITS_START = .;
             bin/keyboard.elf(.saved_digits_table);
-            __SAVED_DIGITS_END = .;
-            __ROUND_BUFFER_START = .;
             bin/keyboard.elf(.round_buffer);
-            __ROUND_BUFFER_END = .;
         }
         /* __SAVED_DIGITS_LENGTH =  SIZEOF(.saved_digits_table); */
         /* __SAVED_DIGITS_END = __SAVED_DIGITS_START + __SAVED_DIGITS_LENGTH; */
