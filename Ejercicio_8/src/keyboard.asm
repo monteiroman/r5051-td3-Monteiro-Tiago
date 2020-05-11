@@ -75,7 +75,9 @@ keyboard_fill_lookup_table:
         mov word        [ebp+0x09],             0x8
         mov word        [ebp+0x0A],             0x9
         mov word        [ebp+0x0B],             0x0
-        mov word        [ebp+0x21],             0xF
+        ;mov word        [ebp+0x21],             0xF
+        mov word        [ebp+0x1C],             0x0     ;ENTER no me interesa el valor en la tabla, no se guarda
+
 
         ;mov word        [ebp+0x15],             0x00    ;Y
         ;mov word        [ebp+0x16],             0x06    ;U
@@ -110,8 +112,8 @@ keyboard_routine:
         cmp     bl, 0x80                    ;0 -> Make (se presiono la tecla), 1 -> Break (se libero la tecla).
         jz      exit                        ;Se desea detectar cuando la tecla se suelta. Si fue presionada vuelvo a buffer_check.
 
-        ;Si la tecla presionada y liberada es "F" salgo.
-        cmp     al, 0x21
+        ;Si la tecla presionada y liberada es ENTER; guardo el buffer.
+        cmp     al, 0x1C
         jz      exit
 
         ;Chequeo si es mayor a la tecla "0". Si lo es salto a chequear el buffer
@@ -128,58 +130,53 @@ keyboard_routine:
 
     save_number:
 
-        mov     ebp, table           ;Busco la direccion de la tabla de inspeccion.
-
-        ;Inicio los punteros de las tablas de guardado de los caracteres.
-        xor     ebx, ebx
-        mov     bl, [round_buffer_index]
-        mov     edx, round_buffer_end
-
-        ;Ya puedo guardar el valor de la tecla en la tabla.
         ;En "al" ya tenia el valor que presionaron, si le sumo ebp obtengo,
         ;desde la lookup table, el valor de la tecla que apretaron.
+        mov     ebp, table           ;Busco la direccion de la tabla de inspeccion.
         xor     ecx,ecx
         mov     cl, [ebp+eax]
-BKPT
-        ;Chequeo si estoy por sobrepasar el buffer
-        mov     edi, round_buffer           ;Guardo el inicio del buffer en edi
-        xor     ebx,ebx
-        xor     eax,eax
-        mov     bl, 0x2
-        mov     eax, [round_buffer_index]
-        div     bl
-        add     eax, ebx                    ;sumo eax y ebx para tener la posicion exacta en el buffer
-        cmp     eax, edx
-        jnz     round_buffer_not_overflow   ;Si no hizo overflow salto la proxima instruccion que
-        mov     bx,0                        ; pone al indice en cero
 
-        ;Incremento el indice y guardo el valor de "cl" (que es el que se obtenia
-        ;de la lookup table) en el inicio de la tabla + edi (que seria el puntero
-        ;de la tabla de guardado).
-        round_buffer_not_overflow:
-
+        ;Inicio los punteros del buffer de guardado de los caracteres.
         xor     ebx, ebx
-        mov     bl, [round_buffer_index]
-        ;BKPT
+        mov     bl, [round_buffer_index]    ; Valor del indice
+        mov     edx, round_buffer_end       ; Final del buffer
+        mov     edi, round_buffer           ; Inicio del buffer
+
+        ;Chequeo si estoy por sobrepasar el buffer
+        shr     ebx, 1                      ; Divido el indice por dos (este indice indica nibles no bytes)
+        add     edi, ebx                    ; Sumo ebx y edi para tener la posicion exacta en el buffer
+        cmp     edi, edx                    ; Comparo con el final del buffer.
+        jnz     round_buffer_not_overflow   ; Si hizo overflow, reseteo el indice
+          mov     bl,0                      ;    que venia manejando en ebx
+          mov     [round_buffer_index], bl  ; Guardo el indice reseteado
+
+
+        ;Una vez solucionada la parte de overflow
+        round_buffer_not_overflow:
+        xor     ebx, ebx                        ; Limpio registros.
         xor     eax, eax
         xor     edx, edx
-        mov     ax, bx          ;Divido ax por dos, en la parte baja guardo el resultado,
-        mov     dl, 0x2         ; en la parte alta el resto.
-        div     dl
+        mov     bl, [round_buffer_index]        ; Vuelvo a cargar el indice (antes estaba dividido por dos)
+        mov     ax, bx
+        mov     dl, 0x2                         ; Al valor del indice lo divido por dos y me fijo si es impar o par. DIV guarda el resultado
+        div     dl                              ;    de la division en la parte baja de ax y el resto en la parte alta.
 
-        and     ah, 0x01                ;Me fijo en el ultimo bit de la parte alta de ax, me dice si el indice es par o impar
-        cmp     ah, 0x01                ; si el indice es impar lo tengo que guardar un nible corrido
+        and     ah, 0x01                        ; Me fijo en el ultimo bit de la parte alta de ax, me dice si el indice es par o impar
+        cmp     ah, 0x01                        ;     si el indice es impar lo tengo que guardar un nible corrido
         jz      not_even_index
-            xor     edx, edx
-            mov     dl, al
-            mov     [round_buffer + edx], cl
-            jmp     saving_end
+            xor     edx, edx                    ; Si es par, tengo que guardar el numero donde dice al
+            mov     dl, al                      ; Guardo al en dl para usarlo de puntero.
+            mov     al, 0xF0                    ; Hago una mascara para poner a cero el primer nible
+            and     [round_buffer + edx], al    ; Pongo a cero el primer nible.
+            add     [round_buffer + edx], cl    ; Le cargo el valor.
+            jmp     saving_end                  ; Termino de guardar.
         not_even_index:
-            xor     dx, dx
-            mov     dl, al
-            shl     cx, 4
-            add     [round_buffer + edx], cx
-
+            xor     dx, dx                      ; Si es impar, tengo que guardar el numero donde dice al
+            mov     dl, al                      ; Guardo al en dl para usarlo de puntero.
+            mov     al, 0x0F                    ; Hago una mascara para poner a cero el segundo nible
+            and     [round_buffer + edx], al    ; Pongo a cero el segundo nible.
+            shl     cx, 4                       ; Corro mi numero a grardar 4 veces para que quede en la parte alta.
+            add     [round_buffer + edx], cx    ; Cargo el valor en el buffer.
         saving_end:
         inc     bx
         mov     [round_buffer_index], bl     ;guardo el indice
