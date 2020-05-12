@@ -42,6 +42,7 @@ SECTIONS
             bin/exc_handlers.elf(.exc_handlers);
             bin/irq_handlers.elf(.irq_handlers)
             bin/keyboard.elf(.keyboard);
+            bin/timer.elf(.timer);
         } AT >rom
         __ROUTINES_LENGTH = SIZEOF(.routines);
 
@@ -72,6 +73,7 @@ SECTIONS
 
     .saved_digits_table 0x00210000 :                  /* tabla de digitos guardados*/
         {
+            bin/timer.elf(.timer_count);
             bin/keyboard.elf(.saved_digits_table);
             bin/keyboard.elf(.round_buffer);
         }

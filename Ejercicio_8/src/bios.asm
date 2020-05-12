@@ -190,11 +190,5 @@ Inicio_32bits:
 ;________________________________________
 section .main
 Main:
-        ;BKPT
-
-        ;call keyboard_routine
-
-        ;BKPT
-
         hlt
         jmp     Main

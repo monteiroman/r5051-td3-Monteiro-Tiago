@@ -13,6 +13,36 @@ GLOBAl pic_init
 
 section .init32 progbits
 pic_init:
+
+
+; Inicializar controlador de teclado.
+        MOV AL,0xFF         ;Enviar comando de reset al controlador
+        OUT 0x64,AL         ;de teclado
+        MOV ECX,256         ;Esperar que rearranque el controlador.
+        LOOP $
+        MOV ECX,0x10000
+ciclo1:
+        IN AL,0x60          ;Esperar que termine el reset del controlador.
+        TEST AL,1
+        LOOPZ ciclo1
+        MOV AL,0xF4         ;Habilitar el teclado.
+        OUT 0x64,AL
+        MOV ECX,0x10000
+ciclo2:
+        IN AL,0x60          ;Esperar que termine el comando.
+        TEST AL,1
+        LOOPZ ciclo2
+        IN AL,0x60          ;Vaciar el buffer de teclado.
+; Inicializar timer para que interrumpa cada 54.9 milisegundos.
+        MOV AL,00110100b    ;Canal cero, byte bajo y luego byte alto.
+        OUT 0x43,AL
+        MOV AL,0            ;Dividir 1193181 Hz por 65536. Eso da 18,2 Hz aprox.
+        OUT 0x40,AL         ;Programar byte bajo del timer de 16 bits.
+        OUT 0x40,AL         ;Programar byte alto del timer de 16 bits.
+
+
+
+
 ; Inicializar ambos PIC usando ICW (Initialization Control Words).
 ; ICW1 = Indicarle a los PIC que estamos inicializándolo.
         mov al,0x11                 ;Palabra de inicialización (bit 4=1) indicando que
@@ -38,7 +68,7 @@ pic_init:
         out Slave_PIC_Data,al       ;Enviar ICW4 al segundo PIC.
 
 ; Indicar cuales son los IRQ habilitados.
-        mov al,0xFD                 ;Deshabilito todas las interrupciones menos la de teclado
+        mov al,0xFC                 ;Deshabilito todas las interrupciones menos la de teclado
         out Master_PIC_Data,al      ;Enviar máscara al primer PIC.
         mov al, 0xFF
         out Slave_PIC_Data,al       ;Enviar máscara al segundo PIC.

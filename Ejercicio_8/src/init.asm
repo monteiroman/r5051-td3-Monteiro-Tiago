@@ -36,7 +36,6 @@ GLOBAL IDT_handler_cleaner
 EXTERN Inicio_32bits
 
 ;Desde exc_handlers.asm
-EXTERN IDT_handler_loader
 EXTERN handler#DE
 EXTERN handler#UD
 EXTERN handler#DF
@@ -44,6 +43,7 @@ EXTERN handler#GP
 
 ;Desde irq_handlers.asm
 EXTERN irq#01_keyboard_handler
+EXTERN irq#00_timer_handler
 
 
 USE16                           ;El codigo que continúa va en segmento de código
@@ -200,6 +200,13 @@ init_IDT:
     ;Interrupcion de teclado
         push    irq#01_keyboard_handler
         push    0x21
+        call    IDT_handler_loader
+        pop     eax
+        pop     eax
+
+    ;Interrupcion del timer
+        push    irq#00_timer_handler
+        push    0x20
         call    IDT_handler_loader
         pop     eax
         pop     eax

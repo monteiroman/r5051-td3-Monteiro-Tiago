@@ -4,6 +4,8 @@
 %define Keyb_Ctrl_Stat_Reg      0x64
 %define Keyb_Out_Buffer_Reg     0x60
 
+%define number_bytes   8
+
 GLOBAL keyboard_fill_lookup_table
 GLOBAL keyboard_routine
 
@@ -17,6 +19,9 @@ EXTERN __ROUND_BUFFER_END
 
 ;Desde handlers.asm
 EXTERN IDT_handler_cleaner
+
+;Desde timer.asm.
+EXTERN timer_count
 
 USE32
 ;______________________________________________________________________________;
@@ -43,9 +48,12 @@ section .saved_digits_table nobits
 section .round_buffer nobits
     round_buffer_index:
         resb 1
+    round_buffer_is_overflown:
+        resb 1
     round_buffer:
         resb 9                        ; Reservo los bytes del buffer circular.
         round_buffer_end:
+        round_buffer_size equ $-round_buffer
 
  ;________________________________________
  ; Tabla para identificar los digitos
@@ -75,9 +83,8 @@ keyboard_fill_lookup_table:
         mov word        [ebp+0x09],             0x8
         mov word        [ebp+0x0A],             0x9
         mov word        [ebp+0x0B],             0x0
-        ;mov word        [ebp+0x21],             0xF
+        mov word        [ebp+0x21],             0xF
         mov word        [ebp+0x1C],             0x0     ;ENTER no me interesa el valor en la tabla, no se guarda
-
 
         ;mov word        [ebp+0x15],             0x00    ;Y
         ;mov word        [ebp+0x16],             0x06    ;U
@@ -90,7 +97,6 @@ keyboard_fill_lookup_table:
 ;______________________________________________________________________________;
 ;                           Rutina del teclado                                 ;
 ;______________________________________________________________________________;
-
 section .keyboard
 keyboard_routine:
         pushad                       ;Pusheo los registros a pila.
@@ -112,9 +118,16 @@ keyboard_routine:
         cmp     bl, 0x80                    ;0 -> Make (se presiono la tecla), 1 -> Break (se libero la tecla).
         jz      exit                        ;Se desea detectar cuando la tecla se suelta. Si fue presionada vuelvo a buffer_check.
 
+        ;Si presiono F paro el programa para ver el valor de la cuenta de timer
+        cmp     al, 0x21
+        jnz continue
+            mov     ax, [timer_count]
+            BKPT
+            continue:
+
         ;Si la tecla presionada y liberada es ENTER; guardo el buffer.
         cmp     al, 0x1C
-        jz      exit
+        jz      save_buffer
 
         ;Chequeo si es mayor a la tecla "0". Si lo es salto a chequear el buffer
         cmp     al, 0x0B
@@ -125,11 +138,14 @@ keyboard_routine:
         cmp     al, 0x02
         jl      exit
 
-        jmp     save_number        ;es un numero -> lo guardo
+        jmp     save_number_in_buffer        ;es un numero -> lo guardo
 
 
-    save_number:
-
+;________________________________________
+; Funcion de guardado de numeros
+; en el buffer.
+;________________________________________
+    save_number_in_buffer:
         ;En "al" ya tenia el valor que presionaron, si le sumo ebp obtengo,
         ;desde la lookup table, el valor de la tecla que apretaron.
         mov     ebp, table           ;Busco la direccion de la tabla de inspeccion.
@@ -149,7 +165,9 @@ keyboard_routine:
         jnz     round_buffer_not_overflow   ; Si hizo overflow, reseteo el indice
           mov     bl,0                      ;    que venia manejando en ebx
           mov     [round_buffer_index], bl  ; Guardo el indice reseteado
-
+          mov     ebx, 1
+          mov     [round_buffer_is_overflown], bl     ; Dejo aviso que se sobrepaso el buffer
+                                                        ;   aunque sea una vez
 
         ;Una vez solucionada la parte de overflow
         round_buffer_not_overflow:
@@ -184,12 +202,11 @@ keyboard_routine:
         jmp     exit
 
 
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;; esta guarda en la tabla. por ahora la dejo aca
-    save_key:
-        mov     ebp, table           ;Busco la direccion de la tabla de inspeccion.
-
+;________________________________________
+; Funcion de guardado de numeros
+; del buffer en la tabla.
+;________________________________________
+    save_buffer:
         ;Inicio los punteros de las tablas de guardado de los caracteres.
         xor     esi, esi
         xor     edi, edi
@@ -197,26 +214,72 @@ keyboard_routine:
         mov     di, si
         mov     edx, saved_digits_table_end
 
-        ;Ya puedo guardar el valor de la tecla en la tabla.
-        ;En "al" ya tenia el valor que presionaron, si le sumo ebp obtengo,
-        ;desde la lookup table, el valor de la tecla que apretaron.
-        mov     cl, [ebp+eax]
-
         ;Chequeo si el inicio y el final son iguales. Si lo son estoy por entrar
         ;en overflow, entonces vuelvo al principio con 'mov edi,esi'. Si no lo
         ;son, puedo seguir guardando.
         cmp     [saved_digits_table + edi], edx
         jnz     not_overflow
-        mov     di,si
+            mov     di,0
+            mov     [saved_digits_table_index], di
 
         ;Incremento el indice y guardo el valor de "cl" (que es el que se obtenia
         ;de la lookup table) en el inicio de la tabla + edi (que seria el puntero
         ;de la tabla de guardado).
         not_overflow:
-        mov     [saved_digits_table + edi], cl
-        inc     di
-        mov     [saved_digits_table_index], di     ;guardo el indice
+        xor     eax, eax
+        xor     ebx, ebx
+        xor     ecx, ecx
+        xor     edx, edx
+        mov     eax, 1
+        cmp     al, [round_buffer_is_overflown]
+        mov     cl, number_bytes                ; Cantidad de bytes que voy a copiar
+        jz      overflowed_round_buffer
+        ; Si el buffer no se sobrepaso, lo copio asi como esta a la tabla de digitos
+        ; guardados.
+            direct_copy:
+            mov     bl, [round_buffer + edx]        ; Saco el valor del buffer. En este caso empiezo desde cero.
+            mov     [saved_digits_table + edi], bl  ; Lo guardo en la tabla.
+            inc     edx                             ; Incremento el indice con el que me muevo en el buffer
+            inc     di                              ; Incremento el indice con el que me muevo en la tabla.
+            cmp     edx, ecx                        ; Comparo, si el indice del buffer es igual a la cantidad de bytes
+            jz      clean_buffer                    ;   que necesito, me voy.
+            jmp     direct_copy                     ; Si no es igual, sigo sacando del buffer.
+        ; Si el buffer se desbordó, la operatoria es diferente,
+            overflowed_round_buffer:
+            mov     dl, [round_buffer_index]        ; Obtengo el indice de digito donde quedo el buffer.
+            shr     dl,1                            ; Lo divido por dos para saber el byte que corresponde.
+            inc     edx                             ; Incremento 1 para ir al inicio de lo que tengo que
+            overflowed_cicle:                       ;     levantar (tamaño de buffer - tamaño dato a guardar).
+            mov     bl, [round_buffer + edx]        ; Saco el valor del buffer.
+            mov     [saved_digits_table + edi], bl  ; Lo guardo en la tabla.
+            inc     edx
+            inc     di
+            mov     esi, round_buffer_end
+            mov     eax, round_buffer
+            add     eax,edx
+            cmp     eax, esi                        ; Comparo el final del buffer con la posicion en la que estoy.
+            jnz     not_end
+                mov     edx, 0                      ; Si es el final del buffer vuelvo al principio.
+            not_end:
+            dec     ecx                             ; Decremento la cantidad de veces que tengo que hacer este ciclo.
+            cmp     ecx,0
+            jnz     overflowed_cicle                ; Comparo para saber si ya saque los 8 valores.
+            jmp     clean_buffer
 
+        clean_buffer:                               ; Limpio el buffer temporal
+        mov     [saved_digits_table_index], di
+        xor     eax, eax
+        xor     ebx, ebx
+        xor     ecx, ecx
+        mov     [round_buffer_index], ax
+        mov     [round_buffer_is_overflown], ax
+        mov     ebx, round_buffer_size
+            clean_cicle:
+            mov     [round_buffer + ecx], ax
+            inc     ecx
+            cmp     ecx, ebx
+            jnz     clean_cicle
+; Fin de la rutina
 exit:
         popad                        ;Popeo los registros de pila.
         ret
