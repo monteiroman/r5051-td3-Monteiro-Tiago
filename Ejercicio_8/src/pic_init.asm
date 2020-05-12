@@ -1,11 +1,16 @@
 ; Informacion importante aca: https://wiki.osdev.org/PIC
 
-%define Master_PIC_Command  0x20
-%define Master_PIC_Data     0x21
-%define Master_Intrr_type   0x20
-%define Slave_PIC_Command   0xA0
-%define Slave_PIC_Data      0xA1
-%define Slave_Intrr_type    0x28
+;PIC
+%define Master_PIC_Command      0x20
+%define Master_PIC_Data         0x21
+%define Master_Intrr_type       0x20
+%define Slave_PIC_Command       0xA0
+%define Slave_PIC_Data          0xA1
+%define Slave_Intrr_type        0x28
+
+;PIT
+%define Mode_Command_register   0x43
+%define Channel_0_data_port     0x40
 
 USE32
 
@@ -16,32 +21,30 @@ pic_init:
 
 
 ; Inicializar controlador de teclado.
-        MOV AL,0xFF         ;Enviar comando de reset al controlador
-        OUT 0x64,AL         ;de teclado
-        MOV ECX,256         ;Esperar que rearranque el controlador.
-        LOOP $
-        MOV ECX,0x10000
+        mov     al, 0xFF                    ;Enviar comando de reset al controlador
+        out     0x64, al                    ;de teclado
+        mov     ecx, 256                    ;Esperar que rearranque el controlador.
+        loop $
+        mov     ecx, 0x10000
 ciclo1:
-        IN AL,0x60          ;Esperar que termine el reset del controlador.
-        TEST AL,1
-        LOOPZ ciclo1
-        MOV AL,0xF4         ;Habilitar el teclado.
-        OUT 0x64,AL
-        MOV ECX,0x10000
+        in      al, 0x60                    ;Esperar que termine el reset del controlador.
+        test    al, 1
+        loopz ciclo1
+        mov     al, 0xF4                    ;Habilitar el teclado.
+        out     0x64, al
+        mov     ecx, 0x10000
 ciclo2:
-        IN AL,0x60          ;Esperar que termine el comando.
-        TEST AL,1
-        LOOPZ ciclo2
-        IN AL,0x60          ;Vaciar el buffer de teclado.
+        in      al, 0x60                    ;Esperar que termine el comando.
+        test    al, 1
+        loopz ciclo2
+        in      al, 0x60                    ;Vaciar el buffer de teclado.
 ; Inicializar timer para que interrumpa cada 54.9 milisegundos.
-        MOV AL,00110100b    ;Canal cero, byte bajo y luego byte alto.
-        OUT 0x43,AL
-        MOV AL,0            ;Dividir 1193181 Hz por 65536. Eso da 18,2 Hz aprox.
-        OUT 0x40,AL         ;Programar byte bajo del timer de 16 bits.
-        OUT 0x40,AL         ;Programar byte alto del timer de 16 bits.
-
-
-
+        mov     al, 00110100b               ;Canal cero, byte bajo y luego byte alto.
+        out     Mode_Command_register, al
+        mov     ax, 0;11932                   ;1.193182MHz * 10ms = 11932 Ticks de 10ms
+        out     Channel_0_data_port, al     ;Programo pa parte baja.
+        rol     ax, 8
+        out     Channel_0_data_port, al     ;Programo pa parte alta.
 
 ; Inicializar ambos PIC usando ICW (Initialization Control Words).
 ; ICW1 = Indicarle a los PIC que estamos inicializándolo.

@@ -1,4 +1,4 @@
-;Mucha mas info aca: 
+;Mucha mas info aca: https://wiki.osdev.org/PIT
 
 %define BKPT    xchg    bx,bx
 
@@ -22,11 +22,15 @@ section .timer_count nobits
 section .timer
 timer_routine:
     pushad
-    xor     eax, eax
-    mov     eax, [timer_count]
-    inc     eax
-    mov     [timer_count], eax
     ;BKPT
-    ;xor eax,eax
+    xor     eax, eax
+    mov     ax, [timer_count]
+    inc     eax
+    cmp     eax, 0xFFF
+    jnz     continue
+        xor     eax,eax
+        BKPT
+    continue:
+    mov     [timer_count], ax
     popad
     ret
