@@ -84,7 +84,7 @@ keyboard_fill_lookup_table:
         mov word        [ebp+0x0A],             0x9
         mov word        [ebp+0x0B],             0x0
         mov word        [ebp+0x21],             0xF
-        mov word        [ebp+0x1C],             0x0     ;ENTER no me interesa el valor en la tabla, no se guarda
+        mov word        [ebp+0x1C],             0xE     ;ENTER no me interesa el valor en la tabla, no se guarda
 
         ;mov word        [ebp+0x15],             0x00    ;Y
         ;mov word        [ebp+0x16],             0x06    ;U
@@ -102,6 +102,7 @@ keyboard_routine:
         pushad                       ;Pusheo los registros a pila.
 
     buffer_check:
+        xor     eax,eax
         in      al, Keyb_Ctrl_Stat_Reg      ;Miro el puerto 0x64 "Keyboard Controller Status Register".
         and     al, 0x01                    ;Obtengo el bit 0 "Output buffer status" haciendo una AND.
         cmp     al, 0x01                    ;Si "Output buffer status" vale 1 el buffer tiene informacion que se puede leer.

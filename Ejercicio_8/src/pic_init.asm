@@ -41,9 +41,9 @@ ciclo2:
 ; Inicializar timer para que interrumpa cada 54.9 milisegundos.
         mov     al, 00110100b               ;Canal cero, byte bajo y luego byte alto.
         out     Mode_Command_register, al
-        mov     ax, 0;11932                   ;1.193182MHz * 10ms = 11932 Ticks de 10ms
+        mov     ax, 11932                   ;1.193182MHz * 10ms = 11932 Ticks de 10ms
         out     Channel_0_data_port, al     ;Programo pa parte baja.
-        rol     ax, 8
+        mov     al, ah
         out     Channel_0_data_port, al     ;Programo pa parte alta.
 
 ; Inicializar ambos PIC usando ICW (Initialization Control Words).
