@@ -228,6 +228,24 @@ keyboard_routine:
         jz      not_even_nibles
         ; Si la cantidad de nibles es par puedo levanta byte a byte desde el buffer
         ; circular. RECORRO EN DIRECCION INVERSA AL LLENADO.
+        ;
+        ; Ejemplo:
+        ; Buffer circular:
+        ;    __________________________________________________________________________________________________________
+        ;   |          ||          ||         ||          ||           ||         ||         ||           ||           |
+        ;   | n14  n15 ||  X    X  || n0   n1 || n2   n3  ||  n4   n5  || n6   n7 || n8   n9 || n10   n11 || n12   n13 |
+        ;   |____·_____||____·_____||____·____||_____·____||_____·_____||____·____||____·____||_____·_____||_____·_____|
+        ;      Byte 0     Byte 1     Byte 2      Byte 3      Byte 4       Byte 5      Byte 6      Byte 7       Byte 8
+        ;
+        ;
+        ;Posicion de memoria: (Para poder levantarlo en un registro)
+        ;    _______________________________________________________________________________________________
+        ;   |          ||          ||           ||          ||           ||         ||         ||          |
+        ;   | n14  n15 || n12  n13 || n10   n11 || n8   n9  ||  n6   n7  || n4   n5 || n2   n3 || n0    n1 |
+        ;   |____·_____||____·_____||_____·_____||_____·____||_____·_____||____·____||____·____||_____·____|
+        ;      Byte 0     Byte 1       Byte 2       Byte 3      Byte 4       Byte 5     Byte 6     Byte 7
+        ;
+        ;
         dec     edx                                     ; Me ubico en el ultimo byte ingresado
         mov     ebx, 0x08                               ; Cantidad de veces que voy a repetir en ciclo (Cantidad de bytes a levantar)
         saving_loop1:
@@ -247,29 +265,41 @@ keyboard_routine:
 
         ; Cuando la cantidad de nibles es impar el problema que se presenta es que quedan dos nibles
         ; cruzados. Estos los tengo que tratar especialmente.
-        ;    _______________________________________________________________________________________________________
-        ;   |         ||         ||         ||          ||           ||           ||         ||         ||         |
-        ;   | n3   n2 || n1   X  || X   n16 || n15  n14 || n13   n12 || n11   n10 || n9   n8 || n7   n6 || n5   n4 |
-        ;   |____·____||____·____||____·____||_____·____||_____·_____||_____·_____||____·____||____·____||____·____|
-        ;      Byte 0     Byte 1     Byte 2      Byte 3      Byte 4       Byte 5      Byte 6     Byte 7     Byte 8
+        ;
+        ; Ejemplo:
+        ; Buffer circular:
+        ;    __________________________________________________________________________________________________________
+        ;   |          ||         ||         ||          ||           ||         ||         ||           ||           |
+        ;   | n13  n14 || n15  X  || X    n0 || n1   n2  ||  n3   n4  || n5   n6 || n7   n8 || n9    n10 || n11   n12 |
+        ;   |____·_____||____·____||____·____||_____·____||_____·_____||____·____||____·____||_____·_____||_____·_____|
+        ;      Byte 0     Byte 1     Byte 2      Byte 3      Byte 4       Byte 5      Byte 6      Byte 7       Byte 8
+        ;
+        ;
+        ;Posicion de memoria: (Para poder levantarlo en un registro)
+        ;    _______________________________________________________________________________________________
+        ;   |          ||          ||           ||          ||           ||         ||         ||          |
+        ;   | n14  n15 || n12  n13 || n10   n11 || n8   n9  ||  n6   n7  || n4   n5 || n2   n3 || n0    n1 |
+        ;   |____·_____||____·_____||_____·_____||_____·____||_____·_____||____·____||____·____||_____·____|
+        ;      Byte 0     Byte 1     Byte 2      Byte 3      Byte 4       Byte 5      Byte 6      Byte 7
 
         not_even_nibles:
+        ; Para el primer nible________________
+        ;BKPT
         first_nible:
         mov     al, [round_buffer + edx]                ; Saco del buffer.
-        shr     al, 4
-        or     [saved_digits_table + edi], al
-        cmp     edx, 0x00
+        shr     al, 4                                   ; Lo muevo a la derecha para convertirlo en parte baja de mi byte
+        or     [saved_digits_table + edi], al           ; Guardo en memoria
+        cmp     edx, 0x00                               ; Chequeo si me cai del buffer
         jnz     not_underflow2
-            mov     edx, round_buffer_size
-            inc     edx
+            mov     edx, round_buffer_size              ; Si me cai vuelvo a cargar el valor de bytes del buffer
         not_underflow2:
-        dec     edx
+        dec     edx                                     ; Decremento el indice del buffer
         ; Para los otros 7 Bytes______________
         mov     ebx, 0x07
         saving_loop2:
         mov     al, [round_buffer + edx]                ; Saco del buffer.
         mov     cl, [round_buffer + edx]                ; Saco del buffer.
-        and     al, 0x0F                                ; Parte baja del byte.
+        and     al, 0x0F                                ; Me quedo con la parte baja del byte.
         shl     al, 4
         or      [saved_digits_table + edi], al
         inc     edi
@@ -286,8 +316,8 @@ keyboard_routine:
         cmp     ebx, 0x00
         jne     saving_loop2
         ; Para el ultimo nible______________
-        ; El ultimo nible va a estar [Tamaño de buffer - tamaño a guardar] (en este caso
-        ; = 1) a la derecha del ultimo valor ingresado.
+        ; El ultimo nible va a estar a distancia [Tamaño de buffer - tamaño a guardar]
+        ; (en este caso 9 - 8 = 1) a la derecha del ultimo valor ingresado.
         mov     esi, [round_buffer_index]               ; Indice en nibles.
         mov     edx, esi
         shr     edx, 1                                  ; Indice en bytes.
@@ -301,15 +331,16 @@ keyboard_routine:
 
         ; Limpio el buffer para el proximo numero.
         clean_buffer:
-
+        ; [DEBUG]
+        ;Para debuguear copio los numeros guardados en memoria a dos registros
         mov     ecx, [saved_digits_table_index]
         mov     eax, [saved_digits_table + ecx - 8]
         mov     ebx, [saved_digits_table + ecx - 4]
         mov     ecx, [round_buffer]
         mov     edx, 4
         mov     edx, [round_buffer + edx]
-
-        BKPT
+        ;BKPT
+        ;[!DEBUG]
 
         mov     [saved_digits_table_index], di
         xor     eax, eax

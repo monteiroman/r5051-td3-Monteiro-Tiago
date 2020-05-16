@@ -1,30 +1,20 @@
-;8. INTERRUPCIONES DE HARDWARE
+;9. RUTINA TEMPORIZADA Y CONTROLADOR DE VIDEO
 ;
-;Utilizando lo realizado anteriormente, implementar las siguientes modificaciones:
+;Modificar el programa desarrollado hasta el momento considerando las siguientes
+;consignas:
 ;
-;a) La rutina de adquisición de teclas debe realizarse en el controlador de
-;   teclado (IRQ1). Se debe tener en cuenta que por cada presión de una tecla se
-;   producen dos interrupciones, una por el make code y otra por el break code.
+;a) Implementar una rutina que sume todos los números almacenados en la tabla de
+;   dígitos, presente el resultado parcial en pantalla y el cómputo final sea
+;   almacenado en alguna variable situada en Datos. La rutina debe cumplir los
+;   siguientes requerimientos:
 ;
-;b) Los dígitos correspondientes al alfabeto decimal conformarán un número de
-;   64bits, es decir si se presionan las teclas 12345678, se debe almacenar en
-;   la tabla de dígitos como una entrada que contiene al número 0000000012345678h.
-;   Cada nuevo número se insertará en la tabla cuando se presione ENTER. Por
-;   razones de simplicidad el buffer circular de teclado dispondrá de una longitud
-;   de 9 bytes. En la tabla se ingresarán los últimos 16 dígitos hexadecimales
-;   presionados al pulsar ENTER (123JH01AB4567CDEF89012LMNENTER equivale a
-;   0000123456789012). Si al presionar ENTER se han ingresado menos de 8 Bytes,
-;   se completarán con ceros en las posiciones MSB (1E.ENTER equivale
-;   0000000000000001h).
+;           a. Ejecutarse cada 500ms.
+;           b. No implementarse dentro de la IRQ0.
+;           c. Situarse en la zona de Tarea 1.
+;           d. Mientras no se ejecute establecer al procesador en estado halted.
 ;
-;c) Escribir el controlador del temporizador (IRQ0 [10]) de modo que interrumpa
-;   cada 100ms. Verifique el correcto funcionamiento almacenando en alguna
-;   dirección de Datos el número de veces que se produce la interrupción. Tenga
-;   en cuenta que la implementación del timer tick en Bochs no garantiza ejecución
-;   del tipo tiempo real, es decir observará una falta de correspondencia temporal
-;   entre la unidad de tiempo calculada y la que Bochs ejecuta en la práctica.
-;
-;El mapa de memoria debe ser el siguiente:
+;b) Adecuar el código y el linker script para satisfacer el siguiente mapa de
+;   memoria.
 ;
 ;               Sección                 |       Dirección inicial
 ;   ____________________________________|_________________________
@@ -33,6 +23,7 @@
 ;               Núcleo                  |          00200000h
 ;           Tabla de dígitos            |          00210000h
 ;               Datos                   |          00202000h
+;              Tarea 1                  |          00300000h
 ;               Pila                    |          1FF08000h
 ;    Secuencia inicialización ROM       |          FFFF0000h
 ;           Vector de reset             |          FFFFFFF0h
