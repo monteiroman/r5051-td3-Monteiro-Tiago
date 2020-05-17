@@ -82,9 +82,15 @@ EXTERN __TABLES_LENGTH
 EXTERN __SYS_TABLES_DEST
 EXTERN __SYS_TABLES_ORIG
 EXTERN __SYS_TABLES_LENGTH
+EXTERN __TASKS_DEST
+EXTERN __TASKS_ORIG
+EXTERN __TASKS_LENGTH
 
 ;Desde pic_init.asm.
 EXTERN pic_init
+
+;Desde task1.asm
+EXTERN sum_routine
 
 USE32                   ;El codigo que continúa va en segmento de código
                                     ; de 32 BITS.
@@ -117,7 +123,7 @@ Inicio_32bits:
 
         ;BKPT
 
-        ;Copio la rutina de teclado a RAM.
+        ;Copio las rutinas y tablas asociadas a RAM.
         push    __ROUTINES_ORIG
         push    __ROUTINES_DEST
         push    __ROUTINES_LENGTH
@@ -128,19 +134,19 @@ Inicio_32bits:
 
         ;BKPT
 
-        ;Copio la tabla de inspeccion de teclas a la memoria RAM.
-        push    __TABLES_ORIG
-        push    __TABLES_DEST
-        push    __TABLES_LENGTH
+        ;Lleno la tabla de inspeccion del teclado.
+        call keyboard_fill_lookup_table
+
+        ;BKPT
+
+        ;Copio las tareas a RAM.
+        push    __TASKS_ORIG
+        push    __TASKS_DEST
+        push    __TASKS_LENGTH
         call    Funcion_copia
         pop     eax
         pop     eax
         pop     eax
-
-        ;BKPT
-
-        ;Lleno la tabla de inspeccion.
-        call keyboard_fill_lookup_table
 
         ;BKPT
 
@@ -182,4 +188,6 @@ Inicio_32bits:
 section .main
 Main:
         hlt
+        ;BKPT
+        call    sum_routine
         jmp     Main

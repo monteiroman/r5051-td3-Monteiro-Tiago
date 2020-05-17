@@ -11,8 +11,10 @@ GLOBAL keyboard_routine
 
 GLOBAL loop_buffer
 
-GLOBAL timer_count
+GLOBAL saved_digits_table
+GLOBAL saved_digits_table_index
 
+GLOBAL enter_key_flag
 
 ;Desde el linkerscript
 EXTERN __SAVED_DIGITS_START
@@ -37,8 +39,6 @@ USE32
 ;Aca voy a guardar los digitos ingresados. Se usa nobits para decirle al linker
 ;que esta sección va a existir pero que no le carge nada.
 section .saved_digits_table nobits
-    timer_count:
-        resb 8
     saved_digits_table_index:
         resb 8                        ; Reservo dos bytes para indice
     saved_digits_table:
@@ -53,8 +53,10 @@ section .saved_digits_table nobits
 section .round_buffer nobits
     round_buffer_index:
         resb 8
-    dummy_byte:                         ; PAra que me quede ordenada la tabla cuando la miro en Bochs.
+    enter_key_flag:                     ; Aviso que se presiono enter.
         resb 8
+    ; Los flags podrian ser las chicos pero de esta manera puedo ver mejor las
+    ; tablas en el Bochs.
     round_buffer:
         resb 9                          ; Reservo los bytes del buffer circular.
         round_buffer_end:
@@ -70,9 +72,9 @@ section .keyboard_table nobits
 table:
         resb 0xA6                   ;La hago pensando en que uso todas las teclas
                                     ;   del teclado.
+
 ;Lleno "table" con el codigo de los digitos que voy a necesitar. Esta parte va
 ;en ROM y se carga en el inicio.
-
 section .keyboard_table_init
 keyboard_fill_lookup_table:
         mov     ebp, table          ;Pongo la direccion de la tabla que se encuentra en ram
@@ -131,9 +133,14 @@ keyboard_routine:
             BKPT
             continue:
 
-        ;Si la tecla presionada y liberada es ENTER; guardo el buffer.
+        ;Si la tecla presionada y liberada es ENTER; guardo el buffer y seteo el
+        ; flag de enter.
         cmp     al, 0x1C
-        jz      save_buffer
+        jnz     no_enter
+            mov     al, 0x01
+            mov     [enter_key_flag], al
+            jmp     save_buffer
+        no_enter:
 
         ;Chequeo si es mayor a la tecla "0". Si lo es salto a chequear el buffer
         cmp     al, 0x0B
@@ -300,20 +307,20 @@ keyboard_routine:
         mov     al, [round_buffer + edx]                ; Saco del buffer.
         mov     cl, [round_buffer + edx]                ; Saco del buffer.
         and     al, 0x0F                                ; Me quedo con la parte baja del byte.
-        shl     al, 4
-        or      [saved_digits_table + edi], al
-        inc     edi
+        shl     al, 4                                   ; Lo muevo para convertirla en alta.
+        or      [saved_digits_table + edi], al          ; Lo guardo.
+        inc     edi                                     ; Me muevo al siguiente byte de la tabla de guardados.
         mov     [saved_digits_table_index], edi         ; Guardo el indice de la tabla en memoria.
-        and     cl, 0xF0                                ;parte alta del byte
-        shr     cl, 4
-        or     [saved_digits_table + edi], cl
+        and     cl, 0xF0                                ; Me quedo con la parte alta del byte.
+        shr     cl, 4                                   ; Lo muevo para convertirla en baja.
+        or     [saved_digits_table + edi], cl           ; Lo guardo.
         cmp     edx, 0x00
-        jne      not_underflow3
+        jne      not_underflow3                         ; Chequeo no haberme ido para abajo del buffer.
             mov     edx, round_buffer_size
         not_underflow3:
-        dec     edx
-        dec     ebx
-        cmp     ebx, 0x00
+        dec     edx                                     ; Decremento el byte del buffer.
+        dec     ebx                                     ; Decremento las vueltas del loop.
+        cmp     ebx, 0x00                               ; Si lo hice 7 veces salgo.
         jne     saving_loop2
         ; Para el ultimo nible______________
         ; El ultimo nible va a estar a distancia [Tamaño de buffer - tamaño a guardar]
@@ -323,10 +330,10 @@ keyboard_routine:
         shr     edx, 1                                  ; Indice en bytes.
         inc     edx                                     ; Me muevo una vez a la derecha
         mov     al, [round_buffer + edx]                ; Saco del buffer.
-        and     al, 0x0F                                ; Parte baja del byte.
-        shl     al, 4
-        or      [saved_digits_table + edi], al
-        inc     edi
+        and     al, 0x0F                                ; Me quedo con la parte baja del byte.
+        shl     al, 4                                   ; Lo muevo para convertirla en alta.
+        or      [saved_digits_table + edi], al          ; Lo guardo.
+        inc     edi                                     ; Me muevo al siguiente byte de la tabla de guardados.
         mov     [saved_digits_table_index], edi         ; Guardo el indice de la tabla en memoria.
 
         ; Limpio el buffer para el proximo numero.

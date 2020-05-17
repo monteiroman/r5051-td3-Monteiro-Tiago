@@ -18,7 +18,6 @@ MEMORY
   reset_bios (rx):  ORIGIN = 0xFFFFFFF0,    LENGTH = 0x10
 }
 
-
 /*____________________________________________________________________________*/
 /*                         Areas de memoria                                   */
 /*____________________________________________________________________________*/
@@ -35,13 +34,20 @@ SECTIONS
             bin/bios.elf(.main);
         } AT >rom                                   /*LMA donde se ubica*/
 
+    .reset 0xFFFFFFF0 :
+		{
+            *(.reset);
+        } AT >reset_bios
+
     .routines 0x00000000 :                          /* rutina del teclado*/
         {
             __ROUTINES_DEST = .;
             __ROUTINES_ORIG = LOADADDR(.routines);
             bin/exc_handlers.elf(.exc_handlers);
-            bin/irq_handlers.elf(.irq_handlers)
+            bin/irq_handlers.elf(.irq_handlers);
             bin/keyboard.elf(.keyboard);
+            bin/keyboard.elf(.keyboard_table_init);
+            bin/keyboard.elf(.keyboard_table);
             bin/timer.elf(.timer);
         } AT >rom
         __ROUTINES_LENGTH = SIZEOF(.routines);
@@ -64,25 +70,21 @@ SECTIONS
 
     .data 0x00202000 :                              /* Lugar donde van las tablas y el codigo que las inicia*/
         {
-            __TABLES_DEST = .;
-            __TABLES_ORIG = LOADADDR(.data);
-            bin/keyboard.elf(.keyboard_table);
-            bin/keyboard.elf(.keyboard_table_init);
-        } AT >rom
-        __TABLES_LENGTH = SIZEOF(.data);
+            bin/task1.elf(.sum_stored);
+        }
 
     .saved_digits_table 0x00210000 :                  /* tabla de digitos guardados*/
         {
-            bin/timer.elf(.timer_count);
+            bin/timer.elf(.counter_bytes);
             bin/keyboard.elf(.saved_digits_table);
             bin/keyboard.elf(.round_buffer);
         }
-        /* __SAVED_DIGITS_LENGTH =  SIZEOF(.saved_digits_table); */
-        /* __SAVED_DIGITS_END = __SAVED_DIGITS_START + __SAVED_DIGITS_LENGTH; */
 
-	.reset 0xFFFFFFF0 :
-		{
-            *(.reset);
-        } AT >reset_bios
-
+    .tasks 0x00300000 :
+        {
+            __TASKS_DEST = .;
+            __TASKS_ORIG = LOADADDR(.tasks);
+            bin/task1.elf(.task_one);
+        } AT >rom
+        __TASKS_LENGTH = SIZEOF(.tasks);
 }
