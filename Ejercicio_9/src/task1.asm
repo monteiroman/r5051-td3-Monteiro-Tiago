@@ -1,6 +1,7 @@
 %define BKPT    xchg    bx,bx
 
 GLOBAL sum_routine
+GLOBAL sum_stored
 
 ; Desde keyboard.asm
 EXTERN saved_digits_table
@@ -61,7 +62,7 @@ sum_routine:
         save:
         mov     [sum_stored], ecx                       ; Guardo en la posicion pedida.
         mov     [sum_stored + 4], edx
-        BKPT
+        ;BKPT
 
     sum_end:
         popad

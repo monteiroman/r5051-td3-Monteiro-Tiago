@@ -92,6 +92,9 @@ EXTERN pic_init
 ;Desde task1.asm
 EXTERN sum_routine
 
+; Desde screen.asm
+EXTERN refresh_screen
+
 USE32                   ;El codigo que continúa va en segmento de código
                                     ; de 32 BITS.
 
@@ -189,5 +192,6 @@ section .main
 Main:
         hlt
         ;BKPT
+        call    refresh_screen
         call    sum_routine
         jmp     Main

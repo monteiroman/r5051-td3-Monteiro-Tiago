@@ -34,11 +34,6 @@ SECTIONS
             bin/bios.elf(.main);
         } AT >rom                                   /*LMA donde se ubica*/
 
-    .reset 0xFFFFFFF0 :
-		{
-            *(.reset);
-        } AT >reset_bios
-
     .routines 0x00000000 :                          /* rutina del teclado*/
         {
             __ROUTINES_DEST = .;
@@ -65,6 +60,7 @@ SECTIONS
             __KERNEL_DEST = .;
             __KERNEL_ORIG = LOADADDR(.kernel);
             bin/copy.elf(.copy);
+            bin/screen.elf(.screen);
         } AT >rom
         __KERNEL_LENGTH = SIZEOF(.kernel);
 
@@ -87,4 +83,9 @@ SECTIONS
             bin/task1.elf(.task_one);
         } AT >rom
         __TASKS_LENGTH = SIZEOF(.tasks);
+
+    .reset 0xFFFFFFF0 :
+		{
+            *(.reset);
+        } AT >reset_bios
 }
