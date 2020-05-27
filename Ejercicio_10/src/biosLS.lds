@@ -2,7 +2,7 @@
 /*                            Pila de sistema                                 */
 /*____________________________________________________________________________*/
 
-__STACK_START = 0X1FF08000;
+__STACK_START = 0x1FF08000;
 __STACK_SIZE = 0x00004000;
 __STACK_END = __STACK_START + __STACK_SIZE;         /*Stack de 16k
 
@@ -11,7 +11,7 @@ __STACK_END = __STACK_START + __STACK_SIZE;         /*Stack de 16k
 /*                            Pila de sistema                                 */
 /*____________________________________________________________________________*/
 
-__TASK1_STACK_START = 0X1FFFF000;
+__TASK1_STACK_START = 0x1FFFF000;
 __TASK1_STACK_SIZE = 0x00004000;
 __TASK1_STACK_END = __TASK1_STACK_START + __TASK1_STACK_SIZE;    /*Stack de 16k
 
@@ -37,6 +37,9 @@ SECTIONS
     /*________________________________________________________________________*/
     /*  INICIALIZACIONES                                                      */
     /*________________________________________________________________________*/
+    /*   OJO ESTO EN IDENTITY MAPPING                                         */
+    /*                  Si no esta asi no puede hacer la paginación!!!        */
+    /*________________________________________________________________________*/
     .init 0xFFFF0000 :                                  /*Posiciono "." (vector de VMA) en 0xFFFF0000*/
 		{
             __INIT_DEST = .;
@@ -46,6 +49,7 @@ SECTIONS
             bin/pic_init.elf(.init32);
             bin/bios.elf(.init32);
             bin/bios.elf(.main);
+            bin/paging.elf(.init32);
         } AT >rom                                       /*LMA donde se ubica*/
         __INIT_LENGTH = SIZEOF(.init);
 
@@ -87,7 +91,7 @@ SECTIONS
     .paging_tables 0x00110000 :
         {
             __PAGING_TABLES_DEST = .;
-            
+            bin/paging.elf(.paging_tables);
         }
         __PAGING_TABLES_LENGTH = SIZEOF(.paging_tables);
 
@@ -139,7 +143,7 @@ SECTIONS
     .task1_bss 0x00301000 :                             /* Seccion de datos no inicializados. */
         {
             __TASK1_BSS_DEST = .;
-            bin/task1.elf(.sum_stored);
+            bin/task1.elf(.sum_store);
         }
         __TASK1_BSS_LENGTH = SIZEOF(.task1_bss);
 

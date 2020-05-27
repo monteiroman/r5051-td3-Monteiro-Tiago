@@ -109,7 +109,7 @@ EXTERN refresh_screen
 
 ; Desde paging.asm
 EXTERN paging_init
-EXTERN directorio;page_directory
+EXTERN page_directory
 
 USE32                   ;El codigo que continúa va en segmento de código
                                     ; de 32 BITS.
@@ -128,10 +128,18 @@ Inicio_32bits:
         mov     esp, __STACK_END    ;Cargo el registro de pila y le doy
                                         ;direccion de inicio (recordar que se
                                         ;carga de arriba hacia abajo).
+        ; Paginación
+        call    paging_init
+        mov     eax, page_directory
+        mov     CR3, eax            ; Cargo CR3 con la direccion del directorio
 
-        ;BKPT
+        mov     eax, CR0            ; Activo la paginación poniendo en 1 el
+        or      eax, 0x80000000     ;   bit 31 de CR0.
+        mov     CR0, eax
 
-        ;Uso la pila para pasarle los valores a la funcion de copiado (mi nucleo).
+        BKPT
+
+        ; Uso la pila para pasarle los valores a la funcion de copiado (mi nucleo).
         push    __KERNEL_ORIG     ;Posicion de origen .kernel (en ROM) que contiene a .copy.
         push    __KERNEL_DEST     ;Posicion destino 0x00200000 (en RAM).
         push    __KERNEL_LENGTH   ;Largo de la seccion .kernel que contiene a .copy.
@@ -142,7 +150,7 @@ Inicio_32bits:
 
         ;BKPT
 
-        ;Copio las rutinas y tablas asociadas a RAM.
+        ; Copio las rutinas y tablas asociadas a RAM.
         push    __ROUTINES_ORIG
         push    __ROUTINES_DEST
         push    __ROUTINES_LENGTH
@@ -153,12 +161,12 @@ Inicio_32bits:
 
         ;BKPT
 
-        ;Lleno la tabla de inspeccion del teclado.
+        ; Lleno la tabla de inspeccion del teclado.
         call keyboard_fill_lookup_table
 
         ;BKPT
 
-        ;Copio las tareas a RAM.
+        ; Copio las tareas a RAM.
         push    __TASK1_TXT_ORIG
         push    __TASK1_TXT_DEST
         push    __TASK1_TXT_LENGTH
@@ -169,7 +177,7 @@ Inicio_32bits:
 
         ;BKPT
 
-        ;Copio la GDT que va a correr desde memoria.
+        ; Copio la GDT que va a correr desde memoria.
         push    GDT_ROM
         push    GDT
         push    tam_GDT_ROM
@@ -180,7 +188,7 @@ Inicio_32bits:
 
         ;BKPT
 
-        ;Cargo la nueva GDT que está en RAM.
+        ; Cargo la nueva GDT que está en RAM.
         lgdt    [cs:imagen_gdtr]
         mov     ax, DS_SEL      ;Cargo DS con el selector que apunta al
         mov     ds, ax          ;   descriptor de segmento de datos flat.
@@ -189,14 +197,14 @@ Inicio_32bits:
 
         ;BKPT
 
-        ;Cargo la imagen de idtr y los handlers.
+        ; Cargo la imagen de idtr y los handlers.
         call init_IDT
         lidt [cs:imagen_idtr]
 
-        ;Inicializo los pic's.
+        ; Inicializo los pic's.
         call pic_init
 
-        ;habilito las interrupciones
+        ; Habilito las interrupciones
         sti
 
         jmp     CS_SEL:Main
