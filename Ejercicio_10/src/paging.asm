@@ -88,7 +88,7 @@ EXTERN __TASK1_STACK_SIZE
 ;           P = Present
 ;
 ;
-;   ________________________________________________________________________________________              _
+;   ________________________________________________________________________________________
 ;  |                          |                   |                      |                 |
 ;  |                          | Dirección inicial | Indice en Directorio | Indice en Tabla |
 ;  |         Sección          |                   |     de Paginas       |    de Paginas   |
@@ -109,7 +109,8 @@ EXTERN __TASK1_STACK_SIZE
 ;  |   Inicialización ROM     |    0xFFFF0000h    |        0x3FF         |      0x3F0      |
 ;  |   Vector de reset        |    0xFFFFFFF0h    |        0x3FF         |      0x3FF      |
 ;
-;   Necesito un Directorio de Paginas y tres Tablas de Paginas.
+;   Necesito un Directorio de Paginas y 4 Tablas de Paginas (La pila de la tarea 1 empieza
+;   en una tabla y termina en otra).
 ;
 USE32
 ;______________________________________________________________________________;
@@ -119,7 +120,7 @@ section .paging_tables nobits
     page_directory:
         resd 1024           ; 1024 posiciones de 4 bytes cada una para el Directorio.
     page_tables:
-        resd 1024*3         ; 1024 posiciones de 4 bytes cada una para
+        resd 1024*4         ; 1024 posiciones de 4 bytes cada una para
                             ;       cada Tabla de paginas (son 3).
     count_created_tables:
         resd 1              ; Cantidad de tablas creadas.
@@ -144,8 +145,6 @@ paging_init:
         pop     eax
         pop     eax
 
-        ;BKPT
-
         push    __ROUTINES_LENGTH
         push    __ROUTINES_DEST
         push    __ROUTINES_DEST
@@ -157,8 +156,6 @@ paging_init:
         pop     eax
         pop     eax
         pop     eax
-
-        ;BKPT
 
         push    __VIDEO_BUFFER_SIZE
         push    __VIDEO_BUFFER_ORIG
@@ -172,8 +169,6 @@ paging_init:
         pop     eax
         pop     eax
 
-        ;BKPT
-
         push    __SYS_TABLES_LENGTH
         push    __SYS_TABLES_DEST
         push    __SYS_TABLES_DEST
@@ -185,8 +180,6 @@ paging_init:
         pop     eax
         pop     eax
         pop     eax
-
-        ;BKPT
 
         push    __PAGING_TABLES_LENGTH
         push    __PAGING_TABLES_DEST
@@ -200,8 +193,6 @@ paging_init:
         pop     eax
         pop     eax
 
-        ;BKPT
-
         push    __KERNEL_LENGTH
         push    __KERNEL_DEST
         push    __KERNEL_DEST
@@ -213,8 +204,6 @@ paging_init:
         pop     eax
         pop     eax
         pop     eax
-
-        ;BKPT
 
         push    __SAVED_DIGITS_TABLE_LENGTH
         push    __SAVED_DIGITS_TABLE_DEST
@@ -228,8 +217,6 @@ paging_init:
         pop     eax
         pop     eax
 
-        ;BKPT
-
         push    __TASK1_TXT_LENGTH
         push    __TASK1_TXT_DEST
         push    __TASK1_TXT_DEST
@@ -241,9 +228,6 @@ paging_init:
         pop     eax
         pop     eax
         pop     eax
-
-        ;ret
-        ;BKPT
 
         push    __TASK1_BSS_LENGTH
         push    __TASK1_BSS_DEST
@@ -257,9 +241,6 @@ paging_init:
         pop     eax
         pop     eax
 
-        ;ret
-        ;BKPT
-
         push    __STACK_SIZE
         push    __STACK_START
         push    __STACK_START
@@ -271,9 +252,6 @@ paging_init:
         pop     eax
         pop     eax
         pop     eax
-
-        ;ret
-        ;BKPT
 
         push    __TASK1_STACK_SIZE
         push    __TASK1_STACK_START
@@ -290,6 +268,9 @@ paging_init:
         ret
 
 
+;________________________________________
+; Paginacion
+;________________________________________
 paging:
         mov     ebp, esp                    ; Traigo el puntero a pila
         mov     edi, [ebp + 0x0C]           ; Saco de la pila la direccion lineal
@@ -302,6 +283,8 @@ paging:
     ; Obtengo el indice de la Tabla de Pagina (me señala la Pagina).
         and     esi, 0x003FF000             ; Obtengo los segundos 10 bits
         shr     esi, 0x0C                   ; Muevo los bits hasta el principio del registro
+
+        overflowed_table:                   ; Si una tabla se sobrepasa, empiezo desde aca.
 
         mov     eax, [page_directory + edi * 4]     ; Traigo la entrada desde el directorio de pagina
         cmp     eax, 0x00                   ; Chequeo si ya existe la tabla
@@ -330,24 +313,34 @@ paging:
         shr     ebx, 0x0C                   ; Divido por 4096. Me da la cantidad de paginas - 1.
         inc     ebx                         ; Cantidad de paginas que necesito para la sección.
 
-        shl     esi, 0x02                   ; Incremento el indice de Tabla (pagina nueva, 4 bytes).
-        add     eax, esi                    ; "eax" es la dirección de la Tabla de Pagina, "esi" es el offset.
+        xor     edx, edx                    ; Limpio edx.
+        mov     edx, esi
+        shl     edx, 0x02                   ; Incremento el indice de Tabla (pagina nueva, 4 bytes).
+        add     eax, edx                    ; "eax" es la dirección de la Tabla de Pagina, "edx" es el offset.
 
         mov     ecx, [ebp + 0x10]           ; Traigo la direccion fisica.
         xor     edx, edx                    ; Limpio edx.
 
         page_loop:                          ; Empiezo a crear las paginas.
-            and     ecx, 0xFFFFF000
-            mov     esi, [ebp + 0x04]       ; Atributos de pagina.
-            and     esi, 0x00000FFF         ; Limpio esi.
-            add     ecx, esi                ; Pego los atributos de Pagina.
-
+            and     ecx, 0xFFFFF000         ; Limpio la dirección fisica
+            add     ecx, [ebp + 0x04]       ; Saco de la pila y pego los atributos de Pagina.
             mov     [eax + edx * 4], ecx    ; Guardo la direccion de pagina en la entrada de Tabla.
 
             add     ecx, 0x1000             ; Incremento en 4k la dirección física. (nueva pagina).
             inc     edx                     ; Incremento el contador.
 
+            inc     esi                     ; Incremento el indice de Tabla.
+            cmp     esi, 0x400              ; Si llego al final de la tabla, tengo que hacer una nueva.
+            jne     continue
+                inc     edi                 ; Me voy a la siguiente entrada de directorio (pagina nueva)
+                mov     esi, 0x00           ; Pongo el indice de tabla de pagina en cero (pagina cero)
+                shl     edx, 0x0C           ; multiplico la cantidad de paginas creadas por 4k
+                sub     [ebp + 0x14], edx   ; Corrijo la cantidad de paginas creadas
+                add     [ebp + 0x10], edx   ; muevo la direccion fisica la cantidad de paginas que ya se crearon
+
+                jmp     overflowed_table    ; Vuelvo para generar la nueva tabla.
+            continue:
             cmp     edx, ebx                ; Comparo si terminé de crear la cantidad de paginas.
-            jnz     page_loop
+            jnz     page_loop               ; Sigo creando paginas.
 
         ret

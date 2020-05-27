@@ -137,7 +137,7 @@ Inicio_32bits:
         or      eax, 0x80000000     ;   bit 31 de CR0.
         mov     CR0, eax
 
-        BKPT
+        ;BKPT
 
         ; Uso la pila para pasarle los valores a la funcion de copiado (mi nucleo).
         push    __KERNEL_ORIG     ;Posicion de origen .kernel (en ROM) que contiene a .copy.
