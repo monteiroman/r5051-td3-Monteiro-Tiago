@@ -94,20 +94,20 @@ EXTERN __TASK1_STACK_SIZE
 ;  |         Sección          |                   |     de Paginas       |    de Paginas   |
 ;  |                          |                   |  (Tabla de Pagina)   |     (Pagina)    |
 ;  |__________________________|___________________|______________________|_________________|
-;  |   ISR                    |    0x00000000h    |        0x000         |      0x000      |
-;  |   Video                  |    0x000B8000h    |        0x000         |      0x0B8      |
-;  |   Tablas de sistema      |    0x00100000h    |        0x000         |      0x100      |
-;  |   Tablas de paginación   |    0x00110000h    |        0x000         |      0x110      |
-;  |   Núcleo                 |    0x00200000h    |        0x000         |      0x200      |
-;  |   Datos                  |    0x00202000h    |        0x000         |      0x202      |
-;  |   Tabla de dígitos       |    0x00210000h    |        0x000         |      0x210      |
-;  |   TEXT Tarea 1           |    0x00300000h    |        0x000         |      0x300      |
-;  |   BSS Tarea 1            |    0x00301000h    |        0x000         |      0x301      |
-;  |   DATA Tarea 1           |    0x00302000h    |        0x000         |      0x302      |
-;  |   Pila Nucleo            |    0x1FF08000h    |        0x07F         |      0x308      |
-;  |   Pila Tarea 1           |    0x1FFFF000h    |        0x07F         |      0x3FF      |
-;  |   Inicialización ROM     |    0xFFFF0000h    |        0x3FF         |      0x3F0      |
-;  |   Vector de reset        |    0xFFFFFFF0h    |        0x3FF         |      0x3FF      |
+;  |   ISR                    |    0x00000000     |        0x000         |      0x000      |
+;  |   Video                  |    0x000B8000     |        0x000         |      0x0B8      |
+;  |   Tablas de sistema      |    0x00100000     |        0x000         |      0x100      |
+;  |   Tablas de paginación   |    0x00110000     |        0x000         |      0x110      |
+;  |   Núcleo                 |    0x00200000     |        0x000         |      0x200      |
+;  |   Datos                  |    0x00202000     |        0x000         |      0x202      |
+;  |   Tabla de dígitos       |    0x00210000     |        0x000         |      0x210      |
+;  |   TEXT Tarea 1           |    0x00300000     |        0x000         |      0x300      |
+;  |   BSS Tarea 1            |    0x00301000     |        0x000         |      0x301      |
+;  |   DATA Tarea 1           |    0x00302000     |        0x000         |      0x302      |
+;  |   Pila Nucleo            |    0x1FF08000     |        0x07F         |      0x308      |
+;  |   Pila Tarea 1           |    0x1FFFF000     |        0x07F         |      0x3FF      |
+;  |   Inicialización ROM     |    0xFFFF0000     |        0x3FF         |      0x3F0      |
+;  |   Vector de reset        |    0xFFFFFFF0     |        0x3FF         |      0x3FF      |
 ;
 ;   Necesito un Directorio de Paginas y 4 Tablas de Paginas (La pila de la tarea 1 empieza
 ;   en una tabla y termina en otra).
