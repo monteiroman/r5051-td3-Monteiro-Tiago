@@ -177,11 +177,11 @@ Inicio_32bits:
         ;BKPT
 
         ; Cargo la imagen de idtr y los handlers.
-        call init_IDT
-        lidt [cs:imagen_idtr]
+        call    init_IDT
+        lidt    [cs:imagen_idtr]
 
         ; Inicializo los pic's.
-        call pic_init
+        call    pic_init
 
         ; Habilito las interrupciones
         sti
