@@ -63,7 +63,7 @@ sum_routine:
         mov     [sum_stored], ecx                       ; Guardo la parte baja en la posicion pedida.
         mov     [sum_stored + 4], edx                   ; Guardo la parte alta en la posicion pedida.
 
-        cmp     edx, 0x01                               ; Si la parte alta es mayor a 1 es mas que 512MB, me voy.
+        cmp     edx, 0x00                               ; Si la parte alta es mayor a 0 es mas que 512MB, me voy.
         jg      sum_end
         cmp     ecx, 0x20000000                         ; Si la parte baja es mayor a 512MB, me voy.
         jg      sum_end
