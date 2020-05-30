@@ -11,6 +11,9 @@ EXTERN IDT
 EXTERN CS_SEL
 EXTERN CS_SEL_ROM
 
+; Desde paging.asm
+EXTERN runtime_paging
+
 USE32
 
 ;______________________________________________________________________________;
@@ -92,18 +95,24 @@ handler#GP:
 
 ;Excepcion #GP (Page Fault, [0x0E])
 handler#PF:
-        pushad
-        xor     eax, eax
-        xor     ebx, ebx
-        ;xor     ecx, ecx
-        xor     edx, edx
-        xor     edi, edi
-        xor     esi, esi
-        xor     ebp, ebp
-        mov     dx, 0x0E
+        pushad                          ; Guardo los registros en pila
+        xor     eax, eax                ; \
+        xor     ebx, ebx                ; |
+        xor     ecx, ecx                ; |
+        xor     edx, edx                ; | Borro los registros para ver mejor
+        xor     edi, edi                ; | en Bochs.
+        xor     esi, esi                ; |
+        xor     ebp, ebp                ; /
+        mov     dx, 0x0E                ; Pongo el numero error para que se vea.
 
-        BKPT
+        mov     eax, CR2                ; Obtengo la dirección que generó el fallo.
 
-        hlt
-        popad
-        iret
+        push    eax
+        call    runtime_paging
+        pop     eax
+
+        ;BKPT
+
+        popad                           ; Cargo los registros de nuevo.
+        add     esp, 0x04               ; Saco el codigo de error que metió #PF en pila
+        iret                            ; Saco EIP, CS y EFLAGS de la pila

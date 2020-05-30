@@ -8,6 +8,7 @@
 
 GLOBAL paging_init
 GLOBAL page_directory
+GLOBAL runtime_paging
 
 ; Desde biosLS.lds
 EXTERN __INIT_LIN
@@ -49,6 +50,8 @@ EXTERN __STACK_SIZE
 EXTERN __TASK1_STACK_LIN
 EXTERN __TASK1_STACK_PHY
 EXTERN __TASK1_STACK_SIZE
+
+EXTERN __RUNTIME_PAGES_PHY
 
 ;________________________________________
 ;   Linear Address
@@ -256,6 +259,8 @@ EXTERN __TASK1_STACK_SIZE
 ;  |        0x00115000  (Tabla 5)                  |        0x1FFFF000  (Pila Nucleo)               |
 ;  ==================================================================================================
 ;
+;  A partir de la dirección física 0x08000000 se guardan las paginas no mapeadas
+;  al inicio del programa.
 ;
 ;
 USE32
@@ -267,11 +272,13 @@ section .paging_tables nobits
     page_directory:
         resd 1024           ; 1024 posiciones de 4 bytes cada una para el Directorio.
     page_tables:
-        resd 1024*5         ; 1024 posiciones de 4 bytes cada una para
-                            ;       cada Tabla de paginas (son 5).
+        resd 1024*105       ; 1024 posiciones de 4 bytes cada una para
+                            ;       cada Tabla de paginas (son 5 del programa y
+                            ;       100 para las creadas en tiempo de ejecución).
     count_created_tables:
         resd 1              ; Cantidad de tablas creadas. OJO QUE ESTE SE PUEDE METER EN LAS TABLAS!!
-
+    runtime_pages_count:
+        resd 1              ; Cantidad de páginas creadas en tiempo de ejecución.
 
 ;______________________________________________________________________________;
 ;                           Paginación                                         ;
@@ -492,5 +499,38 @@ paging:
             continue:
             cmp     edx, ebx                ; Comparo si terminé de crear la cantidad de paginas.
             jnz     page_loop               ; Sigo creando paginas.
+
+        ret
+
+
+;________________________________________
+; Paginacion en tiempo de ejecución
+;________________________________________
+runtime_paging:
+        mov     ebp, esp
+
+        mov     eax, __RUNTIME_PAGES_PHY    ; Traigo la dirección física.
+        mov     ebx, [runtime_pages_count]  ; Cantidad de paginas creadas.
+        shl     ebx, 0x0C                   ; Multiplico por 4096 el contador de paginas creadas para que no se pise con la anterior.
+        add     eax, ebx                    ; Dirección fisica de la nueva pagina.
+        inc     ebx                         ; Incremento el contador.
+        mov     [runtime_pages_count], ebx  ; Guardo la cantidad de paginas creadas.
+
+        xor     ebx, ebx                    ; Limpio ebx, lo voy a usar de tamaño de sección para calcular una sola pagina.
+
+        mov     ecx, [ebp + 0x04]           ; Saco de pila la dirección que me genero el error.
+
+        ;BKPT
+        push    ebx
+        push    eax
+        push    ecx
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
 
         ret
