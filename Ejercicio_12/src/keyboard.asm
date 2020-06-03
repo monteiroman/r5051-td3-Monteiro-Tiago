@@ -290,6 +290,10 @@ keyboard_routine:
         ;      Byte 0     Byte 1       Byte 2       Byte 3      Byte 4       Byte 5     Byte 6     Byte 7
         ;
         ;
+        cmp     edx, 0x00                               ; Se da un caso particular si la cantidad de digitos ingresados es cero
+        jne     not_zero_digits
+            mov     edx, 0x01                           ; Le cargo aunque sea algo a "edx" para que recorra el buffer. 
+        not_zero_digits:
         dec     edx                                     ; Me ubico en el ultimo byte ingresado
         mov     ebx, 0x08                               ; Cantidad de veces que voy a repetir en ciclo (Cantidad de bytes a levantar)
         saving_loop1:
