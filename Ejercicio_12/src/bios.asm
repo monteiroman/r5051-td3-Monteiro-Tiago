@@ -1,24 +1,16 @@
-;11. P AGINACIÓN AVANZADA
-;Modificar el esquema de paginación del ejercicio anterior para satisfacer el
-;siguiente mapa de memoria.
+;12. PAGINACIÓN REAL
+;En base al código anterior modificar las siguientes funcionalidades:
 ;
-;        Sección        |  Dirección física inicial  |  Dirección lineal inicial
-;  _____________________|____________________________|____________________________
-;  ISR                  |          00000000h         |          00000000h
-;  Video                |          000B8000h         |          00010000h
-;  Tablas de sistema    |          00100000h         |          00100000h
-;  Tablas de paginación |          00110000h         |          00110000h
-;  Núcleo               |          00200000h         |          01200000h
-;  Tabla de dígitos     |          00210000h         |          01210000h
-;  Datos                |          00202000h         |          01300000h
-;  TEXT Tarea 1         |          00300000h         |          01301000h
-;  BSS Tarea 1          |          00301000h         |          01302000h
-;  DATA Tarea 1         |          00302000h         |          01202000h
-;  Pila Nucleo          |          1FF08000h         |          1FF08000h
-;  Pila Tarea 1         |          1FFFF000h         |          00713000h
-;  Secuencia inic. ROM  |          FFFF0000h         |          FFFF0000h
-;  Vector de reset      |          FFFFFFF0h         |          FFFFFFF0h
+;a) La rutina de suma (Tarea 1) debe intentar leer en la dirección que se 
+;   obtenga como resultado de la suma. En caso de que dicho número supere 
+;   la RAM del sistema (512MB) se omitirá la lectura.
 ;
+;b) El controlador de #PF al detectar que el error se debe a una página no
+;   presente, deberá asignar a la dirección que produjo el error una nueva 
+;   página a partir de la dirección física 0x08000000h.
+;
+;Tenga en cuenta que las estructuras de paginación deberán completarse en 
+;forma dinámica.
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
