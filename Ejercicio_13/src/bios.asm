@@ -249,5 +249,5 @@ Main:
         call    refresh_screen
         call    sum_routine
         call    sum_routine_2
-        BKPT
+        ;BKPT
         jmp     Main

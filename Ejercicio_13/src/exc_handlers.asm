@@ -114,6 +114,7 @@ handler#PF:
         push    eax
         call    runtime_paging
         pop     eax
+        ;_______________________________________________________________________________________________________________
 
         popad                           ; Cargo los registros de nuevo.
         add     esp, 0x04               ; Saco el codigo de error que metió #PF en pila

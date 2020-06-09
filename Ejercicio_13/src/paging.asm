@@ -314,8 +314,6 @@ section .init32
 
 paging_init:
 
-        BKPT
-
         push    __INIT_LENGTH               ; Largo de la sección.
         push    __INIT_PHY                  ; Direccion Física
         push    __INIT_LIN                  ; Dirección Lineal
@@ -552,7 +550,7 @@ paging:
             add     ecx, [ebp + 0x04]       ; Saco de la pila y pego los atributos de Pagina.
 
             mov     [eax + edx * 4], ecx    ; Guardo la direccion de pagina en la entrada de Tabla.
-
+            
             add     ecx, 0x1000             ; Incremento en 4k la dirección física. (nueva pagina).
             inc     edx                     ; Incremento el contador.
 
@@ -560,6 +558,8 @@ paging:
             cmp     esi, 0x400              ; Si llego al final de la tabla, tengo que hacer una nueva.
             jne     continue
                 inc     edi                 ; Me voy a la siguiente entrada de directorio (pagina nueva)
+                cmp     edi, 0x400          ; No tengo que paginar mas alla del Directorio
+                    je      end_page
                 mov     esi, 0x00           ; Pongo el indice de tabla de pagina en cero (pagina cero)
                 shl     edx, 0x0C           ; multiplico la cantidad de paginas creadas por 4k
                 sub     [ebp + 0x14], edx   ; Corrijo la cantidad de paginas creadas
@@ -570,6 +570,7 @@ paging:
             cmp     edx, ebx                ; Comparo si terminé de crear la cantidad de paginas.
             jnz     page_loop               ; Sigo creando paginas.
 
+        end_page:
         ret
 
 
