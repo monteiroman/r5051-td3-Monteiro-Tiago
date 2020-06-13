@@ -55,7 +55,7 @@ timer_routine:
         xor     eax,eax
         mov word    [timer_flag_2], 0x01      ; Una vez terminada la cuenta pongo a 1 el flag1
         ;BKPT                               
-    continue:
+    continue_2:
     mov     [timer_count_2], ax
 
     popad

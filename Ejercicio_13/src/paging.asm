@@ -7,7 +7,10 @@
 %define SUP_R_PRES_PageAttrib     0x03
 
 GLOBAL paging_init
-GLOBAL page_directory
+GLOBAL kernel_page_directory
+GLOBAL task1_page_directory
+GLOBAL task2_page_directory
+GLOBAL task3_page_directory
 GLOBAL runtime_paging
 
 ; Desde biosLS.lds
@@ -296,14 +299,36 @@ USE32
 ;______________________________________________________________________________;
 section .paging_tables nobits
 
-    page_directory:
+    kernel_page_directory:
         resd 1024           ; 1024 posiciones de 4 bytes cada una para el Directorio.
-    page_tables:
+    task1_page_directory:
+        resd 1024           ; 1024 posiciones de 4 bytes cada una para el Directorio.
+    task2_page_directory:
+        resd 1024           ; 1024 posiciones de 4 bytes cada una para el Directorio.
+    task3_page_directory:
+        resd 1024           ; 1024 posiciones de 4 bytes cada una para el Directorio.
+    kernel_page_tables:
         resd 1024*105       ; 1024 posiciones de 4 bytes cada una para
                             ;       cada Tabla de paginas (son 5 del programa y
                             ;       100 para las creadas en tiempo de ejecución).
-    count_created_tables:
-        resd 1              ; Cantidad de tablas creadas. OJO QUE ESTE SE PUEDE METER EN LAS TABLAS!!
+    task1_page_tables:
+        resd 1024*10         ; 1024 posiciones de 4 bytes cada una para
+                            ;       cada Tabla de paginas
+    task2_page_tables:
+        resd 1024*10         ; 1024 posiciones de 4 bytes cada una para
+                            ;       cada Tabla de paginas
+    task3_page_tables:
+        resd 1024*10         ; 1024 posiciones de 4 bytes cada una para
+                            ;       cada Tabla de paginas
+    count_kernel_created_tables:
+        resd 1              ; Cantidad de tablas creadas por el kernel.
+    count_task1_created_tables:
+        resd 1              ; Cantidad de tablas creadas por la tarea 1.
+    count_task2_created_tables:
+        resd 1              ; Cantidad de tablas creadas por la tarea 2.
+    count_task3_created_tables:
+        resd 1              ; Cantidad de tablas creadas por la tarea 3.
+
     runtime_pages_count:
         resd 1              ; Cantidad de páginas creadas en tiempo de ejecución.
 
@@ -314,6 +339,13 @@ section .init32
 
 paging_init:
 
+;________________________________________
+; Paginación de Kernel
+;________________________________________
+
+        push    kernel_page_tables          ; Tablas de Paginas del Kernel
+        push    kernel_page_directory       ; Directorio de Kernel
+        push    count_kernel_created_tables ; Cantidad de paginas creadas por el Kernel
         push    __INIT_LENGTH               ; Largo de la sección.
         push    __INIT_PHY                  ; Direccion Física
         push    __INIT_LIN                  ; Dirección Lineal
@@ -325,7 +357,13 @@ paging_init:
         pop     eax
         pop     eax
         pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
 
+        push    kernel_page_tables
+        push    kernel_page_directory       
+        push    count_kernel_created_tables
         push    __ROUTINES_LENGTH
         push    __ROUTINES_PHY
         push    __ROUTINES_LIN
@@ -337,7 +375,13 @@ paging_init:
         pop     eax
         pop     eax
         pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
 
+        push    kernel_page_tables
+        push    kernel_page_directory       
+        push    count_kernel_created_tables
         push    __VIDEO_BUFFER_SIZE
         push    __VIDEO_BUFFER_PHY
         push    __VIDEO_BUFFER_LIN
@@ -349,7 +393,13 @@ paging_init:
         pop     eax
         pop     eax
         pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
 
+        push    kernel_page_tables
+        push    kernel_page_directory       
+        push    count_kernel_created_tables
         push    __SYS_TABLES_LENGTH
         push    __SYS_TABLES_PHY
         push    __SYS_TABLES_LIN
@@ -361,7 +411,13 @@ paging_init:
         pop     eax
         pop     eax
         pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
 
+        push    kernel_page_tables
+        push    kernel_page_directory       
+        push    count_kernel_created_tables
         push    __PAGING_TABLES_LENGTH
         push    __PAGING_TABLES_PHY
         push    __PAGING_TABLES_LIN
@@ -373,7 +429,13 @@ paging_init:
         pop     eax
         pop     eax
         pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
 
+        push    kernel_page_tables
+        push    kernel_page_directory       
+        push    count_kernel_created_tables
         push    __KERNEL_LENGTH
         push    __KERNEL_PHY
         push    __KERNEL_LIN
@@ -385,7 +447,13 @@ paging_init:
         pop     eax
         pop     eax
         pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
 
+        push    kernel_page_tables
+        push    kernel_page_directory       
+        push    count_kernel_created_tables
         push    __SAVED_DIGITS_TABLE_LENGTH
         push    __SAVED_DIGITS_TABLE_PHY
         push    __SAVED_DIGITS_TABLE_LIN
@@ -397,7 +465,14 @@ paging_init:
         pop     eax
         pop     eax
         pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
 
+    ; Paginación de las taréas dentro del Directorio de Kernel
+        push    kernel_page_tables
+        push    kernel_page_directory       
+        push    count_kernel_created_tables
         push    __TASK1_TXT_LENGTH
         push    __TASK1_TXT_PHY
         push    __TASK1_TXT_LIN
@@ -409,7 +484,13 @@ paging_init:
         pop     eax
         pop     eax
         pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
 
+        push    kernel_page_tables
+        push    kernel_page_directory       
+        push    count_kernel_created_tables
         push    __TASK1_BSS_LENGTH
         push    __TASK1_BSS_PHY
         push    __TASK1_BSS_LIN
@@ -421,8 +502,13 @@ paging_init:
         pop     eax
         pop     eax
         pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
 
-        ;------------------------------------------------------------------
+        push    kernel_page_tables
+        push    kernel_page_directory       
+        push    count_kernel_created_tables
         push    __TASK2_TXT_LENGTH
         push    __TASK2_TXT_PHY
         push    __TASK2_TXT_LIN
@@ -434,7 +520,13 @@ paging_init:
         pop     eax
         pop     eax
         pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
 
+        push    kernel_page_tables
+        push    kernel_page_directory       
+        push    count_kernel_created_tables
         push    __TASK2_BSS_LENGTH
         push    __TASK2_BSS_PHY
         push    __TASK2_BSS_LIN
@@ -446,8 +538,14 @@ paging_init:
         pop     eax
         pop     eax
         pop     eax
-        ;------------------------------------------------------------------
+        pop     eax
+        pop     eax
+        pop     eax
 
+    ; Paginación de la Pila de kernel.
+        push    kernel_page_tables
+        push    kernel_page_directory       
+        push    count_kernel_created_tables
         push    __STACK_SIZE
         push    __STACK_PHY
         push    __STACK_LIN
@@ -459,7 +557,53 @@ paging_init:
         pop     eax
         pop     eax
         pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
 
+
+;________________________________________
+; Paginación de Tarea 1
+;________________________________________
+        push    task1_page_tables
+        push    task1_page_directory       
+        push    count_task1_created_tables
+        push    __TASK1_TXT_LENGTH
+        push    __TASK1_TXT_PHY
+        push    __TASK1_TXT_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        push    task1_page_tables
+        push    task1_page_directory       
+        push    count_task1_created_tables
+        push    __TASK1_BSS_LENGTH
+        push    __TASK1_BSS_PHY
+        push    __TASK1_BSS_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        push    task1_page_tables
+        push    task1_page_directory       
+        push    count_task1_created_tables
         push    __TASK1_STACK_SIZE
         push    __TASK1_STACK_PHY
         push    __TASK1_STACK_LIN
@@ -471,8 +615,53 @@ paging_init:
         pop     eax
         pop     eax
         pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
 
-        ;------------------------------------------------------------------
+
+;________________________________________
+; Paginación de Tarea 2
+;________________________________________
+        push    task2_page_tables
+        push    task2_page_directory       
+        push    count_task2_created_tables
+        push    __TASK2_TXT_LENGTH
+        push    __TASK2_TXT_PHY
+        push    __TASK2_TXT_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        push    task2_page_tables
+        push    task2_page_directory       
+        push    count_task2_created_tables
+        push    __TASK2_BSS_LENGTH
+        push    __TASK2_BSS_PHY
+        push    __TASK2_BSS_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        push    task2_page_tables
+        push    task2_page_directory       
+        push    count_task2_created_tables
         push    __TASK2_STACK_SIZE
         push    __TASK2_STACK_PHY
         push    __TASK2_STACK_LIN
@@ -484,7 +673,9 @@ paging_init:
         pop     eax
         pop     eax
         pop     eax
-        ;------------------------------------------------------------------
+        pop     eax
+        pop     eax
+        pop     eax
 
 
         ret
@@ -508,17 +699,20 @@ paging:
 
         overflowed_table:                   ; Si una tabla se sobrepasa, empiezo desde aca.
 
-        mov     eax, [page_directory + edi * 4]     ; Traigo la entrada desde el directorio de pagina
+        mov     eax, [ebp + 0x1C]           ; Saco de la pila el Directorio a utilizar
+        mov     eax, [eax + edi * 4]        ; Traigo la entrada desde el directorio de pagina
+        
         cmp     eax, 0x00                   ; Chequeo si ya existe la tabla
         je      create_table                ; Si no esta creada, salto a crearla.
         and     eax, 0xFFFFF000             ; Si existe, me quedo con la base de la entrada de directorio (dirección de la Tabla).
         jmp create_pages                    ; Si la tabla ya esta creada, salto
                                             ;   directamente a hacerle las paginas
     create_table:
-        mov     ebx, [count_created_tables] ; Busco el contador de tablas creadas.
+        mov     ebx, [ebp + 0x18]           ; Busco en la pila la dirección del contador de tablas creadas.
+        mov     ebx, [ebx]                  ; Obtengo la cantidad de tablas creadas.
 
         shl     ebx, 0x0C                   ; Multiplico por 4096 (4 bytes * 1024 entradas) para ubicarme en la tabla.
-        mov     ecx, page_tables            ; Comienzo de tablas de paginacion
+        mov     ecx, [ebp + 0x20]           ; Busco de la pila la dirección del comienzo de las tablas de la tarea correspondiente.
         add     ecx, ebx                    ; Sumo el comienzo y el contador de tabla para conformar el indice.
         and     ecx, 0xFFFFF000             ; Borro los 12 bits menos significativos.
         mov     eax, ecx                    ; Guardo la dirección de la tabla para el proximo paso. (create_pages)
@@ -526,11 +720,13 @@ paging:
         and     edx, 0x00000FFF             ; Limpio edx
         add     ecx, edx                    ; Le agrego los atributos de tabla.
 
-        mov     [page_directory + edi * 4], ecx     ; Guardo el indice de tabla en el directorio.
+        mov     edx, [ebp + 0x1C]           ; Saco de la pila el Directorio a utilizar
+        mov     [edx + edi * 4], ecx        ; Guardo el indice de tabla en el directorio.
 
-        mov     ebx, [count_created_tables] ; Busco el contador de tablas creadas.
-        inc     ebx                         ; Lo incremento.
-        mov     [count_created_tables], ebx ; Guardo.
+        mov     ebx, [ebp + 0x18]           ; Busco en la pila la dirección del contador de tablas creadas.
+        mov     edx, [ebx]                  ; Obtengo la cantidad de tablas creadas.
+        inc     edx                         ; Incremento la cantidad de tablas
+        mov     [ebx], edx                  ; Guardo.
 
     create_pages:
         mov     ebx, [ebp + 0x14]           ; Saco el largo de la sección de la pila.
@@ -559,7 +755,8 @@ paging:
             jne     continue
                 inc     edi                 ; Me voy a la siguiente entrada de directorio (pagina nueva)
                 cmp     edi, 0x400          ; No tengo que paginar mas alla del Directorio
-                    je      end_page
+                je      end_page
+                
                 mov     esi, 0x00           ; Pongo el indice de tabla de pagina en cero (pagina cero)
                 shl     edx, 0x0C           ; multiplico la cantidad de paginas creadas por 4k
                 sub     [ebp + 0x14], edx   ; Corrijo la cantidad de paginas creadas
@@ -592,12 +789,18 @@ runtime_paging:
         mov     ecx, [ebp + 0x04]           ; Saco de pila la dirección que me genero el error.
 
         ;BKPT
+        push    kernel_page_tables
+        push    kernel_page_directory       
+        push    count_kernel_created_tables
         push    ebx
         push    eax
         push    ecx
         push    SUP_RW_PRES_TableAttrib
         push    SUP_RW_PRES_PageAttrib
         call    paging
+        pop     eax
+        pop     eax
+        pop     eax
         pop     eax
         pop     eax
         pop     eax

@@ -127,7 +127,10 @@ EXTERN refresh_screen
 
 ; Desde paging.asm
 EXTERN paging_init
-EXTERN page_directory
+EXTERN kernel_page_directory
+EXTERN task1_page_directory
+EXTERN task2_page_directory
+EXTERN task3_page_directory               
 
 USE32                   ;El codigo que continúa va en segmento de código
                                     ; de 32 BITS.
@@ -148,14 +151,12 @@ Inicio_32bits:
                                         ;carga de arriba hacia abajo).
         ; Paginación
         call    paging_init
-        mov     eax, page_directory
+        mov     eax, kernel_page_directory
         mov     CR3, eax            ; Cargo CR3 con la direccion del directorio
 
         mov     eax, CR0            ; Activo la paginación poniendo en 1 el
         or      eax, 0x80000000     ;   bit 31 de CR0.
         mov     CR0, eax
-
-        BKPT
 
         ; Uso la pila para pasarle los valores a la funcion de copiado (mi nucleo).
         push    __KERNEL_ORIG     ;Posicion de origen .kernel (en ROM) que contiene a .copy.
