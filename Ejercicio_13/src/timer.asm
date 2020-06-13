@@ -18,6 +18,8 @@ GLOBAL timer_flag_2
 section .counter_bytes nobits               ; Las variables usadas son mucho mas
     timer_count:                            ; grandes de lo necesario para que se
         resb 4                              ; vean bien las tablas en el Bochs
+    timer_count_2: 
+        resb 4
     timer_flag:
         resb 4
     timer_flag_2:
@@ -31,16 +33,30 @@ section .counter_bytes nobits               ; Las variables usadas son mucho mas
 section .timer
 timer_routine:
     pushad
+
+    ; Contador de Tarea 1
     xor     eax, eax
     mov     ax, [timer_count]
     inc     eax
-    cmp     eax, 0x32                   ; El timer interrumpe cada 10ms
-    jnz     continue                    ;           -> 500ms / 10ms = 50 = 0x32
+    cmp     eax, 0x0A                       ; El timer interrumpe cada 10ms
+    jnz     continue                        ;           -> 100ms / 10ms = 10 = 0x0A
         xor     eax,eax
-        mov word    [timer_flag], 0x01   ; Una vez terminada la cuenta pongo a 1 el flag1
-        mov word    [timer_flag_2], 0x01 ; Una vez terminada la cuenta pongo a 1 el flag2
-        ;BKPT                           ;   el flag.
+        mov word    [timer_flag], 0x01      ; Una vez terminada la cuenta pongo a 1 el flag1
+        ;BKPT                               
     continue:
     mov     [timer_count], ax
+
+    ; Contador de Tarea 2
+    xor     eax, eax
+    mov     ax, [timer_count_2]
+    inc     eax
+    cmp     eax, 0x14                         ; El timer interrumpe cada 10ms
+    jnz     continue_2                        ;           -> 200ms / 10ms = 20 = 0x14
+        xor     eax,eax
+        mov word    [timer_flag_2], 0x01      ; Una vez terminada la cuenta pongo a 1 el flag1
+        ;BKPT                               
+    continue:
+    mov     [timer_count_2], ax
+
     popad
     ret
