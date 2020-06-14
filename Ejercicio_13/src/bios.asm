@@ -4,7 +4,7 @@
 ;prestaciones:
 ;
 ;a) Implementar 3 tareas a saber:
-;       i.Suma (2 tareas). Estas tareas de ejecutarán cada 100 y 200 ms. 
+;       i.Suma (2 tareas). Estas tareas se ejecutarán cada 100 y 200 ms. 
 ;         respectivamente.
 ;         En todos los casos utilizarán los mismos datos como sumandos 
 ;         (Tabla de dígitos), presentado el resultado en pantalla y al finalizar

@@ -124,6 +124,7 @@ SECTIONS
             __KERNEL_ORIG = LOADADDR(.kernel);
             bin/copy.elf(.copy);
             bin/screen.elf(.screen);
+            bin/scheduler.elf(.scheduler);
         } AT >rom
         __KERNEL_LENGTH = SIZEOF(.kernel);
 
@@ -148,6 +149,7 @@ SECTIONS
             bin/timer.elf(.counter_bytes);
             bin/keyboard.elf(.saved_digits_table);
             bin/keyboard.elf(.round_buffer);
+            bin/scheduler.elf(.scheduler_tables);
         }
         __SAVED_DIGITS_TABLE_LENGTH = SIZEOF(.saved_digits_table);
 
