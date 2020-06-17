@@ -7,6 +7,11 @@ GLOBAL timer_count
 GLOBAL timer_flag
 GLOBAL timer_flag_2
 
+; Desde scheduler.asm
+EXTERN future_task
+EXTERN current_task
+EXTERN change_context
+
 ;______________________________________________________________________________;
 ;                           Rutina del timer                                   ;
 ;______________________________________________________________________________;

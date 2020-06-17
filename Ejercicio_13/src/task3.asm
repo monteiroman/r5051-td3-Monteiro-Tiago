@@ -12,5 +12,6 @@ section .task_three
 idle_task:
         mov     eax, 0x6969
         BKPT
-        hlt
+        ;hlt
+        ret
         jmp     idle_task
