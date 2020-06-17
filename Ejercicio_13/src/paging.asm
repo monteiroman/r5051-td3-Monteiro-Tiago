@@ -62,6 +62,18 @@ EXTERN __TASK2_DATA_R_LENGTH
 EXTERN __TASK2_DATA_RW_LIN
 EXTERN __TASK2_DATA_RW_PHY
 EXTERN __TASK2_DATA_RW_LENGTH
+EXTERN __TASK3_TXT_LIN
+EXTERN __TASK3_TXT_PHY
+EXTERN __TASK3_TXT_LENGTH
+EXTERN __TASK3_BSS_LIN
+EXTERN __TASK3_BSS_PHY
+EXTERN __TASK3_BSS_LENGTH
+EXTERN __TASK3_DATA_R_LIN
+EXTERN __TASK3_DATA_R_PHY
+EXTERN __TASK3_DATA_R_LENGTH
+EXTERN __TASK3_DATA_RW_LIN
+EXTERN __TASK3_DATA_RW_PHY
+EXTERN __TASK3_DATA_RW_LENGTH
 EXTERN __STACK_LIN
 EXTERN __STACK_PHY
 EXTERN __STACK_SIZE
@@ -71,6 +83,9 @@ EXTERN __TASK1_STACK_SIZE
 EXTERN __TASK2_STACK_LIN
 EXTERN __TASK2_STACK_PHY
 EXTERN __TASK2_STACK_SIZE
+EXTERN __TASK3_STACK_LIN
+EXTERN __TASK3_STACK_PHY
+EXTERN __TASK3_STACK_SIZE
 
 
 EXTERN __RUNTIME_PAGES_PHY
@@ -542,6 +557,42 @@ paging_init:
         pop     eax
         pop     eax
 
+        push    kernel_page_tables
+        push    kernel_page_directory       
+        push    count_kernel_created_tables
+        push    __TASK3_TXT_LENGTH
+        push    __TASK3_TXT_PHY
+        push    __TASK3_TXT_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        push    kernel_page_tables
+        push    kernel_page_directory       
+        push    count_kernel_created_tables
+        push    __TASK3_BSS_LENGTH
+        push    __TASK3_BSS_PHY
+        push    __TASK3_BSS_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
     ; Paginación de la Pila de kernel.
         push    kernel_page_tables
         push    kernel_page_directory       
@@ -619,6 +670,62 @@ paging_init:
         pop     eax
         pop     eax
 
+        push    task1_page_tables
+        push    task1_page_directory       
+        push    count_task1_created_tables
+        push    __ROUTINES_LENGTH
+        push    __ROUTINES_PHY
+        push    __ROUTINES_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        ; OJO!! Si trabajo con permisos esto no tiene que ir!! --->
+        push    task1_page_tables
+        push    task1_page_directory       
+        push    count_task1_created_tables
+        push    __KERNEL_LENGTH
+        push    __KERNEL_PHY
+        push    __KERNEL_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        push    task1_page_tables
+        push    task1_page_directory       
+        push    count_task1_created_tables
+        push    __SYS_TABLES_LENGTH
+        push    __SYS_TABLES_PHY
+        push    __SYS_TABLES_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        ; <--- OJO!! Si trabajo con permisos esto no tiene que ir!! 
+
 
 ;________________________________________
 ; Paginación de Tarea 2
@@ -676,6 +783,158 @@ paging_init:
         pop     eax
         pop     eax
         pop     eax
+
+        push    task2_page_tables
+        push    task2_page_directory       
+        push    count_task2_created_tables
+        push    __ROUTINES_LENGTH
+        push    __ROUTINES_PHY
+        push    __ROUTINES_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        ; OJO!! Si trabajo con permisos esto no tiene que ir!! --->
+        push    task2_page_tables
+        push    task2_page_directory       
+        push    count_task2_created_tables
+        push    __KERNEL_LENGTH
+        push    __KERNEL_PHY
+        push    __KERNEL_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        push    task2_page_tables
+        push    task2_page_directory       
+        push    count_task2_created_tables
+        push    __SYS_TABLES_LENGTH
+        push    __SYS_TABLES_PHY
+        push    __SYS_TABLES_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        ; <--- OJO!! Si trabajo con permisos esto no tiene que ir!! 
+
+
+;________________________________________
+; Paginación de Tarea 3
+;________________________________________
+        push    task3_page_tables
+        push    task3_page_directory       
+        push    count_task3_created_tables
+        push    __TASK3_TXT_LENGTH
+        push    __TASK3_TXT_PHY
+        push    __TASK3_TXT_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        push    task3_page_tables
+        push    task3_page_directory       
+        push    count_task3_created_tables
+        push    __TASK3_STACK_SIZE
+        push    __TASK3_STACK_PHY
+        push    __TASK3_STACK_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        push    task3_page_tables
+        push    task3_page_directory       
+        push    count_task3_created_tables
+        push    __ROUTINES_LENGTH
+        push    __ROUTINES_PHY
+        push    __ROUTINES_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        ; OJO!! Si trabajo con permisos esto no tiene que ir!! --->
+        push    task3_page_tables
+        push    task3_page_directory       
+        push    count_task3_created_tables
+        push    __KERNEL_LENGTH
+        push    __KERNEL_PHY
+        push    __KERNEL_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        push    task3_page_tables
+        push    task3_page_directory       
+        push    count_task3_created_tables
+        push    __SYS_TABLES_LENGTH
+        push    __SYS_TABLES_PHY
+        push    __SYS_TABLES_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        ; <--- OJO!! Si trabajo con permisos esto no tiene que ir!! 
 
 
         ret

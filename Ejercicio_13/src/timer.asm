@@ -27,12 +27,12 @@ section .counter_bytes nobits               ; Las variables usadas son mucho mas
 
 
 ;________________________________________
-; Tabla para guardar los digitos
+; Interrupcion de timer
 ;________________________________________
 
 section .timer
 timer_routine:
-    pushad
+    ;pushad
 
     ; Contador de Tarea 1
     xor     eax, eax
@@ -58,5 +58,5 @@ timer_routine:
     continue_2:
     mov     [timer_count_2], ax
 
-    popad
+    ;popad
     ret

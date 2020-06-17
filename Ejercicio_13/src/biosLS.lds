@@ -14,18 +14,28 @@ __STACK_END = __STACK_LIN + __STACK_SIZE;
 
 __TASK1_STACK_PHY = 0x1FFFF000;
 __TASK1_STACK_LIN = 0x00713000;
-__TASK1_STACK_SIZE = 0x00004000;                    /*Stack de 16k*/
+__TASK1_STACK_SIZE = 0x00000200;                    /*Stack de 512b*/
 __TASK1_STACK_END = __TASK1_STACK_LIN + __TASK1_STACK_SIZE;
 
 
 /*____________________________________________________________________________*/
-/*                            Pila de Tarea 1                                 */
+/*                            Pila de Tarea 2                                 */
 /*____________________________________________________________________________*/
 
 __TASK2_STACK_PHY = 0x1FFFE000;
 __TASK2_STACK_LIN = 0x00713000;
-__TASK2_STACK_SIZE = 0x00004000;                    /*Stack de 16k*/
+__TASK2_STACK_SIZE = 0x00000200;                    /*Stack de 512b*/
 __TASK2_STACK_END = __TASK2_STACK_LIN + __TASK2_STACK_SIZE;
+
+
+/*____________________________________________________________________________*/
+/*                            Pila de Tarea 3                                 */
+/*____________________________________________________________________________*/
+
+__TASK3_STACK_PHY = 0x1FFFD000;
+__TASK3_STACK_LIN = 0x00713000;
+__TASK3_STACK_SIZE = 0x00000200;                    /*Stack de 512b*/
+__TASK3_STACK_END = __TASK3_STACK_LIN + __TASK3_STACK_SIZE;
 
 
 /*____________________________________________________________________________*/
@@ -81,6 +91,7 @@ SECTIONS
             bin/keyboard.elf(.keyboard_table_init);     /*                      */
             bin/keyboard.elf(.keyboard_table);          /*                      */
             bin/timer.elf(.timer);                      /*                      */
+            bin/timer.elf(.counter_bytes);
         } AT >rom                                       /*Que se cargue en ROM -> LMA*/
         __ROUTINES_LENGTH = SIZEOF(.routines);          /*Tamaño de toda la seccion*/
 
@@ -99,6 +110,7 @@ SECTIONS
         {
             __SYS_TABLES_LIN = .;
             bin/init.elf(.system_tables);
+            bin/scheduler.elf(.scheduler_tables);
         }
         __SYS_TABLES_LENGTH = SIZEOF(.system_tables);
 
@@ -146,10 +158,8 @@ SECTIONS
     .saved_digits_table 0x01210000 :                    /* tabla de digitos guardados*/
         {
             __SAVED_DIGITS_TABLE_LIN = .;
-            bin/timer.elf(.counter_bytes);
             bin/keyboard.elf(.saved_digits_table);
             bin/keyboard.elf(.round_buffer);
-            bin/scheduler.elf(.scheduler_tables);
         }
         __SAVED_DIGITS_TABLE_LENGTH = SIZEOF(.saved_digits_table);
 
@@ -239,7 +249,7 @@ SECTIONS
         {
             __TASK3_TXT_LIN = .;
             __TASK3_TXT_ORIG = LOADADDR(.task3_text);
-            /*bin/task3.elf(.task_one);*/
+            bin/task3.elf(.task_three);
         } AT >rom
         __TASK3_TXT_LENGTH = SIZEOF(.task3_text);
 

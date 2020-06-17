@@ -112,6 +112,9 @@ EXTERN __TASK1_TXT_LENGTH
 EXTERN __TASK2_TXT_LIN
 EXTERN __TASK2_TXT_ORIG
 EXTERN __TASK2_TXT_LENGTH
+EXTERN __TASK3_TXT_LIN
+EXTERN __TASK3_TXT_ORIG
+EXTERN __TASK3_TXT_LENGTH
 
 ;Desde pic_init.asm.
 EXTERN pic_init
@@ -130,7 +133,11 @@ EXTERN paging_init
 EXTERN kernel_page_directory
 EXTERN task1_page_directory
 EXTERN task2_page_directory
-EXTERN task3_page_directory               
+EXTERN task3_page_directory
+
+; Desde scheduler.asm
+EXTERN scheduler_init
+
 
 USE32                   ;El codigo que continúa va en segmento de código
                                     ; de 32 BITS.
@@ -208,6 +215,16 @@ Inicio_32bits:
 
         ;BKPT
 
+        push    __TASK3_TXT_ORIG
+        push    __TASK3_TXT_LIN
+        push    __TASK3_TXT_LENGTH
+        call    Funcion_copia
+        pop     eax
+        pop     eax
+        pop     eax
+
+        ;BKPT
+
         ; Copio la GDT que va a correr desde memoria.
         push    GDT_ROM
         push    GDT
@@ -238,6 +255,8 @@ Inicio_32bits:
         ; Habilito las interrupciones
         sti
 
+        ;BKPT
+
         jmp     CS_SEL:Main
 
 ;________________________________________
@@ -245,10 +264,13 @@ Inicio_32bits:
 ;________________________________________
 section .main
 Main:
-        hlt
         ;BKPT
-        call    refresh_screen
-        call    sum_routine
-        call    sum_routine_2
+        ;call    refresh_screen
+        ;call    sum_routine
+        ;call    sum_routine_2
+        ;hlt
+        
         ;BKPT
+        jmp     scheduler_init
+
         jmp     Main

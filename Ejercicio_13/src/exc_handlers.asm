@@ -96,13 +96,13 @@ handler#GP:
 ;Excepcion #GP (Page Fault, [0x0E])
 handler#PF:
         pushad                          ; Guardo los registros en pila
-        xor     eax, eax                ; \
+        xor     eax, eax                ; |
         xor     ebx, ebx                ; |
         xor     ecx, ecx                ; |
         xor     edx, edx                ; | Borro los registros para ver mejor
         xor     edi, edi                ; | en Bochs.
         xor     esi, esi                ; |
-        xor     ebp, ebp                ; /
+        xor     ebp, ebp                ; |
         mov     dx, 0x0E                ; Pongo el numero error para que se vea.
 
         BKPT

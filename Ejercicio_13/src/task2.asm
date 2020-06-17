@@ -28,7 +28,6 @@ section .sum_store_2 nobits
 
 section .task_two
 sum_routine_2:
-        pushad
         mov     ax, [timer_flag_2]
         mov     bx, [enter_key_flag_2]
         cmp     ax, 0x00                                ; Chequeo que este el flag de timer.
@@ -64,5 +63,4 @@ sum_routine_2:
         mov     [sum_stored_2 + 4], edx                 ; Guardo la parte alta en la posicion pedida.
 
     sum_end:
-        popad
         ret
