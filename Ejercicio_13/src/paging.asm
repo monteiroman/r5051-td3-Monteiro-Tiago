@@ -484,6 +484,24 @@ paging_init:
         pop     eax
         pop     eax
 
+        push    kernel_page_tables
+        push    kernel_page_directory       
+        push    count_kernel_created_tables
+        push    __DATA_LENGTH
+        push    __DATA_PHY
+        push    __DATA_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
     ; Paginación de las taréas dentro del Directorio de Kernel
         push    kernel_page_tables
         push    kernel_page_directory       
@@ -616,6 +634,150 @@ paging_init:
 ;________________________________________
 ; Paginación de Tarea 1
 ;________________________________________
+        push    task1_page_tables          
+        push    task1_page_directory       
+        push    count_task1_created_tables 
+        push    __INIT_LENGTH               
+        push    __INIT_PHY                  
+        push    __INIT_LIN                  
+        push    SUP_RW_PRES_TableAttrib     
+        push    SUP_RW_PRES_PageAttrib      
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        push    task1_page_tables
+        push    task1_page_directory       
+        push    count_task1_created_tables
+        push    __ROUTINES_LENGTH
+        push    __ROUTINES_PHY
+        push    __ROUTINES_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        push    task1_page_tables
+        push    task1_page_directory       
+        push    count_task1_created_tables
+        push    __VIDEO_BUFFER_SIZE
+        push    __VIDEO_BUFFER_PHY
+        push    __VIDEO_BUFFER_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        push    task1_page_tables
+        push    task1_page_directory       
+        push    count_task1_created_tables
+        push    __SYS_TABLES_LENGTH
+        push    __SYS_TABLES_PHY
+        push    __SYS_TABLES_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        push    task1_page_tables
+        push    task1_page_directory       
+        push    count_task1_created_tables
+        push    __PAGING_TABLES_LENGTH
+        push    __PAGING_TABLES_PHY
+        push    __PAGING_TABLES_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        push    task1_page_tables
+        push    task1_page_directory       
+        push    count_task1_created_tables
+        push    __KERNEL_LENGTH
+        push    __KERNEL_PHY
+        push    __KERNEL_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        push    task1_page_tables
+        push    task1_page_directory       
+        push    count_task1_created_tables
+        push    __SAVED_DIGITS_TABLE_LENGTH
+        push    __SAVED_DIGITS_TABLE_PHY
+        push    __SAVED_DIGITS_TABLE_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        push    task1_page_tables
+        push    task1_page_directory       
+        push    count_task1_created_tables
+        push    __DATA_LENGTH
+        push    __DATA_PHY
+        push    __DATA_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        
         push    task1_page_tables
         push    task1_page_directory       
         push    count_task1_created_tables
@@ -670,9 +832,31 @@ paging_init:
         pop     eax
         pop     eax
 
-        push    task1_page_tables
-        push    task1_page_directory       
-        push    count_task1_created_tables
+
+;________________________________________
+; Paginación de Tarea 2
+;________________________________________
+        push    task2_page_tables          
+        push    task2_page_directory       
+        push    count_task2_created_tables 
+        push    __INIT_LENGTH               
+        push    __INIT_PHY                  
+        push    __INIT_LIN                  
+        push    SUP_RW_PRES_TableAttrib     
+        push    SUP_RW_PRES_PageAttrib      
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        push    task2_page_tables
+        push    task2_page_directory       
+        push    count_task2_created_tables
         push    __ROUTINES_LENGTH
         push    __ROUTINES_PHY
         push    __ROUTINES_LIN
@@ -688,10 +872,63 @@ paging_init:
         pop     eax
         pop     eax
 
-        ; OJO!! Si trabajo con permisos esto no tiene que ir!! --->
-        push    task1_page_tables
-        push    task1_page_directory       
-        push    count_task1_created_tables
+        push    task2_page_tables
+        push    task2_page_directory       
+        push    count_task2_created_tables
+        push    __VIDEO_BUFFER_SIZE
+        push    __VIDEO_BUFFER_PHY
+        push    __VIDEO_BUFFER_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        push    task2_page_tables
+        push    task2_page_directory       
+        push    count_task2_created_tables
+        push    __SYS_TABLES_LENGTH
+        push    __SYS_TABLES_PHY
+        push    __SYS_TABLES_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        push    task2_page_tables
+        push    task2_page_directory       
+        push    count_task2_created_tables
+        push    __PAGING_TABLES_LENGTH
+        push    __PAGING_TABLES_PHY
+        push    __PAGING_TABLES_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        push    task2_page_tables
+        push    task2_page_directory       
+        push    count_task2_created_tables
         push    __KERNEL_LENGTH
         push    __KERNEL_PHY
         push    __KERNEL_LIN
@@ -707,12 +944,12 @@ paging_init:
         pop     eax
         pop     eax
 
-        push    task1_page_tables
-        push    task1_page_directory       
-        push    count_task1_created_tables
-        push    __SYS_TABLES_LENGTH
-        push    __SYS_TABLES_PHY
-        push    __SYS_TABLES_LIN
+        push    task2_page_tables
+        push    task2_page_directory       
+        push    count_task2_created_tables
+        push    __SAVED_DIGITS_TABLE_LENGTH
+        push    __SAVED_DIGITS_TABLE_PHY
+        push    __SAVED_DIGITS_TABLE_LIN
         push    SUP_RW_PRES_TableAttrib
         push    SUP_RW_PRES_PageAttrib
         call    paging
@@ -724,12 +961,25 @@ paging_init:
         pop     eax
         pop     eax
         pop     eax
-        ; <--- OJO!! Si trabajo con permisos esto no tiene que ir!! 
 
+        push    task2_page_tables
+        push    task2_page_directory       
+        push    count_task2_created_tables
+        push    __DATA_LENGTH
+        push    __DATA_PHY
+        push    __DATA_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
 
-;________________________________________
-; Paginación de Tarea 2
-;________________________________________
         push    task2_page_tables
         push    task2_page_directory       
         push    count_task2_created_tables
@@ -784,9 +1034,31 @@ paging_init:
         pop     eax
         pop     eax
 
-        push    task2_page_tables
-        push    task2_page_directory       
-        push    count_task2_created_tables
+
+;________________________________________
+; Paginación de Tarea 3
+;________________________________________
+        push    task3_page_tables          
+        push    task3_page_directory       
+        push    count_task3_created_tables 
+        push    __INIT_LENGTH               
+        push    __INIT_PHY                  
+        push    __INIT_LIN                  
+        push    SUP_RW_PRES_TableAttrib     
+        push    SUP_RW_PRES_PageAttrib      
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        push    task3_page_tables
+        push    task3_page_directory       
+        push    count_task3_created_tables
         push    __ROUTINES_LENGTH
         push    __ROUTINES_PHY
         push    __ROUTINES_LIN
@@ -802,10 +1074,63 @@ paging_init:
         pop     eax
         pop     eax
 
-        ; OJO!! Si trabajo con permisos esto no tiene que ir!! --->
-        push    task2_page_tables
-        push    task2_page_directory       
-        push    count_task2_created_tables
+        push    task3_page_tables
+        push    task3_page_directory       
+        push    count_task3_created_tables
+        push    __VIDEO_BUFFER_SIZE
+        push    __VIDEO_BUFFER_PHY
+        push    __VIDEO_BUFFER_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        push    task3_page_tables
+        push    task3_page_directory       
+        push    count_task3_created_tables
+        push    __SYS_TABLES_LENGTH
+        push    __SYS_TABLES_PHY
+        push    __SYS_TABLES_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        push    task3_page_tables
+        push    task3_page_directory       
+        push    count_task3_created_tables
+        push    __PAGING_TABLES_LENGTH
+        push    __PAGING_TABLES_PHY
+        push    __PAGING_TABLES_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        push    task3_page_tables
+        push    task3_page_directory       
+        push    count_task3_created_tables
         push    __KERNEL_LENGTH
         push    __KERNEL_PHY
         push    __KERNEL_LIN
@@ -821,12 +1146,12 @@ paging_init:
         pop     eax
         pop     eax
 
-        push    task2_page_tables
-        push    task2_page_directory       
-        push    count_task2_created_tables
-        push    __SYS_TABLES_LENGTH
-        push    __SYS_TABLES_PHY
-        push    __SYS_TABLES_LIN
+        push    task3_page_tables
+        push    task3_page_directory       
+        push    count_task3_created_tables
+        push    __SAVED_DIGITS_TABLE_LENGTH
+        push    __SAVED_DIGITS_TABLE_PHY
+        push    __SAVED_DIGITS_TABLE_LIN
         push    SUP_RW_PRES_TableAttrib
         push    SUP_RW_PRES_PageAttrib
         call    paging
@@ -838,12 +1163,25 @@ paging_init:
         pop     eax
         pop     eax
         pop     eax
-        ; <--- OJO!! Si trabajo con permisos esto no tiene que ir!! 
 
+        push    task3_page_tables
+        push    task3_page_directory       
+        push    count_task3_created_tables
+        push    __DATA_LENGTH
+        push    __DATA_PHY
+        push    __DATA_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
 
-;________________________________________
-; Paginación de Tarea 3
-;________________________________________
         push    task3_page_tables
         push    task3_page_directory       
         push    count_task3_created_tables
@@ -879,63 +1217,6 @@ paging_init:
         pop     eax
         pop     eax
         pop     eax
-
-        push    task3_page_tables
-        push    task3_page_directory       
-        push    count_task3_created_tables
-        push    __ROUTINES_LENGTH
-        push    __ROUTINES_PHY
-        push    __ROUTINES_LIN
-        push    SUP_RW_PRES_TableAttrib
-        push    SUP_RW_PRES_PageAttrib
-        call    paging
-        pop     eax
-        pop     eax
-        pop     eax
-        pop     eax
-        pop     eax
-        pop     eax
-        pop     eax
-        pop     eax
-
-        ; OJO!! Si trabajo con permisos esto no tiene que ir!! --->
-        push    task3_page_tables
-        push    task3_page_directory       
-        push    count_task3_created_tables
-        push    __KERNEL_LENGTH
-        push    __KERNEL_PHY
-        push    __KERNEL_LIN
-        push    SUP_RW_PRES_TableAttrib
-        push    SUP_RW_PRES_PageAttrib
-        call    paging
-        pop     eax
-        pop     eax
-        pop     eax
-        pop     eax
-        pop     eax
-        pop     eax
-        pop     eax
-        pop     eax
-
-        push    task3_page_tables
-        push    task3_page_directory       
-        push    count_task3_created_tables
-        push    __SYS_TABLES_LENGTH
-        push    __SYS_TABLES_PHY
-        push    __SYS_TABLES_LIN
-        push    SUP_RW_PRES_TableAttrib
-        push    SUP_RW_PRES_PageAttrib
-        call    paging
-        pop     eax
-        pop     eax
-        pop     eax
-        pop     eax
-        pop     eax
-        pop     eax
-        pop     eax
-        pop     eax
-        ; <--- OJO!! Si trabajo con permisos esto no tiene que ir!! 
-
 
         ret
 

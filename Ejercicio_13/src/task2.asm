@@ -28,10 +28,10 @@ section .sum_store_2 nobits
 
 section .task_two
 sum_routine_2:
-        mov     ax, [timer_flag_2]
+        ;mov     ax, [timer_flag_2]
         mov     bx, [enter_key_flag_2]
-        cmp     ax, 0x00                                ; Chequeo que este el flag de timer.
-        jz      sum_end
+        ;cmp     ax, 0x00                                ; Chequeo que este el flag de timer.
+        ;jz      sum_end
         cmp     bx, 0x00                                ; Chequeo que este el flag de enter.
         jz      sum_end
 

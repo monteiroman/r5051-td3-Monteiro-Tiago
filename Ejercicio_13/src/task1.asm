@@ -29,13 +29,14 @@ section .sum_store nobits
 section .task_one
 sum_routine:
         pushad
-        mov     ax, [timer_flag]
+        ;mov     ax, [timer_flag]
         mov     bx, [enter_key_flag]
-        cmp     ax, 0x00                                ; Chequeo que este el flag de timer.
-        jz      sum_end
+        ;cmp     ax, 0x00                                ; Chequeo que este el flag de timer.
+        ;jz      sum_end
         cmp     bx, 0x00                                ; Chequeo que este el flag de enter.
         jz      sum_end
 
+;BKPT
         mov     ax, 0x00
         mov     [timer_flag], ax                        ; Pongo en cero los flags.
         mov     [enter_key_flag], ax

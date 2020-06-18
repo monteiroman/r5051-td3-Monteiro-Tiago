@@ -11,7 +11,7 @@ USE32
 section .task_three
 idle_task:
         mov     eax, 0x6969
-        BKPT
+        ;BKPT
         ;hlt
-        ret
+        ;ret
         jmp     idle_task

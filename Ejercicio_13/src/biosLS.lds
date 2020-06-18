@@ -144,10 +144,11 @@ SECTIONS
     /*  DATOS                                                                 */
     /*________________________________________________________________________*/
     __DATA_PHY = 0x00202000;
-    .data 0x01300000 :                                  /* Lugar donde va la variable que guarda la suma*/
+    .data 0x01202000 :                                  /* Lugar donde va la variable que guarda la suma*/
         {
             __DATA_LIN = .;
-
+            bin/task2.elf(.sum_store_2);
+            bin/task1.elf(.sum_store);
         }
         __DATA_LENGTH = SIZEOF(.data);
 
@@ -179,7 +180,7 @@ SECTIONS
     .task1_bss 0x01301000 :                             /* Seccion de datos no inicializados. */
         {
             __TASK1_BSS_LIN = .;
-            bin/task1.elf(.sum_store);
+            /*bin/task1.elf(.sum_store);*/
         }
         __TASK1_BSS_LENGTH = SIZEOF(.task1_bss);
 
@@ -218,7 +219,7 @@ SECTIONS
     .task2_bss 0x01311000 :                             /* Seccion de datos no inicializados. */
         {
             __TASK2_BSS_LIN = .;
-            bin/task2.elf(.sum_store_2);
+            /*bin/task2.elf(.sum_store_2);*/
         }
         __TASK2_BSS_LENGTH = SIZEOF(.task2_bss);
 

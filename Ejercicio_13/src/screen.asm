@@ -78,8 +78,7 @@ USE32
 ;______________________________________________________________________________;
 section .screen
 refresh_screen:
-        pushad
-        ;BKPT
+        ;pushad
         call    sign
 
         push    task1_id
@@ -104,7 +103,7 @@ refresh_screen:
 
         call    joke
         
-        popad
+        ;popad
         ret
 
 
