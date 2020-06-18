@@ -3,6 +3,7 @@
 GLOBAL handler#DE
 GLOBAL handler#UD
 GLOBAL handler#DF
+GLOBAL handler#SS
 GLOBAL handler#GP
 GLOBAL handler#PF
 
@@ -68,6 +69,24 @@ handler#DF:
         xor     esi, esi
         xor     ebp, ebp
         mov     dx, 0x08
+
+        BKPT
+
+        hlt
+        popad
+        iret
+
+;Excepcion #SS (Stack Segment Fault, [0x0C])
+handler#SS:
+        pushad
+        xor     eax, eax
+        xor     ebx, ebx
+        xor     ecx, ecx
+        xor     edx, edx
+        xor     edi, edi
+        xor     esi, esi
+        xor     ebp, ebp
+        mov     dx, 0x0C
 
         BKPT
 

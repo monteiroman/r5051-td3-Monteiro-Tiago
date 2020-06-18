@@ -107,7 +107,6 @@ scheduler_init:
 m_scheduler:
 
     ; Guardo el contexto de la tarea saliente __________________________________________________________________________
-;BKPT        
         push    eax                                     ; Guardo eax en la pila para usarlo de 
 
         cmp     dword [current_task], 0x00              ; Me fijo si vengo desde Kernel
@@ -135,6 +134,7 @@ m_scheduler:
         not_task3:                                         
 
         save_context:                                   ; Guardo el contexto de la tarea que esta por dejar de usarse.
+        ; Guardo registros (menos eax que lo guardo al final).
         mov     [eax + m_ebx_idx], ebx
         mov     [eax + m_ecx_idx], ecx
         mov     [eax + m_edx_idx], edx
@@ -142,20 +142,24 @@ m_scheduler:
         mov     [eax + m_esi_idx], esi
         mov     [eax + m_edi_idx], edi
 
+        ; Ya puedo usar los registros, los uso para guardar los selectores de segmentos.
         mov     ebx, [esp + 0x08]                       ; Saco de la pila la direccion donde vendra "cs"
         mov     [eax + m_cs_idx], bx                    ; Lo guardo en el contexto
         mov     [eax + m_ds_idx], ds
         mov     [eax + m_es_idx], es
         mov     [eax + m_fs_idx], fs
         mov     [eax + m_gs_idx], gs
-        mov     [eax + m_ss_idx], cs
-;BKPT
+        mov     [eax + m_ss_idx], ss
+
+        ; Guardo eflags
         mov     ebx, [esp + 0x0C]                       ; Saco los eflags de pila
         mov     [eax + m_eflags_idx], ebx               ; Los guardo en el contexto
 
+        ; Guardo eip
         mov     ebx, [esp + 0x04]                       ; Saco de la cola la direccion de reinicio de la tarea
         mov     [eax + m_eip_idx], ebx                  ; la guardo en el contexto
 
+        ; Guardo eax.
         pop     ebx                                     ; Saco el valor de "eax" de pila
         mov     [eax + m_eax_idx], ebx                  ; Lo guardo en el contexto
 
@@ -167,16 +171,12 @@ m_scheduler:
 
 
     ; Muestro en pantalla ______________________________________________________________________________________________
-
-;BKPT
         call    refresh_screen
 
-    ; Decido que tarea ejecutar ________________________________________________________________________________________
 
-;BKPT
+    ; Decido que tarea ejecutar ________________________________________________________________________________________
         call    scheduler_logic
 
-;BKPT
 
     ; Cargo el contexto de la tarea entrante ___________________________________________________________________________
         cmp     dword [future_task], 0x00
@@ -202,57 +202,58 @@ m_scheduler:
             mov     eax, m_tss_3                        ; Contexto de tarea 3
         not_task3_load:
     
-;BKPT    
         load_context:
+        ; Cargo registros
         mov     ecx, [eax + m_ecx_idx]
         mov     edx, [eax + m_edx_idx]
         mov     ebp, [eax + m_ebp_idx]
         mov     esi, [eax + m_esi_idx]
         mov     edi, [eax + m_edi_idx]
 
-        ;mov     ax, [m_tss_3 + m_cs_idx]
-        ;mov     cs, ax
-        ;mov     ax, [m_tss_3 + m_ds_idx]
-        ;mov     ds, ax
-        ;mov     ax, [m_tss_3 + m_es_idx]
-        ;mov     es, ax
-        ;mov     ax, [m_tss_3 + m_fs_idx]
-        ;mov     fs, ax
-        ;mov     ax, [m_tss_3 + m_gs_idx]
-        ;mov     gs, ax
-        ;mov     ax, [m_tss_3 + m_ss_idx]
-        ;mov     ss, ax
-;BKPT
+        ; Cargo registros de segmentos (menos cs que va por pila y ss que se carga despues de CR3).
+        xor     ebx, ebx
+        mov     bx, [eax + m_ds_idx]
+        mov     ds, bx
+        mov     bx, [eax + m_es_idx]
+        mov     es, bx
+        mov     bx, [eax + m_fs_idx]
+        mov     fs, bx
+        mov     bx, [eax + m_gs_idx]
+        mov     gs, bx
+    
+        ; Cargo dirección de pila.    
         mov     esp, [eax + m_esp_idx] 
 
+        ; Cargo CR3
         mov     ebx, [eax + m_CR3_idx]
-        mov     CR3, ebx    
+        mov     CR3, ebx
+
+        ; Cargo ss.
+        mov     bx, [eax + m_ss_idx]
+        mov     ss, bx    
         
-;BKPT
-    ; Cargo en la pila los valores que voy a necesitar en el "iret"
+        ; Cargo en la pila los valores que voy a necesitar en el "iret"
         cmp     dword [future_task], 0x03
         je     is_idle_task
             push    m_scheduler_end_task                ; Cuando termine la tarea quiero que vaya a una rutina de 
                                                         ; finalizacion. Esto es solo para las tareas que no son la idle
         is_idle_task:
-        mov     ebx, [eax + m_eflags_idx]           ; Pusheo "eflags"            |
-        push    ebx                                 ;                            |
-        push    dword [eax + m_cs_idx]              ; Pusheo "cs".               |   Para el "iret".
-        mov     ebx, [eax + m_eip_idx]
-        push    ebx              ; pusheo "eip".              |
+        mov     ebx, [eax + m_eflags_idx]               ; Pusheo "eflags"            |
+        push    ebx                                     ;                            |
+        push    dword [eax + m_cs_idx]                  ; Pusheo "cs".               |   Para el "iret".
+        mov     ebx, [eax + m_eip_idx]                  ;                            |
+        push    ebx                                     ; pusheo "eip".              |
 
 
-;BKPT
         ; Seteo la tarea actual
         mov     ebx, [future_task]
         mov     [current_task], ebx
 
         ; Una vez que termino de usar los registros, los completo con los valores del contexto nuevo.
-        mov     ebx, [eax + m_ebx_idx]              ; Cargo el ebx nuevo
-        mov     eax, [eax + m_eax_idx]              ; Cargo el eax nuevo
+        mov     ebx, [eax + m_ebx_idx]                  ; Cargo el ebx nuevo
+        mov     eax, [eax + m_eax_idx]                  ; Cargo el eax nuevo
         
-;BKPT
-        jmp     m_scheduler_int_end                  ; Vuelvo a irq_handlers.asm
+        jmp     m_scheduler_int_end                     ; Vuelvo a irq_handlers.asm
 
 
 ;________________________________________
@@ -276,7 +277,6 @@ scheduler_logic:
         cmp     dword [current_task], 0x03
         jne     not_idle_task_round
             mov     dword [future_task], 0x01
-;BKPT
             ret
         not_idle_task_round:
         
@@ -298,33 +298,21 @@ scheduler_logic:
             
 
 
-       
 
-; Reemplaza al call tarea_1 desde el scheduler
-        ; mov       esp, pila_tarea_1
-        ; push      fin_tarea
-        ; jmp       tarea_1
-
-        ; tarea_1:
-        ;   mov     eax, 0x01
-        ;   ret
-
-        ;fin_tarea:
 
 ;________________________________________
 ; Rutina de finalizacion de tarea
 ;________________________________________
 m_scheduler_end_task:
-;BKPT
     ; Debo resetear el "eip" al principio de la tarea si es que no termino por el tick del scheduler
     ; sino por haber llegado a ret. Lo que hago es tunear los valores que tendrían que haber quedado
     ; en la pila si hubiera salido con la interrupcion.
-        cmp     dword [current_task], 0x01                  ; Para la tarea tarea en ejecucion.
+        cmp     dword [current_task], 0x01              ; Para la tarea tarea en ejecucion.
         jne     not_reset_eip_1
-            push    dword 0x200                             ; Pongo eflags con IF habilitado
-            push    dword [m_tss_1 + m_cs_idx]              ; Pongo el cs
-            push    sum_routine                             ; Pongo la direccion de inicio.
-            jmp     m_scheduler                             ; Me voy al scheduler.
+            push    dword 0x200                         ; Pongo eflags con IF habilitado
+            push    dword [m_tss_1 + m_cs_idx]          ; Pongo el cs
+            push    sum_routine                         ; Pongo la direccion de inicio.
+            jmp     m_scheduler                         ; Me voy al scheduler.
         not_reset_eip_1:
 
         cmp     dword [current_task], 0x02
@@ -335,7 +323,7 @@ m_scheduler_end_task:
             jmp     m_scheduler
         not_reset_eip_2:
 
-    ; Por default de carga la tarea idle (no pasa nunca pero por las dudas)
+        ; Por default de carga la tarea idle (no pasa nunca pero por las dudas)
         push    dword 0x200
         push    dword [m_tss_3 + m_cs_idx]
         push    idle_task
@@ -358,14 +346,14 @@ contexts_init:
         mov     [eax + m_es_idx], es
         mov     [eax + m_fs_idx], fs
         mov     [eax + m_gs_idx], gs
-        mov     [eax + m_ss_idx], cs
+        mov     [eax + m_ss_idx], ss
 
         ;Inicializo eip
         mov     dword [eax + m_eip_idx], sum_routine 
 
         ; Inicializo eflags
-        mov     dword [eax + m_eflags_idx], 0x200   ; Por lo menos le pongo el bit 9 (IF) a 1 para que interrumpa el
-                                                    ; timer.
+        mov     dword [eax + m_eflags_idx], 0x200       ; Por lo menos le pongo el bit 9 (IF) a 1 para que interrumpa el
+                                                        ; timer.
         ; Inicializo la pila
         mov     dword [eax + m_esp_idx], __TASK1_STACK_END           
 
@@ -382,14 +370,14 @@ contexts_init:
         mov     [eax + m_es_idx], es
         mov     [eax + m_fs_idx], fs
         mov     [eax + m_gs_idx], gs
-        mov     [eax + m_ss_idx], cs
+        mov     [eax + m_ss_idx], ss
 
         ;Inicializo eip
         mov     dword [eax + m_eip_idx], sum_routine_2
 
         ; Inicializo eflags
-        mov     dword [eax + m_eflags_idx], 0x200   ; Por lo menos le pongo el bit 9 (IF) a 1 para que interrumpa el
-                                                    ; timer.
+        mov     dword [eax + m_eflags_idx], 0x200       ; Por lo menos le pongo el bit 9 (IF) a 1 para que interrumpa el
+                                                        ; timer.
         ; Inicializo la pila
         mov     dword [eax + m_esp_idx], __TASK2_STACK_END 
 
@@ -406,14 +394,14 @@ contexts_init:
         mov     [eax + m_es_idx], es
         mov     [eax + m_fs_idx], fs
         mov     [eax + m_gs_idx], gs
-        mov     [eax + m_ss_idx], cs
+        mov     [eax + m_ss_idx], ss
 
         ;Inicializo eip
         mov     dword [eax + m_eip_idx], idle_task
 
         ; Inicializo eflags
-        mov     dword [eax + m_eflags_idx], 0x200   ; Por lo menos le pongo el bit 9 (IF) a 1 para que interrumpa el
-                                                    ; timer.
+        mov     dword [eax + m_eflags_idx], 0x200       ; Por lo menos le pongo el bit 9 (IF) a 1 para que interrumpa el
+                                                        ; timer.
         ; Inicializo la pila
         mov     dword [eax + m_esp_idx], __TASK3_STACK_END 
 
@@ -429,12 +417,6 @@ current_task:
         resd 1                  ; Marcador de tarea en curso    |   0 = Kernel
 future_task:                    ;                               |   1 = Task 1      2 = Task 2
         resd 1                  ; Marcador de tarea futura      |   3 = Task 3 (idle)
-;first_call_t1:
- ;       resd 1
-;first_call_t2:
- ;       resd 1
-;first_call_t3:
- ;       resd 1
 m_tss_kernel:
         resd 26
 m_tss_1:

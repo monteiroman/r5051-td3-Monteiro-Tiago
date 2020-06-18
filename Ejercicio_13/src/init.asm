@@ -39,6 +39,7 @@ EXTERN Inicio_32bits
 EXTERN handler#DE
 EXTERN handler#UD
 EXTERN handler#DF
+EXTERN handler#SS
 EXTERN handler#GP
 EXTERN handler#PF
 
@@ -187,6 +188,13 @@ init_IDT:
     ;Excepcion #DF (Double Fault, [0x08])
         push    handler#DF
         push    0x08
+        call    IDT_handler_loader
+        pop     eax
+        pop     eax
+
+    ;Excepcion #SS (Stack Segment Fault, [0x0C])
+        push    handler#SS
+        push    0x0C
         call    IDT_handler_loader
         pop     eax
         pop     eax

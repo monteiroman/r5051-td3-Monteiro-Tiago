@@ -20,7 +20,6 @@ USE32
 section .irq_handlers
 
 irq#00_timer_handler:
-    ;pushad
     ;call    timer_routine
     jmp     m_scheduler
     m_scheduler_int_end:
@@ -31,7 +30,6 @@ irq#00_timer_handler:
     out     Master_PIC_Command, al
 
     pop     eax                 ; para mantener el eax del contexto
-    ;popad
     iret
 
 irq#01_keyboard_handler:
