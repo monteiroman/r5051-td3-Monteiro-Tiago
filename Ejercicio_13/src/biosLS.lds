@@ -91,7 +91,7 @@ SECTIONS
             bin/keyboard.elf(.keyboard_table_init);     /*                      */
             bin/keyboard.elf(.keyboard_table);          /*                      */
             bin/timer.elf(.timer);                      /*                      */
-            bin/timer.elf(.counter_bytes);
+            bin/timer.elf(.counter_bytes);              /*                      */
         } AT >rom                                       /*Que se cargue en ROM -> LMA*/
         __ROUTINES_LENGTH = SIZEOF(.routines);          /*Tamaño de toda la seccion*/
 

@@ -57,9 +57,11 @@
 %define     ASCII_BLANK 0x20    ; Espacio
 %define     ASCII_TAG   0x23    ; #
 %define     ASCII_COLON 0x3A    ; :
+%define     ASCII_DOT   0x2E    ; .
 
 
 GLOBAL refresh_screen
+GLOBAL exc_warning
 
 ; Desde task1.asm
 EXTERN sum_stored
@@ -78,7 +80,6 @@ USE32
 ;______________________________________________________________________________;
 section .screen
 refresh_screen:
-        ;pushad
         call    sign
 
         push    task1_id
@@ -103,7 +104,6 @@ refresh_screen:
 
         call    joke
         
-        ;popad
         ret
 
 
@@ -459,3 +459,80 @@ print_char:
         inc     edi
 
         ret
+
+
+;________________________________________
+; Aviso de Excepcion
+;________________________________________
+exc_warning:
+        mov     edi, __VIDEO_BUFFER_LIN
+        mov     bl, 0x4f
+        add     edi, 0x42A
+        mov     al, ASCII_O
+        call    print_char
+        mov     al, ASCII_C
+        call    print_char
+        mov     al, ASCII_U
+        call    print_char
+        mov     al, ASCII_R
+        call    print_char
+        mov     al, ASCII_R
+        call    print_char
+        mov     al, ASCII_I
+        call    print_char
+        mov     al, ASCII_O
+        call    print_char
+        mov     al, ASCII_BLANK
+        call    print_char
+        mov     al, ASCII_U
+        call    print_char
+        mov     al, ASCII_N
+        call    print_char
+        mov     al, ASCII_A
+        call    print_char
+        mov     al, ASCII_BLANK
+        call    print_char
+        mov     al, ASCII_E
+        call    print_char
+        mov     al, ASCII_X
+        call    print_char
+        mov     al, ASCII_C
+        call    print_char
+        mov     al, ASCII_E
+        call    print_char
+        mov     al, ASCII_P
+        call    print_char
+        mov     al, ASCII_C
+        call    print_char
+        mov     al, ASCII_I
+        call    print_char
+        mov     al, ASCII_O
+        call    print_char
+        mov     al, ASCII_N
+        call    print_char
+        mov     al, ASCII_DOT
+        call    print_char
+        add     edi, 0x80
+        mov     al, ASCII_M
+        call    print_char
+        mov     al, ASCII_I
+        call    print_char
+        mov     al, ASCII_R
+        call    print_char
+        mov     al, ASCII_A
+        call    print_char
+        mov     al, ASCII_R
+        call    print_char
+        mov     al, ASCII_BLANK
+        call    print_char
+        mov     al, ASCII_E
+        call    print_char
+        mov     al, ASCII_D
+        call    print_char
+        mov     al, ASCII_X
+        call    print_char
+        mov     al, ASCII_DOT
+        call    print_char
+
+        ret
+

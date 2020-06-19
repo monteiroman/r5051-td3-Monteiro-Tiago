@@ -87,7 +87,6 @@ EXTERN __TASK3_STACK_LIN
 EXTERN __TASK3_STACK_PHY
 EXTERN __TASK3_STACK_SIZE
 
-
 EXTERN __RUNTIME_PAGES_PHY
 
 ;________________________________________
@@ -353,7 +352,6 @@ section .paging_tables nobits
 section .init32
 
 paging_init:
-
 ;________________________________________
 ; Paginación de Kernel
 ;________________________________________
@@ -778,6 +776,7 @@ paging_init:
         pop     eax
         pop     eax
         
+    ; Paginacion de las secciones de Tarea1 en su directorio.
         push    task1_page_tables
         push    task1_page_directory       
         push    count_task1_created_tables
@@ -980,6 +979,7 @@ paging_init:
         pop     eax
         pop     eax
 
+    ; Paginacion de las secciones de Tarea2 en su directorio.
         push    task2_page_tables
         push    task2_page_directory       
         push    count_task2_created_tables
@@ -1182,6 +1182,7 @@ paging_init:
         pop     eax
         pop     eax
 
+    ; Paginacion de las secciones de Tarea3 en su directorio.
         push    task3_page_tables
         push    task3_page_directory       
         push    count_task3_created_tables

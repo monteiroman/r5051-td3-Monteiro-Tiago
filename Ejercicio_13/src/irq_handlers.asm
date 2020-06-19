@@ -20,7 +20,8 @@ USE32
 section .irq_handlers
 
 irq#00_timer_handler:
-    ;call    timer_routine
+    call    timer_routine
+    
     jmp     m_scheduler
     m_scheduler_int_end:
 

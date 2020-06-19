@@ -37,7 +37,7 @@ section .counter_bytes nobits               ; Las variables usadas son mucho mas
 
 section .timer
 timer_routine:
-    ;pushad
+    pushad
 
     ; Contador de Tarea 1
     xor     eax, eax
@@ -47,7 +47,6 @@ timer_routine:
     jnz     continue                        ;           -> 100ms / 10ms = 10 = 0x0A
         xor     eax,eax
         mov word    [timer_flag], 0x01      ; Una vez terminada la cuenta pongo a 1 el flag1
-        ;BKPT                               
     continue:
     mov     [timer_count], ax
 
@@ -59,9 +58,8 @@ timer_routine:
     jnz     continue_2                        ;           -> 200ms / 10ms = 20 = 0x14
         xor     eax,eax
         mov word    [timer_flag_2], 0x01      ; Una vez terminada la cuenta pongo a 1 el flag1
-        ;BKPT                               
     continue_2:
     mov     [timer_count_2], ax
 
-    ;popad
+    popad
     ret

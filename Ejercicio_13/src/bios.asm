@@ -138,10 +138,8 @@ EXTERN task3_page_directory
 ; Desde scheduler.asm
 EXTERN scheduler_init
 
-
 USE32                   ;El codigo que continúa va en segmento de código
                                     ; de 32 BITS.
-
 ;________________________________________
 ; Inicialización en 32 bits
 ;________________________________________
@@ -174,8 +172,6 @@ Inicio_32bits:
         pop     eax
         pop     eax
 
-        ;BKPT
-
         ; Copio las rutinas y tablas asociadas a RAM.
         push    __ROUTINES_ORIG
         push    __ROUTINES_LIN
@@ -185,12 +181,8 @@ Inicio_32bits:
         pop     eax
         pop     eax
 
-        ;BKPT
-
         ; Lleno la tabla de inspeccion del teclado.
         call keyboard_fill_lookup_table
-
-        ;BKPT
 
         ; Copio las tareas a RAM.
         ;BKPT
@@ -203,8 +195,6 @@ Inicio_32bits:
         pop     eax
         pop     eax
 
-        ;BKPT
-
         push    __TASK2_TXT_ORIG
         push    __TASK2_TXT_LIN
         push    __TASK2_TXT_LENGTH
@@ -213,8 +203,6 @@ Inicio_32bits:
         pop     eax
         pop     eax
 
-        ;BKPT
-
         push    __TASK3_TXT_ORIG
         push    __TASK3_TXT_LIN
         push    __TASK3_TXT_LENGTH
@@ -222,8 +210,6 @@ Inicio_32bits:
         pop     eax
         pop     eax
         pop     eax
-
-        ;BKPT
 
         ; Copio la GDT que va a correr desde memoria.
         push    GDT_ROM
@@ -234,16 +220,12 @@ Inicio_32bits:
         pop     eax
         pop     eax
 
-        ;BKPT
-
         ; Cargo la nueva GDT que está en RAM.
         lgdt    [cs:imagen_gdtr]
         mov     ax, DS_SEL      ;Cargo DS con el selector que apunta al
         mov     ds, ax          ;   descriptor de segmento de datos flat.
         mov     es, ax          ;Cargo ES
         mov     ss, ax          ;Inicio el selector de pila
-
-        ;BKPT
 
         ; Cargo la imagen de idtr y los handlers.
         call    init_IDT
@@ -255,8 +237,6 @@ Inicio_32bits:
         ; Habilito las interrupciones
         sti
 
-        ;BKPT
-
         jmp     CS_SEL:Main
 
 ;________________________________________
@@ -264,13 +244,5 @@ Inicio_32bits:
 ;________________________________________
 section .main
 Main:
-        ;BKPT
-        ;call    refresh_screen
-        ;call    sum_routine
-        ;call    sum_routine_2
-        ;hlt
-        
-        ;BKPT
         jmp     scheduler_init
 
-        jmp     Main

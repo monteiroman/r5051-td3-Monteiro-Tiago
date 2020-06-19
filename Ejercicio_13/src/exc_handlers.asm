@@ -15,6 +15,9 @@ EXTERN CS_SEL_ROM
 ; Desde paging.asm
 EXTERN runtime_paging
 
+; Desde screen.asm
+EXTERN exc_warning
+
 USE32
 
 ;______________________________________________________________________________;
@@ -25,6 +28,8 @@ section .exc_handlers
 ;Excepcion #DE (Divide error, [0x00])
 handler#DE:
         pushad
+        call    exc_warning
+
         xor     eax, eax
         xor     ebx, ebx
         xor     ecx, ecx
@@ -34,7 +39,7 @@ handler#DE:
         xor     ebp, ebp
         mov     dx, 0x00
 
-        BKPT
+BKPT
 
         hlt
         popad
@@ -43,6 +48,8 @@ handler#DE:
 ;Excepcion #UD (Invalid Upcode, [0x06])
 handler#UD:
         pushad
+        call    exc_warning
+
         xor     eax, eax
         xor     ebx, ebx
         xor     ecx, ecx
@@ -52,7 +59,7 @@ handler#UD:
         xor     ebp, ebp
         mov     dx, 0x06
 
-        BKPT
+BKPT
 
         hlt
         popad
@@ -61,6 +68,8 @@ handler#UD:
 ;Excepcion #DF (Double Fault, [0x08])
 handler#DF:
         pushad
+        call    exc_warning
+
         xor     eax, eax
         xor     ebx, ebx
         xor     ecx, ecx
@@ -70,7 +79,7 @@ handler#DF:
         xor     ebp, ebp
         mov     dx, 0x08
 
-        BKPT
+BKPT
 
         hlt
         popad
@@ -79,6 +88,8 @@ handler#DF:
 ;Excepcion #SS (Stack Segment Fault, [0x0C])
 handler#SS:
         pushad
+        call    exc_warning
+
         xor     eax, eax
         xor     ebx, ebx
         xor     ecx, ecx
@@ -88,7 +99,7 @@ handler#SS:
         xor     ebp, ebp
         mov     dx, 0x0C
 
-        BKPT
+BKPT
 
         hlt
         popad
@@ -97,6 +108,8 @@ handler#SS:
 ;Excepcion #GP (General Protection, [0x0D])
 handler#GP:
         pushad
+        call    exc_warning
+
         xor     eax, eax
         xor     ebx, ebx
         xor     ecx, ecx
@@ -106,7 +119,7 @@ handler#GP:
         xor     ebp, ebp
         mov     dx, 0x0D
 
-        BKPT
+BKPT
 
         hlt
         popad
@@ -115,6 +128,8 @@ handler#GP:
 ;Excepcion #GP (Page Fault, [0x0E])
 handler#PF:
         pushad                          ; Guardo los registros en pila
+        call    exc_warning
+
         xor     eax, eax                ; |
         xor     ebx, ebx                ; |
         xor     ecx, ecx                ; |
@@ -124,7 +139,7 @@ handler#PF:
         xor     ebp, ebp                ; |
         mov     dx, 0x0E                ; Pongo el numero error para que se vea.
 
-        BKPT
+BKPT
 
         ; A partir del ejercicio 13 no hay que usar esta funcionalidad
         ;_______________________________________________________________________________________________________________

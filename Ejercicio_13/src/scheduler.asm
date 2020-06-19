@@ -79,18 +79,11 @@ section .scheduler
 ; Inicializacion del Scheduler
 ;________________________________________
 scheduler_init:
-        ;BKPT
-
-        ;mov     dword [first_call_t1], 0x01
-        ;mov     dword [first_call_t2], 0x01
-        ;mov     dword [first_call_t3], 0x01
-
         mov     dword [current_task], 0x00          ; Me voy del Kernel
         mov     dword [future_task], 0x03           ; A la tarea idle
 
         call    contexts_init
 
-;BKPT
         pushfd                                      ; Pusheo flags                  |
         push    cs                                  ; Pusheo Code Segment           |   Lo hago asi de entrada porque es
         push    m_scheduler                         ; Pusheo dirección de destino   |   asi como va a funcionar siempre
@@ -105,7 +98,6 @@ scheduler_init:
 ; Scheduler
 ;________________________________________
 m_scheduler:
-
     ; Guardo el contexto de la tarea saliente __________________________________________________________________________
         push    eax                                     ; Guardo eax en la pila para usarlo de 
 
@@ -259,45 +251,78 @@ m_scheduler:
 ;________________________________________
 ; Logica del Scheduler
 ;________________________________________
-scheduler_logic:
-
-        ;mov     eax, 0x888888
-;BKPT
-
-        ; Decido que tarea es la que se ejecuta
-        ;mov     dword [current_task], 0x03          ; Me voy del Kernel
-        ;mov     dword [future_task], 0x03           ; A la tarea idle
-
+scheduler_logic:            
+        ; Desde el kernel salto a la Tarea 3
         cmp     dword [current_task], 0x00
         jne     not_kernel_round
             mov     dword [future_task], 0x03
             ret
         not_kernel_round:
 
+        ; Desde la Tarea 3 salto a la Tarea 1 o a la Tarea 2 según corresponda.
         cmp     dword [current_task], 0x03
         jne     not_idle_task_round
-            mov     dword [future_task], 0x01
-            ret
+            ; Salto a Tarea 1
+            cmp     dword [enter_key_flag], 0x01
+            jne     not_3_to_1
+            cmp     dword [timer_flag], 0x01
+            jne     not_3_to_1
+                mov     dword [future_task], 0x01
+                ret
+            not_3_to_1:
+            ; Salto a Tarea 2
+            cmp     dword [enter_key_flag_2], 0x01
+            jne     not_3_to_2
+            cmp     dword [timer_flag_2], 0x01
+            jne     not_3_to_2
+                mov     dword [future_task], 0x02
+                ret
+            not_3_to_2:
         not_idle_task_round:
         
+        ; Desde la Tarea 1 salto a la Tarea 2 o a la Tarea 3 según corresponda.
         cmp     dword [current_task], 0x01
         jne     not_task1_round
-            mov     dword [future_task], 0x02
-            ret
+            ; Salto a Tarea 2
+            cmp     dword [enter_key_flag_2], 0x01
+            jne     not_1_to_2
+            cmp     dword [timer_flag_2], 0x01
+            jne     not_1_to_2
+                mov     dword [future_task], 0x02
+                ret
+            not_1_to_2:
+            ; Salto a Tarea 3
+            cmp     dword [enter_key_flag], 0x00
+            jne     not_1_to_3
+            cmp     dword [timer_flag], 0x00
+            jne     not_1_to_3
+                mov     dword [future_task], 0x03       
+                ret
+            not_1_to_3:
         not_task1_round:
         
+        ; Desde la Tarea 2 salto a la Tarea 1 o a la Tarea 3 según corresponda.
         cmp     dword [current_task], 0x02
         jne     not_task2_round
-            mov     dword [future_task], 0x03
-            ret
+            ; Salto a Tarea 1
+            cmp     dword [enter_key_flag], 0x01
+            jne     not_2_to_1
+            cmp     dword [timer_flag], 0x01
+            jne     not_2_to_1
+                mov     dword [future_task], 0x01
+                ret
+            not_2_to_1:
+            ; Salto a Tarea 3
+            cmp     dword [enter_key_flag_2], 0x00
+            jne     not_2_to_3
+            cmp     dword [timer_flag_2], 0x00
+            jne     not_2_to_3
+                mov     dword [future_task], 0x03       
+                ret
+            not_2_to_3:
         not_task2_round:
 
-
         ret
-        
-            
-
-
 
 
 ;________________________________________
@@ -309,6 +334,8 @@ m_scheduler_end_task:
     ; en la pila si hubiera salido con la interrupcion.
         cmp     dword [current_task], 0x01              ; Para la tarea tarea en ejecucion.
         jne     not_reset_eip_1
+            mov     dword [enter_key_flag], 0x00        ; Pongo a cero el flag de enter
+            mov     dword [timer_flag], 0x00            ; Pongo a cero el flag de timer
             push    dword 0x200                         ; Pongo eflags con IF habilitado
             push    dword [m_tss_1 + m_cs_idx]          ; Pongo el cs
             push    sum_routine                         ; Pongo la direccion de inicio.
@@ -317,6 +344,8 @@ m_scheduler_end_task:
 
         cmp     dword [current_task], 0x02
         jne     not_reset_eip_2
+            mov     dword [enter_key_flag_2], 0x00        
+            mov     dword [timer_flag_2], 0x00            
             push    dword 0x200
             push    dword [m_tss_2 + m_cs_idx]
             push    sum_routine_2
@@ -405,7 +434,6 @@ contexts_init:
         ; Inicializo la pila
         mov     dword [eax + m_esp_idx], __TASK3_STACK_END 
 
-
         ret
 
 
@@ -414,9 +442,9 @@ contexts_init:
 ;______________________________________________________________________________;
 section .scheduler_tables nobits
 current_task:
-        resd 1                  ; Marcador de tarea en curso    |   0 = Kernel
-future_task:                    ;                               |   1 = Task 1      2 = Task 2
-        resd 1                  ; Marcador de tarea futura      |   3 = Task 3 (idle)
+        resd 1                  ; Marcador de tarea en curso    |   0 = Kernel          1 = Task 1
+future_task:                    ;                               |         
+        resd 1                  ; Marcador de tarea futura      |   3 = Task 3 (idle)   2 = Task 2
 m_tss_kernel:
         resd 26
 m_tss_1:
@@ -425,6 +453,3 @@ m_tss_2:
         resd 26
 m_tss_3:
         resd 26
-
-   
-
