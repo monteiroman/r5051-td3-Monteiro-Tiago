@@ -185,7 +185,6 @@ Inicio_32bits:
         call keyboard_fill_lookup_table
 
         ; Copio las tareas a RAM.
-        ;BKPT
 
         push    __TASK1_TXT_ORIG
         push    __TASK1_TXT_LIN

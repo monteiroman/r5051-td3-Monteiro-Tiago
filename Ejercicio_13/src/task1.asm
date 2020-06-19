@@ -53,7 +53,6 @@ sum_routine:
         ;jg      sum_end
 
         ;mov     eax, [ecx]                              ; Intento leer la posicion de memoria menor a 512MB
-        ;BKPT
 
-    sum_end:
+        sum_end:
         ret

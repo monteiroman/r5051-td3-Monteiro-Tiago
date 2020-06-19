@@ -46,5 +46,5 @@ sum_routine_2:
         mov     [sum_stored_2], ecx                     ; Guardo la parte baja en la posicion pedida.
         mov     [sum_stored_2 + 4], edx                 ; Guardo la parte alta en la posicion pedida.
 
-    sum_end:
+        sum_end:
         ret
