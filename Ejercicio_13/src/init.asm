@@ -262,7 +262,6 @@ init_IDT:
 ;   D: Size of gate
 ;   Type: E (1110)
 ;
-section .init32
 
 IDT_handler_loader:
         mov     esi, IDT
