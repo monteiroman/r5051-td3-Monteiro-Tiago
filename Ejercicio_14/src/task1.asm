@@ -38,32 +38,12 @@ sum_routine:
             add     edi, 0x08                               ; Le sumo 8 para que pase al siguiente numero.
             mov     [last_index_sum], edi                   ; Guardo el indice en memoria.
 
-            movdqu  xmm0, [saved_digits_table + edi - 8]
-            movdqu  xmm1, [sum_stored]
+            movdqu  xmm0, [saved_digits_table + edi - 8]    ; Traigo el numero siguiente al ultimo que ingrese
+            movdqu  xmm1, [sum_stored]                      ; Traigo la suma previa.
 
-            paddq   xmm0, xmm1
+            paddq   xmm0, xmm1                              ; Sumo.
 
-            movdqu  [sum_stored], xmm0
-
-            ;mov     eax, [saved_digits_table + edi - 8]     ; Traigo la parte baja del ultimo numero ingresado.
-            ;mov     ebx, [saved_digits_table + edi - 4]     ; Traigo la parte alta del ultimo numero ingresado.
-            ;mov     ecx, [sum_stored]                       ; Traigo la parte baja de la suma previamente almacenada
-            ;mov     edx, [sum_stored + 4]                   ; Traigo la parte alta de la suma previamente almacenada
-            ;add     ecx, eax                                ; Sumo, si tengo carry lo considero.
-            ;jc      carry
-            ;jnc     not_carry
-
-            ;carry:
-            ;adc     edx, ebx
-            ;jmp     save
-
-            ;not_carry:
-            ;add     edx, ebx
-            ;jmp     save
-
-            ;save:
-            ;mov     [sum_stored], ecx                       ; Guardo la parte baja en la posicion pedida.
-            ;mov     [sum_stored + 4], edx                   ; Guardo la parte alta en la posicion pedida.
+            movdqu  [sum_stored], xmm0                      ; Guardo la suma.
 
             ;[EJERCICIO 12]
             ;cmp     edx, 0x00                               ; Si la parte alta es mayor a 0 es mas que 512MB, me voy.
@@ -75,14 +55,9 @@ sum_routine:
 
             mov     eax, [saved_digits_table_index]         ; Traigo el indice de la tabla.
             cmp     edi, eax                                ; Lo comparo con el del ultimo numero que sume.
-            ;jne     sum_loop                                ; Si no llegue al ultimo vuelvo a sumar.
-            jne     debug
+            jne     sum_loop                                ; Si no llegue al ultimo vuelvo a sumar.
 
         sum_end:
         mov     dword [task1_end_flag], 0x01
         hlt
         jmp     sum_end
-
-        debug:
-        BKPT
-        jmp     sum_loop
