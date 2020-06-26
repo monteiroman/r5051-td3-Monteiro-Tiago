@@ -1,4 +1,5 @@
 %define BKPT    xchg    bx,bx
+%define m_simd  0x68
 
 GLOBAL handler#DE
 GLOBAL handler#UD
@@ -6,6 +7,7 @@ GLOBAL handler#DF
 GLOBAL handler#SS
 GLOBAL handler#GP
 GLOBAL handler#PF
+GLOBAL handler#NM
 
 ;Desde init32.asm
 EXTERN IDT
@@ -18,8 +20,12 @@ EXTERN runtime_paging
 ; Desde screen.asm
 EXTERN exc_warning
 
-USE32
+; Desde scheduler.asm
+EXTERN current_task
+EXTERN m_simd_task1
+EXTERN m_simd_task2
 
+USE32
 ;______________________________________________________________________________;
 ;                       Manejadores de interrupciones                          ;
 ;______________________________________________________________________________;
@@ -62,6 +68,36 @@ handler#UD:
 BKPT
 
         hlt
+        popad
+        iret
+
+;Excepcion #NM (Device not available, [0x07])
+handler#NM:
+        pushad
+
+        xor     eax, eax
+        xor     ebx, ebx
+        xor     ecx, ecx
+        xor     edx, edx
+        xor     edi, edi
+        xor     esi, esi
+        xor     ebp, ebp
+        mov     dx, 0x07
+
+        clts
+
+        cmp     dword [current_task], 0x01
+        jne     not_t1_SIMD
+            fxsave      [m_simd_task2]
+            fxrstor     [m_simd_task1]
+        not_t1_SIMD:
+
+        cmp     dword [current_task], 0x02
+        jne     not_t2_SIMD
+            fxsave      [m_simd_task1]
+            fxrstor     [m_simd_task2]
+        not_t2_SIMD:
+
         popad
         iret
 
@@ -138,6 +174,7 @@ handler#PF:
         xor     esi, esi                ; |
         xor     ebp, ebp                ; |
         mov     dx, 0x0E                ; Pongo el numero error para que se vea.
+        mov     eax, [current_task]
 
 BKPT
 

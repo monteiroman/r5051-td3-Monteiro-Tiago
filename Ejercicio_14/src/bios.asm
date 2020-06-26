@@ -1,57 +1,9 @@
-;13. CONMUTACIÓN DE TAREAS
-;Incorpore al programa desarrollado hasta el momento una capacidad mínima de
-;administración de tareas. Para ello se requiere, agregar las siguientes 
-;prestaciones:
-;
-;a) Implementar 3 tareas a saber:
-;       i.Suma (2 tareas). Estas tareas se ejecutarán cada 100 y 200 ms. 
-;         respectivamente.
-;         En todos los casos utilizarán los mismos datos como sumandos 
-;         (Tabla de dígitos), presentado el resultado en pantalla y al finalizar
-;         debe establecer al procesador en estado halted. Deshabilitar (no 
-;         borrar) el código de generación de PF.
-;       ii.Idle (1 tarea). Su única función es establecer al procesador en 
-;         estado halted y se debe ejecutar cuando ninguna otra tarea se 
-;         encuentre en ejecución.
-;
-;b) Modificar el valor del temporizador 0 del PIT, para que genere una 
-;   interrupción cada 10 mseg aproximadamente.
-;
-;c) Modificar el controlador de la interrupción 32 (IRQ0, timer tick), para que
-;   actué como conmutador de tareas (scheduler). Diseñe dicho mecanismo para que
-;   despache las tareas en forma secuencial. El mecanismo de conmutación de 
-;   contextos deberá implementarlo finalmente de forma manual (transitoriamente 
-;   puede analizar el mecanismo automático provisto por el procesador).
-;
-;d) Modificar el mapa de memoria al siguiente esquema
-;
-;
-;
-;        Sección        | Dirección física inicial | Dirección lineal inicial
-;  _____________________|__________________________|___________________________
-;  ISR                  |         00000000h        |        00000000h
-;  Video                |         000B8000h        |        00010000h
-;  Tablas de sistema    |         00100000h        |        00100000h
-;  Tablas de paginación |         00110000h        |        00110000h
-;  Núcleo               |         00200000h        |        01200000h
-;  Datos                |         00202000h        |        01202000h
-;  Tabla de dígitos     |         00210000h        |        01210000h
-;  TEXT Tarea 1         |         00300000h        |        01300000h
-;  BSS Tarea 1          |         00301000h        |        01301000h
-;  DATA Tarea 1         |         00302000h        |        01302000h
-;  TEXT Tarea 2         |         00310000h        |        01310000h
-;  BSS Tarea 2          |         00311000h        |        01311000h
-;  DATA Tarea 2         |         00312000h        |        01312000h
-;  TEXT Tarea 3         |         00320000h        |        01320000h
-;  BSS Tarea 3          |         00321000h        |        01321000h
-;  DATA Tarea 3         |         00322000h        |        01322000h
-;  Pila Nucleo          |         1FF08000h        |        1FF08000h
-;  Pila Tarea 3         |         1FFFD000h        |        00713000h
-;  Pila Tarea 2         |         1FFFE000h        |        00713000h
-;  Pila Tarea 1         |         1FFFF000h        |        00713000h
-;  Secuencia inic. ROM  |         FFFF0000h        |        FFFF0000h
-;  Vector de reset      |         FFFFFFF0h        |        FFFFFFF0h
-;
+;14. SIMD
+;Modificar la Tarea 2 para que realice la suma aritmética saturada en tamaño 
+;word y la Tarea 1 para que lo realice en tamaño quadruple word Implementar el 
+;soporte necesario para el resguardo de los registros MMX/SSE mediante la
+;excepción 7 (#NM), así como también realizar las modificaciones
+;correspondientes en la función de cambio de contexto.
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
@@ -232,6 +184,17 @@ Inicio_32bits:
 
         ; Inicializo los pic's.
         call    pic_init
+
+        ; Inicializo SIMD
+        ; https://wiki.osdev.org/CPU_Registers_x86#CR4
+        ; https://wiki.osdev.org/CPU_Registers_x86#CR0
+        mov     eax, cr0            
+        and     eax, 0xFFFFFFFB     ; Pongo en 0 el bit 2 (Emulation).
+        mov     cr0, eax            
+
+        mov     eax, cr4            
+        or      eax, 0x600          ; Pongo en 1 el bit 9 (osfxsr) y 10 (osxmmexcpt)
+        mov     cr4, eax            
 
         ; Habilito las interrupciones
         sti

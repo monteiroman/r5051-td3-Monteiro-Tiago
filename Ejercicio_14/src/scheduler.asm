@@ -29,11 +29,14 @@
 %define m_gs_idx        0x5C
 %define m_ldtr_idx      0x60
 %define m_bitmapIO_idx  0x64
+%define m_simd          0x68
 
 GLOBAL scheduler_init
 GLOBAL current_task
 GLOBAL future_task
 GLOBAL m_scheduler
+GLOBAL m_simd_task1
+GLOBAL m_simd_task2
 
 ; Desde keyboard.asm
 EXTERN enter_key_flag                         ; Al enter lo considero como inicio de mi tarea
@@ -101,7 +104,11 @@ scheduler_init:
 ;________________________________________
 m_scheduler:
     ; Guardo el contexto de la tarea saliente __________________________________________________________________________
-        push    eax                                     ; Guardo eax en la pila para usarlo de 
+        push    eax                                     ; Guardo eax en la pila para usarlo de
+
+        mov     eax, cr0            
+        or      eax, 0x08		                        ; Pongo en 1 el bit 3 (Task Switched).
+        mov     cr0, eax            
 
         cmp     dword [current_task], 0x00              ; Me fijo si vengo desde Kernel
         jne     not_kernel
@@ -233,21 +240,21 @@ m_scheduler:
                                                         ;                               |
         cmp     dword [future_task], 0x03               ; -Si es la tarea 3 que vuelva  | 
         je      prev_return_point                       ; al punto de donde salio.      |
-            cmp     dword [future_task], 0x02           ; -                             |
+            cmp     dword [future_task], 0x02           ; _                             |
             jne     not_task2_return                    ;  |                            |
             cmp     dword [task2_end_flag], 0x01        ;  | Si la tarea futura es la   |   Preparo la pila para 
             jne     prev_return_point                   ;  | tarea 2 y llego hasta el   |   el "iret".
                 mov     ebx, sum_routine_2              ;  | final se resetea.          |
-                jmp     reset_return_point              ;  |                            |
-            not_task2_return:                           ; -                             |
+                jmp     reset_return_point              ; _|                            |
+            not_task2_return:                           ;                               |
                                                         ;                               |
-            cmp     dword [future_task], 0x01           ; -                             |
+            cmp     dword [future_task], 0x01           ; _                             |
             jne     prev_return_point                   ;  |                            |
             cmp     dword [task1_end_flag], 0x01        ;  | Si la tarea futura es la   |
             jne     prev_return_point                   ;  | tarea 1 y llego hasta el   |
                 mov     ebx, sum_routine                ;  | final se resetea.          |
-                jmp     reset_return_point              ;  |                            |
-        prev_return_point:                              ; -                             |
+                jmp     reset_return_point              ; _|                            |
+        prev_return_point:                              ;                               |
         mov     ebx, [eax + m_eip_idx]                  ;                               |
         reset_return_point:                             ;                               |
         push    ebx                                     ; pusheo "eip".                 |
@@ -423,3 +430,8 @@ m_tss_2:
         resd 26
 m_tss_3:
         resd 26
+ALIGN 512                       ; Alineo los espacios de memoria para SIMD
+m_simd_task1:
+        resb 512
+m_simd_task2:
+        resb 512

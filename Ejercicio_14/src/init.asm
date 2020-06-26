@@ -42,6 +42,7 @@ EXTERN handler#DF
 EXTERN handler#SS
 EXTERN handler#GP
 EXTERN handler#PF
+EXTERN handler#NM
 
 ;Desde irq_handlers.asm
 EXTERN irq#01_keyboard_handler
@@ -181,6 +182,13 @@ init_IDT:
     ;Excepcion #UD (Invalid Upcode, [0x06])
         push    handler#UD
         push    0x06
+        call    IDT_handler_loader
+        pop     eax
+        pop     eax
+
+    ;Excepcion #NM (Device not available, [0x07])
+        push    handler#NM
+        push    0x07
         call    IDT_handler_loader
         pop     eax
         pop     eax
