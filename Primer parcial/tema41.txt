@@ -1,0 +1,37 @@
+1.
+¿Qué relación guarda el endianness con el conexionado del bus de datos?. Explique justificadamente y si lo considera necesario haga un gráfico que lo ilustre
+
+2.
+Explique cómo es posible con un procesador IA-32 con segmentación activa en modo 32 bits direccionar 32 Tbytes de memoria. Justificar su respuesta
+
+3.
+Un sistema cuenta con 2 tareas, T1 y T2. En determinado momento está ejecutando una tarea T1 con CPL=00, cuando llega una excepción #PF. ¿Es posible recuperarlo desde la rutina de atención de la excepción ejecutando la instrucción pop? ¿Por qué?
+
+4.
+Dadas las siguientes entradas de una TLB.
+Nro.Pag. Descriptor  Crtl
+  7C047  0EF00121    ccc
+  7EEF0  1EF01067    ccc
+  EC004  001F0163    ccc
+  EC005  001F7123    ccc
+  46104  1F011005    ccc
+  46109  1F010027    ccc
+
+Se pide:
+a. Para las entradas 1 y 4 de la TLB, escribir  el contenido de sus correspondientes descriptores en cada nivel de la jerarquía de tablas de traducción a direcciones físicas.
+b. Especificar para cada PDE que valor deben tener los bits U/S y R/W, para ser consistentes con el contenido de la TLB. Respuestas posibles en cada caso: 0, 1, o X (indistinto).
+c. Suponiendo que las seis entradas están siendo utilizadas por una misma tarea, y por cada task switch se modifica CR3.¿Que ocurre con cada una al momento del task switch? ¿Cual es el tratamiento para aquellas que se han modificado? ¿Cual es la función dentro de la TLB de los bits identificados como ctrl?.
+
+5.
+En un sistema con protección por paginación, ¿cuantas páginas como mínimo debe alojar el sistema operativo por cada tarea nueva de usuario y qué tablas del sistema se deben modificar? Justifique para cada tabla.
+
+
+6.
+Suponga que una tarea con CPL=10b quiere ejecutar código de nivel de privilegio 1 en un segmento conforming y que debe pasarle parametros, desde donde debe leer los parámetros dicha rutina de privilegio 1?
+
+
+7.
+¿Cómo es la secuencia de instrucciones en Assembler para llamar a una función en C cuyo prototipo es: int func(int prim, short seg, char ter); si lo tengo que llamar con los parámetros 2248, 79 y 15 respectivamente?
+
+8.
+¿Qué registros y bits se deben configurar y con qué valores, para poder utilizar el mecanismo que resguarde el valor de los registros SIMD en arquitectura Intel?
