@@ -2,6 +2,7 @@
 ¿Qué relación guarda el endianness con el conexionado del bus de datos?. Explique justificadamente y si lo considera necesario haga un gráfico que lo ilustre
 
 Tiene que ver con como estan conectados los bancos de memoria y como maneja el 80386 los mismos. (ver diagrama adjunto bajo el nombre dibujo_1)
+La memoria debe poder ser direccionada por byte, cada banco tiene un byte que se lee de 0 a 7 pero el micro levanta los datos primero de los bytes mas altos a los mas bajos.
 
 
 2.
@@ -46,7 +47,7 @@ b. Especificar para cada PDE que valor deben tener los bits U/S y R/W, para ser 
 
 c. Suponiendo que las seis entradas están siendo utilizadas por una misma tarea, y por cada task switch se modifica CR3.¿Que ocurre con cada una al momento del task switch? ¿Cual es el tratamiento para aquellas que se han modificado? ¿Cual es la función dentro de la TLB de los bits identificados como ctrl?.
 
-En cada cambio de eliminarán las entradas correspondientes a paginas que no sean de caracter GLOBAL. Eso está seteado en los bits de control.
+En cada cambio de eliminarán de la TLB las entradas correspondientes a paginas que no sean de caracter GLOBAL. Eso está seteado en los bits de control.
 En caso de haber sido modificadas no hay que hacer nada. Se guardan las paginas en el disco cuando estas necesitan ser sacadas de memoria por falta de espacio.
 Los bits identificados con ctrl son los que definen la politica de borrado de la entrada de la tlb asi como tambien si la pagina es de caracter global o no.
 
@@ -55,7 +56,7 @@ Los bits identificados con ctrl son los que definen la politica de borrado de la
 En un sistema con protección por paginación, ¿cuantas páginas como mínimo debe alojar el sistema operativo por cada tarea nueva de usuario y qué tablas del sistema se deben modificar? Justifique para cada tabla.
 
 El sistema debe tener si o si las paginas que almacenan todo el kernel, las que almacenan las tablas de paginas, debe tener tambien las paginas que manejan los puertos y las excepciones. Todas estas paginas antes mencionadas son las que se encargan del manejo basico de la pc, tienen que estar para que la tarea pueda realizar sus actividades.
-las paginas que se deben modificar son las que contienen las pilas de las tareas, las que contienen los datos de lectura escritura, inicializados y el codigo de la tarea.
+Las paginas que se deben modificar son las que contienen las pilas de las tareas, las que contienen los datos de lectura escritura, inicializados y el codigo de la tarea.
 Se cambia de tablas cambiando el valor al que apunta CR3. 
 
 6.
