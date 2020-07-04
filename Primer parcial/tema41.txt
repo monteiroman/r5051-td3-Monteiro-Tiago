@@ -1,11 +1,20 @@
 1.
 ¿Qué relación guarda el endianness con el conexionado del bus de datos?. Explique justificadamente y si lo considera necesario haga un gráfico que lo ilustre
 
+Tiene que ver con como estan conectados los bancos de memoria y como maneja el 80386 los mismos. (ver diagrama adjunto bajo el nombre dibujo_1)
+
+
 2.
 Explique cómo es posible con un procesador IA-32 con segmentación activa en modo 32 bits direccionar 32 Tbytes de memoria. Justificar su respuesta
 
+Cuando se activa la segmentación, las entradas de los segmentos se guardan en la gdt. El formato del selector tiene 13 bits para guardar selectores, esto son 8192 selectores.
+Considerando que un segmento flat es de 4 GB (se direcciona con 32 bits) entonces 2^13 * 2^32 = 32 TB.
+
 3.
 Un sistema cuenta con 2 tareas, T1 y T2. En determinado momento está ejecutando una tarea T1 con CPL=00, cuando llega una excepción #PF. ¿Es posible recuperarlo desde la rutina de atención de la excepción ejecutando la instrucción pop? ¿Por qué?
+
+No, no es posible solo con un pop. #PF hace referencia a que falta una pagina o que se quiso escribir en una pagina de solo lectura. Habrá que, en el caso de que la página
+no se encontrara presente, cargarla desde el disco (la dirección de falla se guardó en CR2) o en el caso que se haya intentado escribir en una pagina de solo lectura, tomar las medidas que sean necesarias y luego hacer el pop correspondiente del código de error que quedó en la pila.
 
 4.
 Dadas las siguientes entradas de una TLB.
@@ -19,19 +28,59 @@ Nro.Pag. Descriptor  Crtl
 
 Se pide:
 a. Para las entradas 1 y 4 de la TLB, escribir  el contenido de sus correspondientes descriptores en cada nivel de la jerarquía de tablas de traducción a direcciones físicas.
+
+Para la entrada 1: 0x7C047 => idxdir = 0x1F0  idxtab = 0x047
+Para la entrada 4: 0xEC005 => idxdir = 0x3B0  idxtab = 0x005
+
+En cada tabla me tendré que mover el valor del indice*4 (porq son 4bytes) desde el comienzo de la misma para guardar el valor. En el descriptor guardo los 5 nibles mas significativos del comienzo de la pagina mas los atributos.
+
+
 b. Especificar para cada PDE que valor deben tener los bits U/S y R/W, para ser consistentes con el contenido de la TLB. Respuestas posibles en cada caso: 0, 1, o X (indistinto).
+
+1) 0001 -> s r ->  X   X
+2) 0111 -> u w ->  1   1
+3) 0011 -> s w ->  X   1
+4) 0011 -> s w ->  X   1
+5) 0101 -> u r ->  1   X
+6) 0111 -> u w ->  1   1
+
 c. Suponiendo que las seis entradas están siendo utilizadas por una misma tarea, y por cada task switch se modifica CR3.¿Que ocurre con cada una al momento del task switch? ¿Cual es el tratamiento para aquellas que se han modificado? ¿Cual es la función dentro de la TLB de los bits identificados como ctrl?.
+
+En cada cambio de eliminarán las entradas correspondientes a paginas que no sean de caracter GLOBAL. Eso está seteado en los bits de control.
+En caso de haber sido modificadas no hay que hacer nada. Se guardan las paginas en el disco cuando estas necesitan ser sacadas de memoria por falta de espacio.
+Los bits identificados con ctrl son los que definen la politica de borrado de la entrada de la tlb asi como tambien si la pagina es de caracter global o no.
+
 
 5.
 En un sistema con protección por paginación, ¿cuantas páginas como mínimo debe alojar el sistema operativo por cada tarea nueva de usuario y qué tablas del sistema se deben modificar? Justifique para cada tabla.
 
+El sistema debe tener si o si las paginas que almacenan todo el kernel, las que almacenan las tablas de paginas, debe tener tambien las paginas que manejan los puertos y las excepciones. Todas estas paginas antes mencionadas son las que se encargan del manejo basico de la pc, tienen que estar para que la tarea pueda realizar sus actividades.
+las paginas que se deben modificar son las que contienen las pilas de las tareas, las que contienen los datos de lectura escritura, inicializados y el codigo de la tarea.
+Se cambia de tablas cambiando el valor al que apunta CR3. 
 
 6.
 Suponga que una tarea con CPL=10b quiere ejecutar código de nivel de privilegio 1 en un segmento conforming y que debe pasarle parametros, desde donde debe leer los parámetros dicha rutina de privilegio 1?
+
+La tarea de PL=2 debe hacer una llamada a sistema mediante una compuerta de llamada de donde el procesador sacará un ss1 y esp1 para el codigo de PL=1. Luego los parametros serán pusheados a esta pila donde el codigo de PL=1 deberá leerlos. 
 
 
 7.
 ¿Cómo es la secuencia de instrucciones en Assembler para llamar a una función en C cuyo prototipo es: int func(int prim, short seg, char ter); si lo tengo que llamar con los parámetros 2248, 79 y 15 respectivamente?
 
+push byte 15
+push word 79
+push dword 2248
+call func
+pop eax
+pop eax
+pop eax
+
 8.
 ¿Qué registros y bits se deben configurar y con qué valores, para poder utilizar el mecanismo que resguarde el valor de los registros SIMD en arquitectura Intel?
+
+Se debe: Poner en 0 del registro CR0.2 
+         Poner en 1 el bit 9 y 10 del registro CR4 
+
+Y en cada cambio de tarea se debe chequear el valor de CR3.3 (Task Switched) que me indicará si se cambió de tarea y se usaron registros SIMD.
+
+
