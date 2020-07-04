@@ -68,8 +68,8 @@ La tarea de PL=2 debe hacer una llamada a sistema mediante una compuerta de llam
 7.
 ¿Cómo es la secuencia de instrucciones en Assembler para llamar a una función en C cuyo prototipo es: int func(int prim, short seg, char ter); si lo tengo que llamar con los parámetros 2248, 79 y 15 respectivamente?
 
-push byte 15
-push word 79
+push dword 15
+push dword 79
 push dword 2248
 call func
 pop eax
