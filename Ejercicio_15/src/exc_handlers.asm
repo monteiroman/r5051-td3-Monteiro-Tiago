@@ -86,16 +86,14 @@ handler#NM:
 
         clts                                ; Limpio el bit de Task Switched
 
-        cmp     dword [current_task], 0x01
+        cmp     dword [current_task], 0x01  ; Si estoy en la tarea 1.
         jne     not_t1_SIMD
-            fxsave      [m_simd_task2]
-            fxrstor     [m_simd_task1]
+            fxrstor     [m_simd_task1]      ; Levanto los registros de SIMD de la tarea 1.
         not_t1_SIMD:
 
-        cmp     dword [current_task], 0x02
+        cmp     dword [current_task], 0x02  ; Si estoy en la tarea 2.
         jne     not_t2_SIMD
-            fxsave      [m_simd_task1]
-            fxrstor     [m_simd_task2]
+            fxrstor     [m_simd_task2]      ; Levanto los registros de SIMD de la tarea 2.
         not_t2_SIMD:
 
         popad

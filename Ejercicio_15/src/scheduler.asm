@@ -106,9 +106,24 @@ m_scheduler:
     ; Guardo el contexto de la tarea saliente __________________________________________________________________________
         push    eax                                     ; Guardo eax en la pila para usarlo de
 
-        mov     eax, cr0            
-        or      eax, 0x08		                        ; Pongo en 1 el bit 3 (Task Switched).
-        mov     cr0, eax            
+        mov     eax, cr0                                ; Miro si se cambio el bit CR0.3 (TS). Si esta en cero es porque 
+        and     eax, 0x08                               ;   se uso SIMD. 
+        cmp     eax, 0x08                               ; Comparo si TS esta en 1.
+        jne     no_simd
+            cmp     dword [current_task], 0x01          ; Si la tarea actual es la 1.
+            jne     not_t1_SIMD
+                fxsave      [m_simd_task1]              ; Guardo los registros SIMD de la tarea 1.
+            not_t1_SIMD:
+
+            cmp     dword [current_task], 0x02          ; Si la tarea actual es la 2.
+            jne     not_t2_SIMD
+                fxsave      [m_simd_task2]              ; Guardo los registros SIMD de la tarea 2.
+            not_t2_SIMD:
+        no_simd:
+
+        mov     eax, cr0
+        or      eax, 0x08		                        ; Pongo en 1 el bit 3 (Task Switched) para que entre en #NM.
+        mov     cr0, eax
 
         cmp     dword [current_task], 0x00              ; Me fijo si vengo desde Kernel
         jne     not_kernel
