@@ -9,7 +9,7 @@ __STACK_END = __STACK_LIN + __STACK_SIZE;
 
 
 /*____________________________________________________________________________*/
-/*                            Pila de Tarea 1                                 */
+/*                            Pilas de Tarea 1                                */
 /*____________________________________________________________________________*/
 
 __TASK1_STACK_PHY = 0x1FFFF000;
@@ -17,9 +17,14 @@ __TASK1_STACK_LIN = 0x00713000;
 __TASK1_STACK_SIZE = 0x00000200;                    /*Stack de 512b*/
 __TASK1_STACK_END = __TASK1_STACK_LIN + __TASK1_STACK_SIZE;
 
+__TASK1_KERNEL_STACK_PHY = 0x1FF07000;
+__TASK1_KERNEL_STACK_LIN = 0x00714000;
+__TASK1_KERNEL_STACK_SIZE = 0x00000200;                    /*Stack de 512b*/
+__TASK1_KERNEL_STACK_END = __TASK1_KERNEL_STACK_LIN + __TASK1_KERNEL_STACK_SIZE;
+
 
 /*____________________________________________________________________________*/
-/*                            Pila de Tarea 2                                 */
+/*                            Pilas de Tarea 2                                */
 /*____________________________________________________________________________*/
 
 __TASK2_STACK_PHY = 0x1FFFE000;
@@ -27,15 +32,25 @@ __TASK2_STACK_LIN = 0x00713000;
 __TASK2_STACK_SIZE = 0x00000200;                    /*Stack de 512b*/
 __TASK2_STACK_END = __TASK2_STACK_LIN + __TASK2_STACK_SIZE;
 
+__TASK2_KERNEL_STACK_PHY = 0x1FF06000;
+__TASK2_KERNEL_STACK_LIN = 0x00714000;
+__TASK2_KERNEL_STACK_SIZE = 0x00000200;                    /*Stack de 512b*/
+__TASK2_KERNEL_STACK_END = __TASK2_KERNEL_STACK_LIN + __TASK2_KERNEL_STACK_SIZE;
+
 
 /*____________________________________________________________________________*/
-/*                            Pila de Tarea 3                                 */
+/*                            Pilas de Tarea 3                                */
 /*____________________________________________________________________________*/
 
 __TASK3_STACK_PHY = 0x1FFFD000;
 __TASK3_STACK_LIN = 0x00713000;
 __TASK3_STACK_SIZE = 0x00000200;                    /*Stack de 512b*/
 __TASK3_STACK_END = __TASK3_STACK_LIN + __TASK3_STACK_SIZE;
+
+__TASK3_KERNEL_STACK_PHY = 0x1FF05000;
+__TASK3_KERNEL_STACK_LIN = 0x00714000;
+__TASK3_KERNEL_STACK_SIZE = 0x00000200;                    /*Stack de 512b*/
+__TASK3_KERNEL_STACK_END = __TASK3_KERNEL_STACK_LIN + __TASK3_KERNEL_STACK_SIZE;
 
 
 /*____________________________________________________________________________*/
@@ -51,7 +66,7 @@ MEMORY
 
 
 /*____________________________________________________________________________*/
-/*                         Areas de memoria                                   */
+/*                         Secciones de memoria                               */
 /*____________________________________________________________________________*/
 
 SECTIONS
@@ -74,9 +89,8 @@ SECTIONS
             bin/bios.elf(.main);
             bin/paging.elf(.init32);
         } AT >rom                                       /*LMA donde se ubica*/
-        /*__INIT_LENGTH = SIZEOF(.init);*/
-        __INIT_LENGTH = 0xfff0;
-
+        __INIT_LENGTH = 0xfff0;                         /*Pagino toda la ROM ya que es donde va a estar mi codigo al  */
+                                                        /*comienzo del programa.                                      */
     /*________________________________________________________________________*/
     /*  RUTINAS                                                               */
     /*________________________________________________________________________*/
@@ -116,6 +130,9 @@ SECTIONS
 
     /*________________________________________________________________________*/
     /*  TABLAS DE PAGINACION                                                  */
+    /*________________________________________________________________________*/
+    /*   OJO ESTO EN IDENTITY MAPPING                                         */
+    /*                  Si no esta asi no puede hacer la paginación!!!        */
     /*________________________________________________________________________*/
     __RUNTIME_PAGES_PHY = 0x08000000;
     __PAGING_TABLES_PHY = 0x00110000;

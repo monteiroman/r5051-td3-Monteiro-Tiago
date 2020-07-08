@@ -91,7 +91,7 @@ EXTERN init_IDT
 ;Desde el linkerscript.
 EXTERN __STACK_START
 EXTERN __STACK_END
-EXTERN __KERNEL_LIN
+EXTERN __KERNEL_PHY
 EXTERN __KERNEL_ORIG
 EXTERN __KERNEL_LENGTH
 EXTERN __ROUTINES_LIN
@@ -151,6 +151,28 @@ Inicio_32bits:
         mov     esp, __STACK_END    ;Cargo el registro de pila y le doy
                                         ;direccion de inicio (recordar que se
                                         ;carga de arriba hacia abajo).
+
+        ; Estas dos secciones las copio a RAM antes de paginar para poder 
+        ; protegerlas por paginacion. De esta manera puedo poner que sus paginas
+        ; sean de solo lectura.
+        ; Uso la pila para pasarle los valores a la funcion de copiado (mi nucleo).
+        push    __KERNEL_ORIG       ;Posicion de origen .kernel (en ROM) que contiene a .copy.
+        push    __KERNEL_PHY        ;Posicion destino (en RAM).
+        push    __KERNEL_LENGTH     ;Largo de la seccion .kernel que contiene a .copy.
+        call    __KERNEL_ORIG
+        pop     eax                 ;Saco los valores de la pila.
+        pop     eax
+        pop     eax
+
+        ; Copio las rutinas y tablas asociadas a RAM.
+        push    __ROUTINES_ORIG
+        push    __ROUTINES_LIN      ; La misma que la fisica (identity maping). 
+        push    __ROUTINES_LENGTH
+        call    __KERNEL_ORIG
+        pop     eax
+        pop     eax
+        pop     eax
+
         ; Paginación
         call    paging_init
         mov     eax, kernel_page_directory
@@ -160,29 +182,10 @@ Inicio_32bits:
         or      eax, 0x80000000     ;   bit 31 de CR0.
         mov     CR0, eax
 
-        ; Uso la pila para pasarle los valores a la funcion de copiado (mi nucleo).
-        push    __KERNEL_ORIG     ;Posicion de origen .kernel (en ROM) que contiene a .copy.
-        push    __KERNEL_LIN      ;Posicion destino 0x00200000 (en RAM).
-        push    __KERNEL_LENGTH   ;Largo de la seccion .kernel que contiene a .copy.
-        call    __KERNEL_ORIG
-        pop     eax               ;Saco los valores de la pila.
-        pop     eax
-        pop     eax
-
-        ; Copio las rutinas y tablas asociadas a RAM.
-        push    __ROUTINES_ORIG
-        push    __ROUTINES_LIN
-        push    __ROUTINES_LENGTH
-        call    Funcion_copia
-        pop     eax
-        pop     eax
-        pop     eax
-
         ; Lleno la tabla de inspeccion del teclado.
         call keyboard_fill_lookup_table
 
         ; Copio las tareas a RAM.
-
         push    __TASK1_TXT_ORIG
         push    __TASK1_TXT_LIN
         push    __TASK1_TXT_LENGTH

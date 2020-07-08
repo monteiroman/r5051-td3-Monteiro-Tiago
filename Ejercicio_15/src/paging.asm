@@ -3,8 +3,14 @@
 %define BKPT    xchg    bx,bx
 
 %define SUP_RW_PRES_TableAttrib   0x03
+%define SUP_R__PRES_TableAttrib   0x01
+%define USR_RW_PRES_TableAttrib   0x07
+%define USR_R__PRES_TableAttrib   0x05
+
 %define SUP_RW_PRES_PageAttrib    0x03
-%define SUP_R_PRES_PageAttrib     0x03
+%define SUP_R__PRES_PageAttrib    0x01
+%define USR_RW_PRES_PageAttrib    0x07
+%define USR_R__PRES_PageAttrib    0x05
 
 GLOBAL paging_init
 GLOBAL kernel_page_directory
@@ -86,6 +92,16 @@ EXTERN __TASK2_STACK_SIZE
 EXTERN __TASK3_STACK_LIN
 EXTERN __TASK3_STACK_PHY
 EXTERN __TASK3_STACK_SIZE
+
+EXTERN __TASK1_KERNEL_STACK_LIN
+EXTERN __TASK1_KERNEL_STACK_PHY
+EXTERN __TASK1_KERNEL_STACK_SIZE
+EXTERN __TASK2_KERNEL_STACK_LIN
+EXTERN __TASK2_KERNEL_STACK_PHY
+EXTERN __TASK2_KERNEL_STACK_SIZE
+EXTERN __TASK3_KERNEL_STACK_LIN
+EXTERN __TASK3_KERNEL_STACK_PHY
+EXTERN __TASK3_KERNEL_STACK_SIZE
 
 EXTERN __RUNTIME_PAGES_PHY
 
@@ -447,8 +463,8 @@ paging_init:
         push    __INIT_LENGTH               ; Largo de la sección.
         push    __INIT_PHY                  ; Direccion Física
         push    __INIT_LIN                  ; Dirección Lineal
-        push    SUP_RW_PRES_TableAttrib     ; Atributos en directorio (de cada tabla)
-        push    SUP_RW_PRES_PageAttrib      ; Atributos en tabla (de cada pagina)
+        push    SUP_R__PRES_TableAttrib     ; Atributos en directorio (de cada tabla)
+        push    SUP_R__PRES_PageAttrib      ; Atributos en tabla (de cada pagina)
         call    paging
         pop     eax
         pop     eax
@@ -465,8 +481,8 @@ paging_init:
         push    __ROUTINES_LENGTH
         push    __ROUTINES_PHY
         push    __ROUTINES_LIN
-        push    SUP_RW_PRES_TableAttrib
-        push    SUP_RW_PRES_PageAttrib
+        push    SUP_R__PRES_TableAttrib
+        push    SUP_R__PRES_PageAttrib
         call    paging
         pop     eax
         pop     eax
@@ -537,8 +553,8 @@ paging_init:
         push    __KERNEL_LENGTH
         push    __KERNEL_PHY
         push    __KERNEL_LIN
-        push    SUP_RW_PRES_TableAttrib
-        push    SUP_RW_PRES_PageAttrib
+        push    SUP_R__PRES_TableAttrib
+        push    SUP_R__PRES_PageAttrib
         call    paging
         pop     eax
         pop     eax
@@ -1024,6 +1040,24 @@ paging_init:
         pop     eax
         pop     eax
 
+        push    task1_page_tables
+        push    task1_page_directory       
+        push    count_task1_created_tables
+        push    __TASK1_KERNEL_STACK_SIZE
+        push    __TASK1_KERNEL_STACK_PHY
+        push    __TASK1_KERNEL_STACK_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
 
 ;________________________________________
 ; Paginación de Tarea 2
@@ -1227,6 +1261,24 @@ paging_init:
         pop     eax
         pop     eax
 
+        push    task2_page_tables
+        push    task2_page_directory       
+        push    count_task2_created_tables
+        push    __TASK2_KERNEL_STACK_SIZE
+        push    __TASK2_KERNEL_STACK_PHY
+        push    __TASK2_KERNEL_STACK_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
 
 ;________________________________________
 ; Paginación de Tarea 3
@@ -1400,6 +1452,24 @@ paging_init:
         push    __TASK3_STACK_SIZE
         push    __TASK3_STACK_PHY
         push    __TASK3_STACK_LIN
+        push    SUP_RW_PRES_TableAttrib
+        push    SUP_RW_PRES_PageAttrib
+        call    paging
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
+        push    task3_page_tables
+        push    task3_page_directory       
+        push    count_task3_created_tables
+        push    __TASK3_KERNEL_STACK_SIZE
+        push    __TASK3_KERNEL_STACK_PHY
+        push    __TASK3_KERNEL_STACK_LIN
         push    SUP_RW_PRES_TableAttrib
         push    SUP_RW_PRES_PageAttrib
         call    paging
