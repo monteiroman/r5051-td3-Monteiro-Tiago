@@ -1,4 +1,5 @@
-%define BKPT    xchg    bx,bx
+%define BKPT        xchg    bx,bx
+%define m_syscall   int     0x80 
 
 GLOBAL sum_routine
 GLOBAL sum_stored

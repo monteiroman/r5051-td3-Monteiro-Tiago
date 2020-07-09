@@ -23,10 +23,9 @@ GLOBAL tam_GDT_ROM
 GLOBAL GDT
 GLOBAL CS_SEL
 GLOBAL DS_SEL
-GLOBAL imagen_gdtr
+GLOBAL init_GDT_RAM
 
 GLOBAL IDT
-GLOBAL imagen_idtr
 GLOBAL init_IDT
 
 GLOBAL IDT_handler_loader
@@ -47,6 +46,9 @@ EXTERN handler#NM
 ;Desde irq_handlers.asm
 EXTERN irq#01_keyboard_handler
 EXTERN irq#00_timer_handler
+
+;Desde copia.asm.
+EXTERN Funcion_copia
 
 
 USE16                           ;El codigo que continúa va en segmento de código
@@ -100,20 +102,21 @@ imagen_gdtr_ROM:
         dw tam_GDT_ROM - 1      ;Limite GDT (16 bits).
         dd GDT_ROM              ;Base GDT (32 bits).
 
+
 ;________________________________________
 ; Inicializacion de Modo protegido
 ;________________________________________
 Inicio_16bits:
 
-        cli                     ;Desabilitar interrupcionees.
-        %include "src/init_pci.inc"     ;Inicialización de bus PCI y video
+        cli                         ;Desabilitar interrupcionees.
+        %include "src/init_pci.inc"         ;Inicialización de bus PCI y video
         o32 lgdt    [cs:imagen_gdtr_ROM]    ;Cargo registro GDTR.
                                             ;El prefijo 0x66 que agrega el o32
-                                            ;permite usar los 4 bytes de la
-                                            ;base. Sin o32 se usan tres.
-        mov     eax, cr0        ;Paso a modo protegido.
-        or      eax, 1          ;Prendo el bit 1
-        mov     cr0, eax        ;Activo el modo protegido
+                                            ;   permite usar los 4 bytes de la
+                                            ;   base. Sin o32 se usan tres.
+        mov     eax, cr0            ;Paso a modo protegido.
+        or      eax, 1              ;Prendo el bit 1
+        mov     cr0, eax            ;Activo el modo protegido
 
         jmp dword CS_SEL_ROM:(Inicio_32bits)    ;Cambio el CS al selector
                                                 ;de modo protegido de 32 bits.
@@ -141,8 +144,9 @@ GDT:
 
         tam_GDT equ $-GDT           ;Tamaño de la GDT.
 
+
 ;________________________________________
-; GDT de Ram
+; IDT de Ram
 ;________________________________________
 IDT:
         resb 8*255                  ;Reservo 255 entradas de 8 bytes
@@ -158,82 +162,112 @@ section .init32
 ; Imagen de GDTR de Ram
 ;________________________________________
 imagen_gdtr:
-        dw tam_GDT - 1      ;Limite GDT (16 bits).
-        dd GDT              ;Base GDT (32 bits).
+        dw tam_GDT - 1              ;Limite GDT (16 bits).
+        dd GDT                      ;Base GDT (32 bits).
+
 
 ;________________________________________
 ; Imagen IDTR
 ;________________________________________
 imagen_idtr:
-        dw tam_IDT - 1      ;Limite IDT
-        dd IDT              ;Base IDT
+        dw tam_IDT - 1              ;Limite IDT
+        dd IDT                      ;Base IDT
+
 
 ;________________________________________
-; Inicializacion de interrupciones
+; Inicializacion de GDT en RAM
+;________________________________________
+init_GDT_RAM:
+ ; Copio la GDT que va a correr desde memoria.
+        push    GDT_ROM             ; Posicion de origen (en ROM) que contiene a la GDT.
+        push    GDT                 ; Posicion destino (en RAM).
+        push    tam_GDT_ROM         ; Largo de la GDT.
+        call    Funcion_copia
+        pop     eax
+        pop     eax
+        pop     eax
+
+        ; Cargo la nueva GDT que está en RAM.
+        lgdt    [cs:imagen_gdtr]
+
+        ; Cargo los selectores.
+        mov     ax, DS_SEL          ; Cargo DS con el selector que apunta al
+        mov     ds, ax              ;   descriptor de segmento de datos flat.
+        mov     es, ax              ; Cargo ES
+        mov     ss, ax              ; Inicio el selector de pila
+
+        ret
+
+
+;________________________________________
+; Inicializacion de IDT
 ;________________________________________
 init_IDT:
-    ;Excepcion #DE (Divide error, [0x00])
-        push    handler#DE          ;Pongo el handler en pila
-        push    0x00                ;Pongo el numero de interrupcion en pila
-        call    IDT_handler_loader  ;Funcion que carga la interrupcion
+    ; Excepcion #DE (Divide error, [0x00])
+        push    handler#DE          ; Pongo el handler en pila (ver exc_handlers.asm).
+        push    0x00                ; Pongo el numero de interrupcion en pila
+        call    IDT_handler_loader  ; Funcion que carga la interrupcion
         pop     eax
         pop     eax
 
-    ;Excepcion #UD (Invalid Upcode, [0x06])
-        push    handler#UD
+    ; Excepcion #UD (Invalid Upcode, [0x06])
+        push    handler#UD          ; Ver exc_handlers.asm.
         push    0x06
         call    IDT_handler_loader
         pop     eax
         pop     eax
 
-    ;Excepcion #NM (Device not available, [0x07])
-        push    handler#NM
+    ; Excepcion #NM (Device not available, [0x07])
+        push    handler#NM          ; Ver exc_handlers.asm.
         push    0x07
         call    IDT_handler_loader
         pop     eax
         pop     eax
 
-    ;Excepcion #DF (Double Fault, [0x08])
-        push    handler#DF
+    ; Excepcion #DF (Double Fault, [0x08])
+        push    handler#DF          ; Ver exc_handlers.asm.
         push    0x08
         call    IDT_handler_loader
         pop     eax
         pop     eax
 
-    ;Excepcion #SS (Stack Segment Fault, [0x0C])
-        push    handler#SS
+    ; Excepcion #SS (Stack Segment Fault, [0x0C])
+        push    handler#SS          ; Ver exc_handlers.asm.
         push    0x0C
         call    IDT_handler_loader
         pop     eax
         pop     eax
 
-    ;Excepcion #GP (General Protection, [0x0D])
-        push    handler#GP
+    ; Excepcion #GP (General Protection, [0x0D])
+        push    handler#GP          ; Ver exc_handlers.asm.
         push    0x0D
         call    IDT_handler_loader
         pop     eax
         pop     eax
 
-    ;Excepcion #PF (Page Fault, [0x0E])
-        push    handler#PF
+    ; Excepcion #PF (Page Fault, [0x0E])
+        push    handler#PF          ; Ver exc_handlers.asm.
         push    0x0E
         call    IDT_handler_loader
         pop     eax
         pop     eax
 
-    ;Interrupcion de teclado
-        push    irq#01_keyboard_handler
+    ; Interrupcion de teclado
+        push    irq#01_keyboard_handler     ; Ver irq_handlers.asm
         push    0x21
         call    IDT_handler_loader
         pop     eax
         pop     eax
 
-    ;Interrupcion del timer
-        push    irq#00_timer_handler
+    ; Interrupcion del timer
+        push    irq#00_timer_handler        ; Ver irq_handlers.asm
         push    0x20
         call    IDT_handler_loader
         pop     eax
         pop     eax
+
+    ; Cargo la imagen de IDT 
+        lidt    [cs:imagen_idtr]
 
         ret
 
@@ -305,13 +339,14 @@ IDT_handler_loader:
 
         ret
 
+
 IDT_handler_cleaner:
         mov     esi, IDT
         mov     ebp, esp            ;No uso el puntero de pila directamente
         mov     ecx, [ebp+4]        ;Numero de Excepcion
-        ;BKPT
+
         shl     ecx,3
         mov dword   [esi+ecx],0x0
         mov dword   [esi+ecx+4],0x0
-        ;BKPT
+
         ret

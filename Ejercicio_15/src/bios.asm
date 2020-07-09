@@ -84,9 +84,8 @@ EXTERN tam_GDT_ROM
 EXTERN GDT
 EXTERN DS_SEL
 EXTERN CS_SEL
-EXTERN imagen_gdtr
-EXTERN imagen_idtr
 EXTERN init_IDT
+EXTERN init_GDT_RAM
 
 ;Desde el linkerscript.
 EXTERN __STACK_START
@@ -149,8 +148,8 @@ Inicio_32bits:
 
         mov     ss, ax              ;Inicio el selector de pila.
         mov     esp, __STACK_END    ;Cargo el registro de pila y le doy
-                                        ;direccion de inicio (recordar que se
-                                        ;carga de arriba hacia abajo).
+                                    ;   direccion de inicio (recordar que se
+                                    ;   carga de arriba hacia abajo).
 
         ; Estas dos secciones las copio a RAM antes de paginar para poder 
         ; protegerlas por paginacion. De esta manera puedo poner que sus paginas
@@ -173,7 +172,7 @@ Inicio_32bits:
         pop     eax
         pop     eax
 
-        ; Paginación
+        ; Paginación (ver paging.asm)
         call    paging_init
         mov     eax, kernel_page_directory
         mov     CR3, eax            ; Cargo CR3 con la direccion del directorio
@@ -182,8 +181,8 @@ Inicio_32bits:
         or      eax, 0x80000000     ;   bit 31 de CR0.
         mov     CR0, eax
 
-        ; Lleno la tabla de inspeccion del teclado.
-        call keyboard_fill_lookup_table
+        ; Lleno la tabla de inspeccion del teclado (ver keyboard.asm).
+        call    keyboard_fill_lookup_table
 
         ; Copio las tareas a RAM.
         push    __TASK1_TXT_ORIG
@@ -210,27 +209,13 @@ Inicio_32bits:
         pop     eax
         pop     eax
 
-        ; Copio la GDT que va a correr desde memoria.
-        push    GDT_ROM
-        push    GDT
-        push    tam_GDT_ROM
-        call    Funcion_copia
-        pop     eax
-        pop     eax
-        pop     eax
+        ; Cargo la GDT a RAM y configuro los registros de segmentos (ver init.asm)
+        call    init_GDT_RAM
 
-        ; Cargo la nueva GDT que está en RAM.
-        lgdt    [cs:imagen_gdtr]
-        mov     ax, DS_SEL      ;Cargo DS con el selector que apunta al
-        mov     ds, ax          ;   descriptor de segmento de datos flat.
-        mov     es, ax          ;Cargo ES
-        mov     ss, ax          ;Inicio el selector de pila
-
-        ; Cargo la imagen de idtr y los handlers.
+        ; Cargo la imagen de idtr y los handlers (ver init.asm).
         call    init_IDT
-        lidt    [cs:imagen_idtr]
 
-        ; Inicializo los pic's.
+        ; Inicializo los pic's (ver pic_init.asm).
         call    pic_init
 
         ; Inicializo SIMD
@@ -254,5 +239,5 @@ Inicio_32bits:
 ;________________________________________
 section .main
 Main:
-        jmp     scheduler_init
+        jmp     scheduler_init      ; Ver scheduler.asm
 

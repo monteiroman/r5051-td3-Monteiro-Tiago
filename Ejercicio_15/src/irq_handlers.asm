@@ -22,20 +22,20 @@ section .irq_handlers
 irq#00_timer_handler:
     call    timer_routine
     
-    jmp     m_scheduler
-    m_scheduler_int_end:
+    jmp     m_scheduler         ; Voy al scheduler (ver scheduler.asm).
+    m_scheduler_int_end:        ; Punto de retorno
 
-    push    eax                 ; Pusheo a pila eax porq lo voy a usar para otra cosa
+    push    eax                 ; Pusheo a pila eax porq lo voy a usar para otra cosa.
 
-    mov     al, 0x20            ; Le viso al pic que ya trate la interrupcion
+    mov     al, 0x20            ; Le viso al pic que ya trate la interrupcion.
     out     Master_PIC_Command, al
 
-    pop     eax                 ; para mantener el eax del contexto
+    pop     eax                 ; Popeo para mantener el eax del contexto.
     iret
 
 irq#01_keyboard_handler:
     pushad
-    call    keyboard_routine
+    call    keyboard_routine    ; Ver keyboard.asm.
     mov     al, 0x20            ; Le viso al pic que ya trate la interrupcion
     out     Master_PIC_Command, al
     popad

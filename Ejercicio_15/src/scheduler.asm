@@ -195,11 +195,11 @@ m_scheduler:
 
 
     ; Cargo el contexto de la tarea entrante ___________________________________________________________________________
-        cmp     dword [future_task], 0x00
-        jne     not_kernel_load
-            mov     eax, m_tss_kernel                   ; Contexto de kernel
-            jmp     load_context
-        not_kernel_load:
+        ;cmp     dword [future_task], 0x00
+        ;jne     not_kernel_load
+        ;    mov     eax, m_tss_kernel                   ; Contexto de kernel
+        ;    jmp     load_context
+        ;not_kernel_load:
 
         cmp     dword [future_task], 0x01
         jne     not_task1_load
@@ -355,6 +355,17 @@ scheduler_logic:
 ; Rutina de finalizacion de tarea
 ;________________________________________
 contexts_init:
+    ; Kernel. Aqui es donde estaran las direcciones lineales de las pilas de 
+    ;           PL=0 y PL=3 que no cambian entre tareas.
+        ;mov     eax, m_tss_kernel
+
+        ; Inicializacion de segmentos
+
+        ; Inicializacion de la pila de PL=0
+
+        ; Inicializacion de la pila de PL=3
+
+
     ; Tarea 1
         mov     eax, m_tss_1
 
