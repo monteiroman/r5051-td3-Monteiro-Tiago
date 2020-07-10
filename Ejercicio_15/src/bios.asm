@@ -74,34 +74,20 @@ EXTERN Funcion_copia
 
 ;Desde keyboard.asm.
 EXTERN keyboard_fill_lookup_table
-EXTERN keyboard_routine
 
 ;Desde init.asm.
-EXTERN GDT_ROM
-EXTERN DS_SEL_ROM
-EXTERN CS_SEL_ROM
-EXTERN tam_GDT_ROM
 EXTERN GDT
-EXTERN DS_SEL
-EXTERN CS_SEL
+EXTERN CS_SEL_KERNEL
 EXTERN init_IDT
 EXTERN init_GDT_RAM
 
 ;Desde el linkerscript.
-EXTERN __STACK_START
-EXTERN __STACK_END
 EXTERN __KERNEL_PHY
 EXTERN __KERNEL_ORIG
 EXTERN __KERNEL_LENGTH
 EXTERN __ROUTINES_LIN
 EXTERN __ROUTINES_ORIG
 EXTERN __ROUTINES_LENGTH
-EXTERN __TABLES_DEST
-EXTERN __TABLES_ORIG
-EXTERN __TABLES_LENGTH
-EXTERN __SYS_TABLES_LIN
-EXTERN __SYS_TABLES_ORIG
-EXTERN __SYS_TABLES_LENGTH
 EXTERN __TASK1_TXT_LIN
 EXTERN __TASK1_TXT_ORIG
 EXTERN __TASK1_TXT_LENGTH
@@ -115,21 +101,9 @@ EXTERN __TASK3_TXT_LENGTH
 ;Desde pic_init.asm.
 EXTERN pic_init
 
-;Desde task1.asm
-EXTERN sum_routine
-
-;Desde task2.asm
-EXTERN sum_routine_2
-
-; Desde screen.asm
-EXTERN refresh_screen
-
 ; Desde paging.asm
 EXTERN paging_init
 EXTERN kernel_page_directory
-EXTERN task1_page_directory
-EXTERN task2_page_directory
-EXTERN task3_page_directory
 
 ; Desde scheduler.asm
 EXTERN scheduler_init
@@ -141,16 +115,6 @@ USE32                   ;El codigo que continúa va en segmento de código
 ;________________________________________
 section .init32
 Inicio_32bits:
-
-        mov     ax, DS_SEL_ROM  ;Cargo DS con el selector que apunta al
-        mov     ds, ax              ;descriptor de segmento de datos flat.
-        mov     es, ax          ;Cargo ES.
-
-        mov     ss, ax              ;Inicio el selector de pila.
-        mov     esp, __STACK_END    ;Cargo el registro de pila y le doy
-                                    ;   direccion de inicio (recordar que se
-                                    ;   carga de arriba hacia abajo).
-
         ; Estas dos secciones las copio a RAM antes de paginar para poder 
         ; protegerlas por paginacion. De esta manera puedo poner que sus paginas
         ; sean de solo lectura.
@@ -232,7 +196,7 @@ Inicio_32bits:
         ; Habilito las interrupciones
         sti
 
-        jmp     CS_SEL:Main
+        jmp     CS_SEL_KERNEL:Main
 
 ;________________________________________
 ; Seccion Main

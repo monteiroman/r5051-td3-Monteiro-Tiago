@@ -27,7 +27,7 @@ EXTERN m_simd_task2
 
 USE32
 ;______________________________________________________________________________;
-;                       Manejadores de interrupciones                          ;
+;                       Manejadores de excepciones                             ;
 ;______________________________________________________________________________;
 section .exc_handlers
 

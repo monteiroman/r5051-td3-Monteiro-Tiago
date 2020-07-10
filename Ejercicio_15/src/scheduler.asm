@@ -37,6 +37,8 @@ GLOBAL future_task
 GLOBAL m_scheduler
 GLOBAL m_simd_task1
 GLOBAL m_simd_task2
+GLOBAL m_tss_length
+GLOBAL m_tss_kernel
 
 ; Desde keyboard.asm
 EXTERN enter_key_flag                         ; Al enter lo considero como inicio de mi tarea
@@ -74,6 +76,9 @@ EXTERN idle_task
 ; Desde screen.asm
 EXTERN refresh_screen
 
+; Desde init.asm
+EXTERN TSS_SEL
+
 USE32
 ;______________________________________________________________________________;
 ;                                 Scheduler                                    ;
@@ -88,6 +93,9 @@ scheduler_init:
         mov     dword [future_task], 0x03           ; A la tarea idle
 
         call    contexts_init
+
+        mov     ax, TSS_SEL
+        ltr     ax                                  ; Cargo el registro de tarea.
 
         pushfd                                      ; Pusheo flags                  |
         push    cs                                  ; Pusheo Code Segment           |   Lo hago asi de entrada porque es
@@ -280,10 +288,10 @@ m_scheduler:
         mov     [current_task], ebx
 
         ; Una vez que termino de usar los registros, los completo con los valores del contexto nuevo.
-        mov     ebx, [eax + m_ebx_idx]                  ; Cargo el ebx nuevo
-        mov     eax, [eax + m_eax_idx]                  ; Cargo el eax nuevo
+        mov     ebx, [eax + m_ebx_idx]                  ; Cargo el ebx nuevo.
+        mov     eax, [eax + m_eax_idx]                  ; Cargo el eax nuevo.
         
-        jmp     m_scheduler_int_end                     ; Vuelvo a irq_handlers.asm
+        jmp     m_scheduler_int_end                     ; Vuelvo al manejador de interrupcion (ver irq_handlers.asm).
 
 
 ;________________________________________
@@ -357,7 +365,7 @@ scheduler_logic:
 contexts_init:
     ; Kernel. Aqui es donde estaran las direcciones lineales de las pilas de 
     ;           PL=0 y PL=3 que no cambian entre tareas.
-        ;mov     eax, m_tss_kernel
+        mov     eax, m_tss_kernel
 
         ; Inicializacion de segmentos
 
@@ -450,6 +458,7 @@ future_task:                    ;                               |
         resd 1                  ; Marcador de tarea futura      |   3 = Task 3 (idle)   2 = Task 2
 m_tss_kernel:
         resd 26
+    m_tss_length equ $-m_tss_kernel     ; Largo de la tss que voy a usar en tr.
 m_tss_1:
         resd 26
 m_tss_2:

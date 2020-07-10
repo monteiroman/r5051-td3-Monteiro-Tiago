@@ -1,35 +1,27 @@
+%define BKPT    xchg    bx,bx
 ;______________________________________________________________________________;
 ;                                   Reset                                      ;
 ;______________________________________________________________________________;
 
 section .reset
-bits 16                         ;El código a continuación va en
-                                    ;segmento de código de 16 bits
+bits 16                             ; El código a continuación va en
+                                    ;   segmento de código de 16 bits.
 
-inicio_reset:                   ;Dirección de arranque del procesador.
-       jmp      Inicio_16bits   ;Saltar al principio de la ROM.
+inicio_reset:                       ; Dirección de arranque del procesador.
+       jmp      Inicio_16bits       ; Saltar al principio de la ROM.
 
-times 0x10 - ($-inicio_reset) db 0        ;Relleno.
+times 0x10 - ($-inicio_reset) db 0  ; Relleno.
 
 
 ;______________________________________________________________________________;
 ;                              Modo real                                       ;
 ;______________________________________________________________________________;
-GLOBAL GDT_ROM
-GLOBAL DS_SEL_ROM
-GLOBAL CS_SEL_ROM
-GLOBAL tam_GDT_ROM
 
-GLOBAL GDT
-GLOBAL CS_SEL
-GLOBAL DS_SEL
+GLOBAL CS_SEL_KERNEL
 GLOBAL init_GDT_RAM
-
-GLOBAL IDT
 GLOBAL init_IDT
-
-GLOBAL IDT_handler_loader
 GLOBAL IDT_handler_cleaner
+GLOBAL TSS_SEL
 
 ;Desde bios.asm
 EXTERN Inicio_32bits
@@ -50,57 +42,99 @@ EXTERN irq#00_timer_handler
 ;Desde copia.asm.
 EXTERN Funcion_copia
 
+;Desde el linkerscript.
+EXTERN __STACK_END
 
-USE16                           ;El codigo que continúa va en segmento de código
-                                    ; de 16 BITS
+; Desde scheduler.asm
+EXTERN m_tss_length
+EXTERN m_tss_kernel
+
+
+USE16                               ; El codigo que continúa va en segmento de código
+                                    ; de 16 BITS.
 section .ROM_init
 ;________________________________________
 ; GDT de Rom
 ;________________________________________
-        align 8                 ;Optimización para leer la GDT más rápido
+        align 8                     ; Optimización para leer la GDT más rápido
 
 GDT_ROM:
-        dq 0                    ;Descriptor nulo. Simepre tiene que estar.
+        dq 0                        ; Descriptor nulo. Simepre tiene que estar.
 
-CS_SEL_ROM  equ $-GDT_ROM       ;Defino el selector de Código
-                                ; Base = 00000000, límite = FFFFFFFF.
-                                ; Granularidad = 1, límite = FFFFF.
-        dw 0xffff               ;Límite 15-0
-        dw 0                    ;Base 15-0
-        db 0                    ;Base 23-16
-        db 10011010b            ;Derechos de acceso.
-                                    ;Bit 7 = 1 (Presente)
-                                    ;Bits 6-5 = 0 (DPL)
-                                    ;Bit 4 = 1 (Todavia no vimos por qué)
-                                    ;Bit 3 = 1 (Código)
-                                    ;Bit 2 = 0 (no conforming)
-                                    ;Bit 1 = 1 (lectura)
-                                    ;Bit 0 = 0 (Accedido).
-        db 0xcf                 ;G = 1, D = 1, límite 19-16
-        db 0                    ;Base 31-24
+CS_SEL_KERNEL_ROM  equ $-GDT_ROM    ; Defino el selector de Código flat de KERNEL.
+                                    ;   Base = 00000000, límite = FFFFFFFF.
+                                    ;   Granularidad = 1, límite = FFFFF.
+        dw 0xffff                   ; Límite 15-0
+        dw 0                        ; Base 15-0
+        db 0                        ; Base 23-16
+        db 10011010b                ; Derechos de acceso.
+                                    ;   Bit 7 = 1 (Presente)
+                                    ;   Bits 6-5 = 0 (DPL)
+                                    ;   Bit 4 = 1
+                                    ;   Bit 3 = 1 (Código)
+                                    ;   Bit 2 = 0 (no conforming)
+                                    ;   Bit 1 = 1 (lectura)
+                                    ;   Bit 0 = 0 (Accedido).
+        db 0xcf                     ; G = 1, D = 1, límite 19-16
+        db 0                        ; Base 31-24
 
-DS_SEL_ROM  equ $-GDT_ROM       ;Defino el selector de Datos flat.
-                                ; Base 000000000, límite FFFFFFFF,
-                                ; Granularidad = 1, límite = FFFFF.
-        dw 0xffff               ;Límite 15-0
-        dw 0                    ;Base 15-0
-        db 0                    ;Base 23-16
-        db 10010010b            ;Derechos de acceso.
-                                    ;Bit 7 = 1 (Presente)
-                                    ;Bits 6-5 = 0 (DPL)
-                                    ;Bit 4 = 1 (Todavia no vimos por qué)
-                                    ;Bit 3 = 0 (Datos)
-                                    ;Bit 2 = 0 (dirección de expansión normal)
-                                    ;Bit 1 = 1 (R/W)
-                                    ;Bit 0 = 0 (Accedido)
-        db 0xcf                 ;G = 1, D = 1, límite 19-16
-        db 0                    ;Base 31-24
+DS_SEL_KERNEL_ROM  equ $-GDT_ROM    ; Defino el selector de Datos flat de KERNEL.
+                                    ;   Base 000000000, límite FFFFFFFF,
+                                    ;   Granularidad = 1, límite = FFFFF.
+        dw 0xffff                   ; Límite 15-0
+        dw 0                        ; Base 15-0
+        db 0                        ; Base 23-16
+        db 10010010b                ; Derechos de acceso.
+                                    ;   Bit 7 = 1 (Presente)
+                                    ;   Bits 6-5 = 0 (DPL)
+                                    ;   Bit 4 = 1 (Todavia no vimos por qué)
+                                    ;   Bit 3 = 0 (Datos)
+                                    ;   Bit 2 = 0 (dirección de expansión normal)
+                                    ;   Bit 1 = 1 (R/W)
+                                    ;   Bit 0 = 0 (Accedido)
+        db 0xcf                     ; G = 1, D = 1, límite 19-16
+        db 0                        ; Base 31-24
 
-tam_GDT_ROM equ $-GDT_ROM       ;Tamaño de la GDT.
+CS_SEL_USER_ROM  equ $-GDT_ROM+0x03 ; Defino el selector de Código flat de USUARIO.
+                                    ;   Base = 00000000, límite = FFFFFFFF.
+                                    ;   Granularidad = 1, límite = FFFFF.
+        dw 0xffff                   ; Límite 15-0
+        dw 0                        ; Base 15-0
+        db 0                        ; Base 23-16
+        db 11111010b                ; Derechos de acceso.
+                                    ;   Bit 7 = 1 (Presente)
+                                    ;   Bits 6-5 = 11 (DPL)
+                                    ;   Bit 4 = 1
+                                    ;   Bit 3 = 1 (Código)
+                                    ;   Bit 2 = 0 (no conforming)
+                                    ;   Bit 1 = 1 (lectura)
+                                    ;   Bit 0 = 0 (Accedido).
+        db 0xcf                     ; G = 1, D = 1, límite 19-16
+        db 0                        ; Base 31-24
+
+DS_SEL_USER_ROM  equ $-GDT_ROM+0x03 ; Defino el selector de Datos flat de USUARIO.
+                                    ;   Base 000000000, límite FFFFFFFF,
+                                    ;   Granularidad = 1, límite = FFFFF.
+        dw 0xffff                   ; Límite 15-0
+        dw 0                        ; Base 15-0
+        db 0                        ; Base 23-16
+        db 11110010b                ; Derechos de acceso.
+                                    ;   Bit 7 = 1 (Presente)
+                                    ;   Bits 6-5 = 11 (DPL)
+                                    ;   Bit 4 = 1 (Todavia no vimos por qué)
+                                    ;   Bit 3 = 0 (Datos)
+                                    ;   Bit 2 = 0 (dirección de expansión normal)
+                                    ;   Bit 1 = 1 (R/W)
+                                    ;   Bit 0 = 0 (Accedido)
+        db 0xcf                     ; G = 1, D = 1, límite 19-16
+        db 0                        ; Base 31-24
+
+
+tam_GDT_ROM equ $-GDT_ROM           ; Tamaño de la GDT.
 
 imagen_gdtr_ROM:
-        dw tam_GDT_ROM - 1      ;Limite GDT (16 bits).
-        dd GDT_ROM              ;Base GDT (32 bits).
+        dw tam_GDT_ROM - 1          ; Limite GDT (16 bits).
+        dd GDT_ROM                  ; Base GDT (32 bits).
 
 
 ;________________________________________
@@ -108,19 +142,29 @@ imagen_gdtr_ROM:
 ;________________________________________
 Inicio_16bits:
 
-        cli                         ;Desabilitar interrupcionees.
-        %include "src/init_pci.inc"         ;Inicialización de bus PCI y video
-        o32 lgdt    [cs:imagen_gdtr_ROM]    ;Cargo registro GDTR.
-                                            ;El prefijo 0x66 que agrega el o32
+        cli                                 ; Desabilitar interrupcionees.
+        %include "src/init_pci.inc"         ; Inicialización de bus PCI y video
+        o32 lgdt    [cs:imagen_gdtr_ROM]    ; Cargo registro GDTR.
+                                            ; El prefijo 0x66 que agrega el o32
                                             ;   permite usar los 4 bytes de la
                                             ;   base. Sin o32 se usan tres.
-        mov     eax, cr0            ;Paso a modo protegido.
-        or      eax, 1              ;Prendo el bit 1
-        mov     cr0, eax            ;Activo el modo protegido
+        mov     eax, cr0                    ; Paso a modo protegido.
+        or      eax, 1                      ; Prendo el bit 1
+        mov     cr0, eax                    ; Activo el modo protegido
 
-        jmp dword CS_SEL_ROM:(Inicio_32bits)    ;Cambio el CS al selector
-                                                ;de modo protegido de 32 bits.
+        mov     ax, DS_SEL_KERNEL_ROM       ; Cargo DS con el selector que apunta al
+        mov     ds, ax                      ;   descriptor de segmento de datos flat.
+        mov     es, ax                      ; Cargo ES.
 
+        mov     ss, ax                      ; Inicio el selector de pila.
+        mov     esp, __STACK_END            ; Cargo el registro de pila y le doy
+                                            ;   direccion de inicio (recordar que se
+                                            ;   carga de arriba hacia abajo).
+
+        jmp dword CS_SEL_KERNEL_ROM:(Inicio_32bits)     ; Cambio el CS al selector 
+                                                        ;   de modo protegido de 32 bits
+                                                        ;   y salto a las inicializaciones
+                                                        ;   de 32 bits (ver bios.asm).
 
 ;______________________________________________________________________________;
 ;                         Tablas del sistema                                   ;
@@ -136,20 +180,26 @@ section .system_tables nobits
 ; GDT de Ram
 ;________________________________________
 GDT:
-        resb 8                      ;Descriptor nulo.
-        CS_SEL equ $-GDT
-        resb 8                      ;Selector de datos nulo. Se carga en tiempo de ejecución.
-        DS_SEL equ $-GDT
-        resb 8                      ;Selector de codigo nulo. Se carga en tiempo de ejecución.
+        resb 8                      ; Descriptor nulo.
+        CS_SEL_KERNEL equ $-GDT
+        resb 8                      ; Selector de datos de kernel nulo. Se carga en tiempo de ejecución.
+        DS_SEL_KERNEL equ $-GDT
+        resb 8                      ; Selector de codigo de kernel nulo. Se carga en tiempo de ejecución.
+        CS_SEL_USER equ $-GDT+0x03
+        resb 8                      ; Selector de datos de usuario nulo. Se carga en tiempo de ejecución.
+        DS_SEL_USER equ $-GDT+0x03
+        resb 8                      ; Selector de codigo de usuario nulo. Se carga en tiempo de ejecución.
+        TSS_SEL equ $-GDT           
+        resb 8                      ; Selector de TSS.
 
-        tam_GDT equ $-GDT           ;Tamaño de la GDT.
+        tam_GDT equ $-GDT           ; Tamaño de la GDT.
 
 
 ;________________________________________
 ; IDT de Ram
 ;________________________________________
 IDT:
-        resb 8*255                  ;Reservo 255 entradas de 8 bytes
+        resb 8*255                  ; Reservo 255 entradas de 8 bytes
 
         tam_IDT equ $-IDT
 
@@ -162,36 +212,53 @@ section .init32
 ; Imagen de GDTR de Ram
 ;________________________________________
 imagen_gdtr:
-        dw tam_GDT - 1              ;Limite GDT (16 bits).
-        dd GDT                      ;Base GDT (32 bits).
+        dw tam_GDT - 1              ; Limite GDT (16 bits).
+        dd GDT                      ; Base GDT (32 bits).
 
 
 ;________________________________________
 ; Imagen IDTR
 ;________________________________________
 imagen_idtr:
-        dw tam_IDT - 1              ;Limite IDT
-        dd IDT                      ;Base IDT
+        dw tam_IDT - 1              ; Limite IDT
+        dd IDT                      ; Base IDT
 
 
 ;________________________________________
 ; Inicializacion de GDT en RAM
 ;________________________________________
 init_GDT_RAM:
- ; Copio la GDT que va a correr desde memoria.
+    ; Copio la GDT que va a correr desde memoria.
         push    GDT_ROM             ; Posicion de origen (en ROM) que contiene a la GDT.
         push    GDT                 ; Posicion destino (en RAM).
-        push    tam_GDT_ROM         ; Largo de la GDT.
+        push    tam_GDT_ROM         ; Largo de la GDT de ROM, la de RAM es mas grande (tiene TSS).
         call    Funcion_copia
         pop     eax
         pop     eax
         pop     eax
 
-        ; Cargo la nueva GDT que está en RAM.
+    ; Cargo el selector de la TSS en la GDT.
+        mov     ebp, GDT                            ; Comienzo de la GDT de RAM
+        mov     eax, m_tss_kernel                   ; Direccion de la TSS que voy a cargar en GDT
+        mov     ebx, m_tss_length                   ; Largo de la TSS.
+        mov     ecx, ebx
+        rol     ecx, 0x10                           ; Giro el largo
+        and     cl, 0x0F                            ; Bits 19 a 16 del largo.
+        or      cl, 0x40                            ; G=0, D=1 (de 32 bits).
+
+        mov     [ebp + TSS_SEL], bx                 ; Bytes 0 a 1: bits 0-15 del limite.
+        mov     [ebp + TSS_SEL + 0x02], ax          ; Bytes 2 a 3: bits 0-15 de la base.
+        rol     eax, 0x10                           ; Giro la direccion de la TSS
+        mov     [ebp + TSS_SEL + 0x04], al          ; Byte 4: bits 16-23 de la base.
+        mov     [ebp + TSS_SEL + 0x05], dword 0x89  ; Byte 5: 100010B1 en binario. B lo escribe el micro  .
+        mov     [ebp + TSS_SEL + 0x06], cl          ; Byte 6: G=0, D=1, 0, 0, bits 16-19 del limite. 
+        mov     [ebp + TSS_SEL + 0x07], ah          ; Byte 7: bits 24-31 de la base.   
+
+    ; Cargo la nueva GDT que está en RAM.
         lgdt    [cs:imagen_gdtr]
 
-        ; Cargo los selectores.
-        mov     ax, DS_SEL          ; Cargo DS con el selector que apunta al
+    ; Cargo los selectores.
+        mov     ax, DS_SEL_KERNEL   ; Cargo DS con el selector que apunta al
         mov     ds, ax              ;   descriptor de segmento de datos flat.
         mov     es, ax              ; Cargo ES
         mov     ss, ax              ; Inicio el selector de pila
@@ -307,9 +374,9 @@ init_IDT:
 
 IDT_handler_loader:
         mov     esi, IDT
-        mov     ebp, esp            ;No uso el puntero de pila directamente
-        mov     ecx, [ebp+4]        ;Numero de Excepcion
-        mov     edi, [ebp+8]        ;Dirección del Handler de la interrupcion
+        mov     ebp, esp            ; No uso el puntero de pila directamente
+        mov     ecx, [ebp+4]        ; Numero de Excepcion
+        mov     edi, [ebp+8]        ; Dirección del Handler de la interrupcion
 
     ;Multiplico por 8. Me da la cantidad de veces que me tengo que mover desde
     ;el inicio de la IDT segun la interrupcion que tenga que llenar.
@@ -317,12 +384,12 @@ IDT_handler_loader:
 
     ;+0:   Lo lleno en el proximo Paso
     ;+1:   Lleno el byte 1 y 0 con la parte baja de edi (16 primeros bits)
-        mov     [esi+ecx],di        ;ebp+ecx me dan el lugar donde empieza descriptor
+        mov     [esi+ecx],di        ; ebp+ecx me dan el lugar donde empieza descriptor
 
     ;+2;   Lo lleno en el siguiente Paso
     ;+3:   Pongo el selector de codigo.
-        mov     ax, CS_SEL_ROM
-        mov     [esi+ecx+2], ax     ;Sumo 2 para pararme en el byte 2 (estoy llenando ambos bytes).
+        mov     ax, CS_SEL_KERNEL
+        mov     [esi+ecx+2], ax     ; Sumo 2 para pararme en el byte 2 (estoy llenando ambos bytes).
 
     ;+4:    CERO
         mov     al, 0x00
@@ -334,7 +401,7 @@ IDT_handler_loader:
 
     ;+6:    Lo lleno en el siguiente Paso
     ;+7:    Parte alta del offset (o sea de edi)
-        rol     edi,16              ;Obtengo la parte alta en la parte baja
+        rol     edi,16              ; Obtengo la parte alta en la parte baja
         mov     [esi+ecx+6], di
 
         ret
@@ -342,8 +409,8 @@ IDT_handler_loader:
 
 IDT_handler_cleaner:
         mov     esi, IDT
-        mov     ebp, esp            ;No uso el puntero de pila directamente
-        mov     ecx, [ebp+4]        ;Numero de Excepcion
+        mov     ebp, esp            ; No uso el puntero de pila directamente
+        mov     ecx, [ebp+4]        ; Numero de Excepcion
 
         shl     ecx,3
         mov dword   [esi+ecx],0x0
