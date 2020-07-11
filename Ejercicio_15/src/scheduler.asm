@@ -52,6 +52,9 @@ EXTERN timer_flag_2
 EXTERN __TASK1_STACK_END
 EXTERN __TASK2_STACK_END
 EXTERN __TASK3_STACK_END
+EXTERN __TASK1_KERNEL_STACK_END
+EXTERN __TASK2_KERNEL_STACK_END
+EXTERN __TASK3_KERNEL_STACK_END
 
 ; Desde paging.asm
 EXTERN kernel_page_directory
@@ -78,6 +81,10 @@ EXTERN refresh_screen
 
 ; Desde init.asm
 EXTERN TSS_SEL
+EXTERN CS_SEL_USER
+EXTERN DS_SEL_USER
+EXTERN CS_SEL_KERNEL
+EXTERN DS_SEL_KERNEL
 
 USE32
 ;______________________________________________________________________________;
@@ -201,7 +208,6 @@ m_scheduler:
     ; Decido que tarea ejecutar ________________________________________________________________________________________
         call    scheduler_logic
 
-
     ; Cargo el contexto de la tarea entrante ___________________________________________________________________________
         ;cmp     dword [future_task], 0x00
         ;jne     not_kernel_load
@@ -245,24 +251,31 @@ m_scheduler:
         mov     bx, [eax + m_gs_idx]
         mov     gs, bx
     
-        ; Cargo dirección de pila.    
-        mov     esp, [eax + m_esp_idx] 
+         
 
-        ; Cargo CR3
+        ; Cambio CR3
         mov     ebx, [eax + m_CR3_idx]
         mov     CR3, ebx
-
-        ; Cargo ss.
-        mov     bx, [eax + m_ss_idx]
-        mov     ss, bx    
+;BKPT       
+        ; Cargo la pila de kernel de la tarea corespondiente
+        mov     ebx, [eax + m_esp0_idx]
+        mov     esp, ebx
         
+        ; Cargo ss.
+        xor     ebx, ebx
+        mov     ebx, [eax + m_ss_idx]
+        push    ebx  
+        ; Cargo dirección de pila.    
+        mov     ebx, [eax + m_esp_idx]
+        push    ebx  
+;BKPT       
                                                         ;               ________________
         mov     ebx, [eax + m_eflags_idx]               ; Pusheo "eflags"               |
         push    ebx                                     ;                               |
         push    dword [eax + m_cs_idx]                  ; Pusheo "cs".                  |   
                                                         ;                               |
         cmp     dword [future_task], 0x03               ; -Si es la tarea 3 que vuelva  | 
-        je      prev_return_point                       ; al punto de donde salio.      |
+        je      prev_return_point                       ;   al punto de donde salio.    |
             cmp     dword [future_task], 0x02           ; _                             |
             jne     not_task2_return                    ;  |                            |
             cmp     dword [task2_end_flag], 0x01        ;  | Si la tarea futura es la   |   Preparo la pila para 
@@ -282,7 +295,6 @@ m_scheduler:
         reset_return_point:                             ;                               |
         push    ebx                                     ; pusheo "eip".                 |
                                                         ;               ________________|
-
         ; Seteo la tarea actual
         mov     ebx, [future_task]
         mov     [current_task], ebx
@@ -370,8 +382,13 @@ contexts_init:
         ; Inicializacion de segmentos
 
         ; Inicializacion de la pila de PL=0
+        mov     dword [eax + m_esp0_idx], __TASK3_KERNEL_STACK_END
+        mov     word [eax + m_ss0_idx], DS_SEL_KERNEL
 
         ; Inicializacion de la pila de PL=3
+        ;mov     dword [eax + m_esp_idx], __TASK3_STACK_END
+        ;mov     word [eax + m_ss_idx], DS_SEL_USER
+
 
 
     ; Tarea 1
@@ -392,7 +409,7 @@ contexts_init:
         mov     dword [eax + m_eip_idx], sum_routine 
 
         ; Inicializo eflags
-        mov     dword [eax + m_eflags_idx], 0x200       ; Por lo menos le pongo el bit 9 (IF) a 1 para que interrumpa el
+        mov     dword [eax + m_eflags_idx], 0x202       ; Por lo menos le pongo el bit 9 (IF) a 1 para que interrumpa el
                                                         ; timer.
         ; Inicializo la pila
         mov     dword [eax + m_esp_idx], __TASK1_STACK_END           
@@ -416,10 +433,10 @@ contexts_init:
         mov     dword [eax + m_eip_idx], sum_routine_2
 
         ; Inicializo eflags
-        mov     dword [eax + m_eflags_idx], 0x200       ; Por lo menos le pongo el bit 9 (IF) a 1 para que interrumpa el
+        mov     dword [eax + m_eflags_idx], 0x202       ; Por lo menos le pongo el bit 9 (IF) a 1 para que interrumpa el
                                                         ; timer.
         ; Inicializo la pila
-        mov     dword [eax + m_esp_idx], __TASK2_STACK_END 
+        mov     dword [eax + m_esp_idx], __TASK2_STACK_END
 
 
     ; Tarea 3
@@ -429,21 +446,27 @@ contexts_init:
         mov     dword [eax + m_CR3_idx], task3_page_directory
 
         ; Inicializo segmentos
-        mov     [eax + m_cs_idx], cs
-        mov     [eax + m_ds_idx], ds
-        mov     [eax + m_es_idx], es
-        mov     [eax + m_fs_idx], fs
-        mov     [eax + m_gs_idx], gs
-        mov     [eax + m_ss_idx], ss
+        mov     cx, DS_SEL_USER
+        mov     bx, CS_SEL_USER
+        mov     [eax + m_cs_idx], bx
+        mov     [eax + m_ds_idx], cx
+        mov     [eax + m_es_idx], cx
+        mov     [eax + m_fs_idx], cx
+        mov     [eax + m_gs_idx], cx
+        mov     [eax + m_ss_idx], cx
 
         ;Inicializo eip
         mov     dword [eax + m_eip_idx], idle_task
 
         ; Inicializo eflags
-        mov     dword [eax + m_eflags_idx], 0x200       ; Por lo menos le pongo el bit 9 (IF) a 1 para que interrumpa el
+        mov     dword [eax + m_eflags_idx], 0x202       ; Por lo menos le pongo el bit 9 (IF) a 1 para que interrumpa el
                                                         ; timer.
         ; Inicializo la pila
-        mov     dword [eax + m_esp_idx], __TASK3_STACK_END 
+        mov     dword [eax + m_esp_idx], __TASK3_STACK_END
+
+        ; Inicializo la pila de PL=0
+        mov     dword [eax + m_esp0_idx], __TASK3_KERNEL_STACK_END 
+ 
 
         ret
 

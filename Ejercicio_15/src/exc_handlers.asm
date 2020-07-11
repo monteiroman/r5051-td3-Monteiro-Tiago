@@ -1,5 +1,4 @@
 %define BKPT    xchg    bx,bx
-%define m_simd  0x68
 
 GLOBAL handler#DE
 GLOBAL handler#UD
@@ -8,6 +7,7 @@ GLOBAL handler#SS
 GLOBAL handler#GP
 GLOBAL handler#PF
 GLOBAL handler#NM
+GLOBAL handler#TS
 
 ;Desde init32.asm
 EXTERN IDT
@@ -119,10 +119,29 @@ BKPT
         popad
         iret
 
+;Excepcion #TS (Invalid TSS, [0x0A])
+handler#TS:
+        pushad
+        call    exc_warning
+
+        xor     eax, eax
+        xor     ebx, ebx
+        xor     ecx, ecx
+        xor     edx, edx
+        xor     edi, edi
+        xor     esi, esi
+        xor     ebp, ebp
+        mov     dx, 0x0A
+
+BKPT
+
+        hlt
+        popad
+        iret
+
 ;Excepcion #SS (Stack Segment Fault, [0x0C])
 handler#SS:
         pushad
-        call    exc_warning
 
         xor     eax, eax
         xor     ebx, ebx
@@ -142,7 +161,6 @@ BKPT
 ;Excepcion #GP (General Protection, [0x0D])
 handler#GP:
         pushad
-        call    exc_warning
 
         xor     eax, eax
         xor     ebx, ebx
@@ -178,13 +196,14 @@ BKPT
 
         ; A partir del ejercicio 13 no hay que usar esta funcionalidad
         ;_______________________________________________________________________________________________________________
-        mov     eax, CR2                ; Obtengo la dirección que generó el fallo.
+        ;mov     eax, CR2                ; Obtengo la dirección que generó el fallo.
 
-        push    eax
-        call    runtime_paging
-        pop     eax
+        ;push    eax
+        ;call    runtime_paging
+        ;pop     eax
         ;_______________________________________________________________________________________________________________
 
         popad                           ; Cargo los registros de nuevo.
         add     esp, 0x04               ; Saco el codigo de error que metió #PF en pila
+        
         iret                            ; Saco EIP, CS y EFLAGS de la pila

@@ -1,4 +1,7 @@
 %define BKPT    xchg    bx,bx
+%define des_attrib_SU    0x8E    ; 10001110b Descriptor con DPL=0
+%define des_attrib__U    0xEE    ; 11101110b Descriptor con DPL=3
+
 ;______________________________________________________________________________;
 ;                                   Reset                                      ;
 ;______________________________________________________________________________;
@@ -22,6 +25,10 @@ GLOBAL init_GDT_RAM
 GLOBAL init_IDT
 GLOBAL IDT_handler_cleaner
 GLOBAL TSS_SEL
+GLOBAL CS_SEL_USER
+GLOBAL DS_SEL_USER
+GLOBAL CS_SEL_KERNEL
+GLOBAL DS_SEL_KERNEL
 
 ;Desde bios.asm
 EXTERN Inicio_32bits
@@ -34,10 +41,12 @@ EXTERN handler#SS
 EXTERN handler#GP
 EXTERN handler#PF
 EXTERN handler#NM
+EXTERN handler#TS
 
 ;Desde irq_handlers.asm
 EXTERN irq#01_keyboard_handler
 EXTERN irq#00_timer_handler
+EXTERN irq#80_syscall
 
 ;Desde copia.asm.
 EXTERN Funcion_copia
@@ -271,65 +280,101 @@ init_GDT_RAM:
 ;________________________________________
 init_IDT:
     ; Excepcion #DE (Divide error, [0x00])
+        push    des_attrib_SU       ; Pongo los atributos del descriptor.
         push    handler#DE          ; Pongo el handler en pila (ver exc_handlers.asm).
         push    0x00                ; Pongo el numero de interrupcion en pila
         call    IDT_handler_loader  ; Funcion que carga la interrupcion
         pop     eax
         pop     eax
+        pop     eax
 
     ; Excepcion #UD (Invalid Upcode, [0x06])
+        push    des_attrib_SU       
         push    handler#UD          ; Ver exc_handlers.asm.
         push    0x06
         call    IDT_handler_loader
         pop     eax
         pop     eax
+        pop     eax
 
     ; Excepcion #NM (Device not available, [0x07])
+        push    des_attrib_SU       
         push    handler#NM          ; Ver exc_handlers.asm.
         push    0x07
         call    IDT_handler_loader
         pop     eax
         pop     eax
+        pop     eax
 
     ; Excepcion #DF (Double Fault, [0x08])
+        push    des_attrib_SU       
         push    handler#DF          ; Ver exc_handlers.asm.
         push    0x08
         call    IDT_handler_loader
         pop     eax
         pop     eax
+        pop     eax
+
+    ; Excepcion #TS (Invalid TSS, [0x0A])
+        push    des_attrib_SU       
+        push    handler#TS          ; Ver exc_handlers.asm.
+        push    0x0A
+        call    IDT_handler_loader
+        pop     eax
+        pop     eax
+        pop     eax
 
     ; Excepcion #SS (Stack Segment Fault, [0x0C])
+        push    des_attrib_SU       
         push    handler#SS          ; Ver exc_handlers.asm.
         push    0x0C
         call    IDT_handler_loader
         pop     eax
         pop     eax
+        pop     eax
 
     ; Excepcion #GP (General Protection, [0x0D])
+        push    des_attrib_SU       
         push    handler#GP          ; Ver exc_handlers.asm.
         push    0x0D
         call    IDT_handler_loader
         pop     eax
         pop     eax
+        pop     eax
 
     ; Excepcion #PF (Page Fault, [0x0E])
+        push    des_attrib_SU       
         push    handler#PF          ; Ver exc_handlers.asm.
         push    0x0E
         call    IDT_handler_loader
         pop     eax
         pop     eax
+        pop     eax
 
     ; Interrupcion de teclado
+        push    des_attrib_SU       
         push    irq#01_keyboard_handler     ; Ver irq_handlers.asm
         push    0x21
         call    IDT_handler_loader
         pop     eax
         pop     eax
+        pop     eax
 
     ; Interrupcion del timer
+        push    des_attrib_SU       
         push    irq#00_timer_handler        ; Ver irq_handlers.asm
         push    0x20
         call    IDT_handler_loader
+        pop     eax
+        pop     eax
+        pop     eax
+
+    ; Interrupcion de syscall.
+        push    des_attrib__U
+        push    irq#80_syscall              ; Ver irq_handlers.asm
+        push    0x80
+        call    IDT_handler_loader
+        pop     eax
         pop     eax
         pop     eax
 
@@ -375,8 +420,8 @@ init_IDT:
 IDT_handler_loader:
         mov     esi, IDT
         mov     ebp, esp            ; No uso el puntero de pila directamente
-        mov     ecx, [ebp+4]        ; Numero de Excepcion
-        mov     edi, [ebp+8]        ; Dirección del Handler de la interrupcion
+        mov     ecx, [ebp + 4]      ; Numero de Excepcion
+        mov     edi, [ebp + 8]      ; Dirección del Handler de la interrupcion
 
     ;Multiplico por 8. Me da la cantidad de veces que me tengo que mover desde
     ;el inicio de la IDT segun la interrupcion que tenga que llenar.
@@ -396,7 +441,7 @@ IDT_handler_loader:
         mov     [esi+ecx+4], al
 
     ;+5:    Derechos de acceso
-        mov     al, 0x8E            ; 0x8E = 10001110
+        mov     al, [ebp + 12]      ; Atributos.
         mov     [esi+ecx+5], al     ;       Presente | permisos elevados | Tipo
 
     ;+6:    Lo lleno en el siguiente Paso

@@ -405,6 +405,12 @@ EXTERN __RUNTIME_PAGES_PHY
 ;   El directorio de la Tarea 1 comienza en 111000 y las tablas en 0x0017E000
 ;   El directorio de la Tarea 2 comienza en 112000 y las tablas en 0x00183000
 ;   El directorio de la Tarea 3 comienza en 113000 y las tablas en 0x00188000
+;   
+;  Se debe tener en cuenta que el atributo que se guarda en la tabla es el que 
+;  primero se ingresa, es decir, el primero con el que se llama a "paging".
+;  Por ejemplo: El atributo de la tabla 3 sera el que se pase a la funcion 
+;               paging al paginar las direcciones de memoria de la sección 
+;               llamada KERNEL que es la primera que se pagina.
 ;
 ;
 USE32
@@ -1213,8 +1219,8 @@ paging_init:
         push    __TASK2_TXT_LENGTH
         push    __TASK2_TXT_PHY
         push    __TASK2_TXT_LIN
-        push    SUP_RW_PRES_TableAttrib
-        push    SUP_RW_PRES_PageAttrib
+        push    USR_RW_PRES_TableAttrib
+        push    USR_RW_PRES_PageAttrib
         call    paging
         pop     eax
         pop     eax
@@ -1379,7 +1385,7 @@ paging_init:
         push    __KERNEL_LENGTH
         push    __KERNEL_PHY
         push    __KERNEL_LIN
-        push    SUP_RW_PRES_TableAttrib
+        push    USR_RW_PRES_TableAttrib
         push    SUP_RW_PRES_PageAttrib
         call    paging
         pop     eax
@@ -1397,7 +1403,7 @@ paging_init:
         push    __SAVED_DIGITS_TABLE_LENGTH
         push    __SAVED_DIGITS_TABLE_PHY
         push    __SAVED_DIGITS_TABLE_LIN
-        push    SUP_RW_PRES_TableAttrib
+        push    USR_RW_PRES_TableAttrib
         push    SUP_RW_PRES_PageAttrib
         call    paging
         pop     eax
@@ -1415,7 +1421,7 @@ paging_init:
         push    __DATA_LENGTH
         push    __DATA_PHY
         push    __DATA_LIN
-        push    SUP_RW_PRES_TableAttrib
+        push    USR_RW_PRES_TableAttrib
         push    SUP_RW_PRES_PageAttrib
         call    paging
         pop     eax
@@ -1434,8 +1440,8 @@ paging_init:
         push    __TASK3_TXT_LENGTH
         push    __TASK3_TXT_PHY
         push    __TASK3_TXT_LIN
-        push    SUP_RW_PRES_TableAttrib
-        push    SUP_RW_PRES_PageAttrib
+        push    USR_RW_PRES_TableAttrib
+        push    USR_RW_PRES_PageAttrib
         call    paging
         pop     eax
         pop     eax
@@ -1452,8 +1458,8 @@ paging_init:
         push    __TASK3_STACK_SIZE
         push    __TASK3_STACK_PHY
         push    __TASK3_STACK_LIN
-        push    SUP_RW_PRES_TableAttrib
-        push    SUP_RW_PRES_PageAttrib
+        push    USR_RW_PRES_TableAttrib
+        push    USR_RW_PRES_PageAttrib
         call    paging
         pop     eax
         pop     eax
