@@ -44,11 +44,11 @@ GLOBAL at_syscall_t2
 GLOBAL at_syscall_t3
 
 ; Desde keyboard.asm
-EXTERN enter_key_flag                         ; Al enter lo considero como inicio de mi tarea
+EXTERN enter_key_flag                         
 EXTERN enter_key_flag_2
 
 ; Desde timer.asm
-EXTERN timer_flag                             ; El timer me va a decir si se puede ejecutar o no
+EXTERN timer_flag                             
 EXTERN timer_flag_2
 
 ; Desde biosLS.lds
@@ -443,6 +443,7 @@ contexts_init:
         ; Inicializacion de la pila de PL=0
         mov     dword [eax + m_esp0_idx], __TASK3_KERNEL_STACK_END
         mov     word [eax + m_ss0_idx], DS_SEL_KERNEL
+
 
     ; Tarea 1
         mov     eax, m_tss_1

@@ -2,6 +2,10 @@
 
 %define Master_PIC_Command  0x20
 
+%define td3_halt    0x11
+%define td3_read    0x22
+%define td3_print   0x33
+
 GLOBAL irq#01_keyboard_handler
 GLOBAL irq#00_timer_handler
 GLOBAL irq#80_syscall
@@ -74,13 +78,14 @@ irq#80_syscall:
         ; Seteo el flag.
         mov     dword [edi], 0x01
 
-       
+        
+        mov     ebp, esp
+        mov     esi, [ebp + 0x2C]                   ; Traigo la pila de PL=3
+        mov     eax, esi                            ; Saco el primer elemento.
 
-    ; Funcion Halt
-        halt:
-        sti
-        hlt
-        jmp     halt
+        cmp     eax, td3_halt
+        jmp     m_td3_halt
+
 
         finish_syscall:
         mov     dword [edi], 0x00                   ; Reseteo el flag de syscall en proceso.
@@ -90,3 +95,12 @@ irq#80_syscall:
 ;______________________________________________________________________________;
 ;                           Funciones de Syscall                               ;
 ;______________________________________________________________________________;
+
+;________________________________________
+; Funcion Halt
+;________________________________________
+m_td3_halt:
+        sti
+        hlt
+        jmp     m_td3_halt
+        jmp     finish_syscall
