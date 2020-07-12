@@ -60,8 +60,9 @@
 %define     ASCII_DOT   0x2E    ; .
 
 
-GLOBAL refresh_screen
+GLOBAL print_sign
 GLOBAL exc_warning
+GLOBAL print_result
 
 ; Desde task1.asm
 EXTERN sum_stored
@@ -79,30 +80,32 @@ USE32
 ;                            80 x 25  ( W x H )                                ;
 ;______________________________________________________________________________;
 section .screen
-refresh_screen:
+print_sign:
         call    sign
 
-        push    task1_id
-        push    num_row_offset
-        push    num_column_offset
-        push    sum_stored
-        call    result
-        pop     eax
-        pop     eax
-        pop     eax
-        pop     eax
+        call    Title
 
-        push    task2_id
-        push    num_row_offset_2
-        push    num_column_offset_2
-        push    sum_stored_2             
-        call    result
-        pop     eax
-        pop     eax
-        pop     eax
-        pop     eax
+        ;push    task1_id
+        ;push    num_row_offset
+        ;push    num_column_offset
+        ;push    sum_stored
+        ;call    print_result
+        ;pop     eax
+        ;pop     eax
+        ;pop     eax
+        ;pop     eax
 
-        call    joke
+        ;push    task2_id
+        ;push    num_row_offset_2
+        ;push    num_column_offset_2
+        ;push    sum_stored_2             
+        ;call    print_result
+        ;pop     eax
+        ;pop     eax
+        ;pop     eax
+        ;pop     eax
+
+        
         
         ret
 
@@ -110,7 +113,7 @@ refresh_screen:
 ;________________________________________
 ; MBI supercompiuter
 ;________________________________________
-joke:
+Title:
         mov     edi, __VIDEO_BUFFER_LIN
         add     edi, 0x32A
         mov     al, ASCII_S
@@ -163,7 +166,7 @@ joke:
 ;________________________________________
 ; Imprimir el Resultado de la Suma
 ;________________________________________
-result:
+print_result:
         mov     ebp, esp                        ; Copio el puntero a pila para no romper nada
         
         mov     edi, __VIDEO_BUFFER_LIN         ; Direccion de inicio de la memoria de video

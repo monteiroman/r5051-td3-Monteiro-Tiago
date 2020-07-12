@@ -20,8 +20,8 @@ section .sum_store_2 nobits
 ALIGN 512
     last_index_sum_2:
         resd 1
-    task2_end_flag:
-        resd 1
+    ;task2_end_flag:
+    ;    resd 1
     sum_stored_2:
         resb 8
 
@@ -50,6 +50,6 @@ sum_routine_2:
             jne     sum_loop_2                              ; Si no llegue al ultimo vuelvo a sumar.
 
         sum_end_2:
-        mov     dword [task2_end_flag], 0x01
+        ;mov     dword [task2_end_flag], 0x01
         hlt
         jmp     sum_end_2

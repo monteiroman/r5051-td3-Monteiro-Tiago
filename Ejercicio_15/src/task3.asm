@@ -22,5 +22,5 @@ idle_task:
         m_syscall
         pop     eax
         ;hlt
-        ;BKPT
+;BKPT
         jmp     idle_task

@@ -30,6 +30,7 @@
 %define m_ldtr_idx      0x60
 %define m_bitmapIO_idx  0x64
 %define m_at_syscall    0x68
+%define m_task_end      0x6C
 
 GLOBAL scheduler_init
 GLOBAL current_task
@@ -42,6 +43,13 @@ GLOBAL m_tss_kernel
 GLOBAL at_syscall_t1
 GLOBAL at_syscall_t2
 GLOBAL at_syscall_t3
+GLOBAL m_tss_1
+GLOBAL m_tss_2
+GLOBAL m_tss_3
+
+; esto despues hay que sacarlo
+GLOBAL task1_end_flag
+
 
 ; Desde keyboard.asm
 EXTERN enter_key_flag                         
@@ -70,7 +78,6 @@ EXTERN m_scheduler_int_end
 
 ; Desde task1.asm
 EXTERN sum_routine
-EXTERN task1_end_flag
 
 ; Desde task2.asm
 EXTERN sum_routine_2
@@ -80,7 +87,7 @@ EXTERN task2_end_flag
 EXTERN idle_task
 
 ; Desde screen.asm
-EXTERN refresh_screen
+EXTERN print_sign
 
 ; Desde init.asm
 EXTERN TSS_SEL
@@ -99,6 +106,8 @@ section .scheduler
 ; Inicializacion del Scheduler
 ;________________________________________
 scheduler_init:
+
+        call    print_sign                          ; Imprimo la firma en pantalla.
 
         mov     dword [current_task], 0x00          ; Me voy del Kernel
         mov     dword [future_task], 0x03           ; A la tarea idle
@@ -128,19 +137,20 @@ m_scheduler:
         save_old_context_done:                      ;   busco no desorganizar la pila.
 
     ; Muestro en pantalla ______________________________________________________
-        call    refresh_screen
+        ;call    refresh_screen
 
     ; Decido que tarea ejecutar ________________________________________________
         call    scheduler_logic
 
     ; Cargo el contexto de la tarea entrante ___________________________________
-
+;BKPT
         jmp     load_new_context
         load_new_context_done:
 
         jmp     m_scheduler_int_end                 ; Vuelvo al manejador de 
                                                     ;   interrupcion (ver 
                                                     ;   irq_handlers.asm).
+
 
 ;______________________________________________________________________________;
 ;                        Funciones del Scheduler                               ;
@@ -333,6 +343,7 @@ load_new_context:
             cmp     dword [task2_end_flag], 0x01        ;  | Si la tarea futura es la   |   Preparo la pila para 
             jne     prev_return_point                   ;  | tarea 2 y llego hasta el   |   el "iret".
                 mov     ebx, sum_routine_2              ;  | final se resetea.          |
+                mov     dword [task2_end_flag], 0x00    ;  |                            |
                 jmp     reset_return_point              ; _|                            |
             not_task2_return:                           ;                               |
                                                         ;                               |
@@ -341,6 +352,7 @@ load_new_context:
             cmp     dword [task1_end_flag], 0x01        ;  | Si la tarea futura es la   |
             jne     prev_return_point                   ;  | tarea 1 y llego hasta el   |
                 mov     ebx, sum_routine                ;  | final se resetea.          |
+                mov     dword [task1_end_flag], 0x00    ;  |                            |
                 jmp     reset_return_point              ; _|                            |
         prev_return_point:                              ;                               |
         mov     ebx, [eax + m_eip_idx]                  ;                               |
@@ -369,13 +381,6 @@ scheduler_logic:
             mov     dword [future_task], 0x03
             ret
         not_kernel_round:
-; --->  
-;BKPT
-        jmp     default_task
-; --->  
-
-
-
 
         ; Desde la Tarea 3 salto a la Tarea 1 o a la Tarea 2 según corresponda.
         cmp     dword [current_task], 0x03
@@ -387,6 +392,12 @@ scheduler_logic:
                 mov     dword [timer_flag], 0x00
                 ret
             not_3_to_1:
+
+; --->  
+;BKPT
+            jmp     default_task
+; --->  
+
             ; Salto a Tarea 2
             cmp     dword [timer_flag_2], 0x01
             jne     not_3_to_2
@@ -399,6 +410,13 @@ scheduler_logic:
         ; Desde la Tarea 1 salto a la Tarea 2 o a la Tarea 3 según corresponda.
         cmp     dword [current_task], 0x01
         jne     not_task1_round
+
+; --->  
+;BKPT
+            jmp     default_task
+; --->  
+
+
             ; Salto a Tarea 2
             cmp     dword [timer_flag_2], 0x01
             jne     not_1_to_2
@@ -410,6 +428,13 @@ scheduler_logic:
             mov     dword [future_task], 0x03       
             ret
         not_task1_round:
+
+
+; --->  
+;BKPT
+        jmp     default_task
+; --->  
+
         
         ; Desde la Tarea 2 salto a la Tarea 1 o a la Tarea 3 según corresponda.
         cmp     dword [current_task], 0x02
@@ -452,12 +477,14 @@ contexts_init:
         mov     dword [eax + m_CR3_idx], task1_page_directory
 
         ; Inicializo segmentos
-        mov     [eax + m_cs_idx], cs
-        mov     [eax + m_ds_idx], ds
-        mov     [eax + m_es_idx], es
-        mov     [eax + m_fs_idx], fs
-        mov     [eax + m_gs_idx], gs
-        mov     [eax + m_ss_idx], ss
+        mov     cx, DS_SEL_USER
+        mov     bx, CS_SEL_USER
+        mov     [eax + m_cs_idx], bx
+        mov     [eax + m_ds_idx], cx
+        mov     [eax + m_es_idx], cx
+        mov     [eax + m_fs_idx], cx
+        mov     [eax + m_gs_idx], cx
+        mov     [eax + m_ss_idx], cx
 
         ;Inicializo eip
         mov     dword [eax + m_eip_idx], sum_routine 
@@ -466,7 +493,16 @@ contexts_init:
         mov     dword [eax + m_eflags_idx], 0x202       ; Por lo menos le pongo el bit 9 (IF) a 1 para que interrumpa el
                                                         ; timer.
         ; Inicializo la pila
-        mov     dword [eax + m_esp_idx], __TASK1_STACK_END           
+        mov     dword [eax + m_esp_idx], __TASK1_STACK_END
+
+        ; Inicializo la pila de PL=0
+        mov     dword [eax + m_esp0_idx], __TASK1_KERNEL_STACK_END
+
+        ; Inocializo el flag de fin de tarea a cero.
+        mov     dword [eax + m_task_end], 0x00
+
+        ; Inicializo el flag de syscall activa en cero.
+        mov     dword [eax + m_at_syscall], 0x00           
 
 
     ; Tarea 2
@@ -521,7 +557,7 @@ contexts_init:
         ; Inicializo la pila de PL=0
         mov     dword [eax + m_esp0_idx], __TASK3_KERNEL_STACK_END
 
-        ; Inicializo el flag de syscall activa
+        ; Inicializo el flag de syscall activa en cero.
         mov     dword [eax + m_at_syscall], 0x00
  
         ret
@@ -551,18 +587,23 @@ m_tss_1:
         resd 26                 ; TSS identica a la de intel.
 at_syscall_t1:                     
         resd 1                  ; Flag para saber si se produjo el salto al scheduler durante la syscall en Tarea 1.
+task1_end_flag:
+        resd 1                  ; Flag para saber si la tarea ternimo de ejecutarse, en base a esto se resetea.
 
 m_tss_2:
         resd 26                 ; TSS identica a la de intel.
 at_syscall_t2:                     
         resd 1                  ; Flag para saber si se produjo el salto al scheduler durante la syscall en Tarea 2.
-
+task2_end_flag:
+        resd 1                  ; Flag para saber si la tarea ternimo de ejecutarse, en base a esto se resetea.
 
 m_tss_3:
         resd 26                 ; TSS identica a la de intel.
 at_syscall_t3:                     
         resd 1                  ; Flag para saber si se produjo el salto al scheduler durante la syscallen Tarea 3.
-
+task3_end_flag:
+        resd 1                  ; Flag para saber si la tarea ternimo de ejecutarse, en base a esto se resetea. Si bien
+                                ;   con la tarea 3 no se usa, la pongo para que los tres contextos sean igual.
 
 ALIGN 512                       ; Alineo los espacios de memoria para SIMD
 m_simd_task1:

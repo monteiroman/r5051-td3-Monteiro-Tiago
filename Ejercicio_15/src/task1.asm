@@ -1,9 +1,12 @@
 %define BKPT        xchg    bx,bx
-%define m_syscall   int     0x80 
+%define m_syscall   int     0x80
+%define td3_halt    0x11
+%define td3_read    0x22
+%define td3_print   0x33 
 
 GLOBAL sum_routine
 GLOBAL sum_stored
-GLOBAL task1_end_flag
+;GLOBAL task1_end_flag
 
 ; Desde keyboard.asm
 EXTERN saved_digits_table
@@ -13,15 +16,16 @@ EXTERN enter_key_flag
 ; Desde timer.asm
 EXTERN timer_flag
 
+; esto despues hay que sacarlo
+EXTERN task1_end_flag
+
 USE32
 ;______________________________________________________________________________;
 ;                          Resultado de la suma                                ;
 ;______________________________________________________________________________;
-section .sum_store nobits
+section .task1_data nobits
 ALIGN 512
     last_index_sum:
-        resd 1
-    task1_end_flag:
         resd 1
     sum_stored:
         resb 8
@@ -31,7 +35,9 @@ ALIGN 512
 ;______________________________________________________________________________;
 section .task_one
 sum_routine:
+
         mov     eax, [last_index_sum]
+
         cmp     [saved_digits_table_index], eax             ; Me fijo si este numero ya lo sume. Me voy si lo hice.
         je      sum_end
             sum_loop:
@@ -58,7 +64,19 @@ sum_routine:
             cmp     edi, eax                                ; Lo comparo con el del ultimo numero que sume.
             jne     sum_loop                                ; Si no llegue al ultimo vuelvo a sumar.
 
+    ; Imprimo en pantalla    
+        push    0x00                                        ; Posicion en la pila del valor de retorno.
+        push    0x02                                        ; Cantidad de Bytes del puntero.
+        push    sum_stored                                  ; Puntero de memoria a imprimir.
+        push    td3_print                                   ; Funcion a ejecutar.
+        m_syscall                                           ; Llamo a la syscall
+        pop     eax
+        pop     eax
+        pop     eax
+        pop     eax
+
         sum_end:
-        mov     dword [task1_end_flag], 0x01
-        hlt
+        push    dword td3_halt
+        m_syscall
+        pop     eax
         jmp     sum_end
