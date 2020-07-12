@@ -22,6 +22,7 @@ EXTERN exc_warning
 
 ; Desde scheduler.asm
 EXTERN current_task
+EXTERN future_task
 EXTERN m_simd_task1
 EXTERN m_simd_task2
 
@@ -43,7 +44,7 @@ handler#DE:
         xor     edi, edi
         xor     esi, esi
         xor     ebp, ebp
-        mov     dx, 0x00
+        mov     dx, 0x01
 
 BKPT
 
@@ -162,8 +163,8 @@ BKPT
 handler#GP:
         pushad
 
-        xor     eax, eax
-        xor     ebx, ebx
+        mov     eax, [current_task]     ; Pongo la tarea en curso (debug)
+        mov     ebx, [future_task]      ; Pongo la tarea futura (debug)
         xor     ecx, ecx
         xor     edx, edx
         xor     edi, edi
@@ -182,7 +183,7 @@ handler#PF:
         pushad                          ; Guardo los registros en pila
         call    exc_warning
 
-        xor     eax, eax                ; |
+        mov     eax, [current_task]     ; Pongo la tarea en curso (debug)
         xor     ebx, ebx                ; |
         xor     ecx, ecx                ; |
         xor     edx, edx                ; | Borro los registros para ver mejor
@@ -190,8 +191,7 @@ handler#PF:
         xor     esi, esi                ; |
         xor     ebp, ebp                ; |
         mov     dx, 0x0E                ; Pongo el numero error para que se vea.
-        mov     eax, [current_task]
-
+        
 BKPT
 
         ; A partir del ejercicio 13 no hay que usar esta funcionalidad

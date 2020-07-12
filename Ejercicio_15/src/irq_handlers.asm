@@ -16,6 +16,12 @@ EXTERN timer_routine
 ; Desde Scheduler
 EXTERN m_scheduler
 
+; Desde scheduler.asm
+EXTERN current_task
+EXTERN at_syscall_t1
+EXTERN at_syscall_t2
+EXTERN at_syscall_t3
+
 USE32
 
 ;______________________________________________________________________________;
@@ -47,7 +53,37 @@ irq#01_keyboard_handler:
 
 irq#80_syscall:
         pushad
-BKPT
+    
+    ; Pongo en 1 el flag de syscall en proceso de la tarea que corresponda    
+        mov     eax, [current_task]
+        cmp     eax, 0x01
+        jne     not_t1_running
+            mov     edi, at_syscall_t1
+        not_t1_running:
+
+        cmp     eax, 0x02
+        jne     not_t2_running
+            mov     edi, at_syscall_t2
+        not_t2_running:
+        
+        cmp     eax, 0x03
+        jne     not_t3_running
+            mov     edi, at_syscall_t3
+        not_t3_running:
+
+        ; Seteo el flag.
+        mov     dword [edi], 0x01
+
+       
+
+    ; Funcion Halt
+        halt:
+        sti
+        hlt
+        jmp     halt
+
+        finish_syscall:
+        mov     dword [edi], 0x00                   ; Reseteo el flag de syscall en proceso.
         popad
         iret
 

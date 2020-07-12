@@ -190,14 +190,14 @@ section .system_tables nobits
 ;________________________________________
 GDT:
         resb 8                      ; Descriptor nulo.
-        CS_SEL_KERNEL equ $-GDT
-        resb 8                      ; Selector de datos de kernel nulo. Se carga en tiempo de ejecución.
-        DS_SEL_KERNEL equ $-GDT
-        resb 8                      ; Selector de codigo de kernel nulo. Se carga en tiempo de ejecución.
-        CS_SEL_USER equ $-GDT+0x03
-        resb 8                      ; Selector de datos de usuario nulo. Se carga en tiempo de ejecución.
-        DS_SEL_USER equ $-GDT+0x03
-        resb 8                      ; Selector de codigo de usuario nulo. Se carga en tiempo de ejecución.
+        CS_SEL_KERNEL equ $-GDT     ; Selector de codigo de kernel nulo. Se 
+        resb 8                      ;   carga en tiempo de ejecución.
+        DS_SEL_KERNEL equ $-GDT     ; Selector de datos de kernel nulo. Se carga
+        resb 8                      ;   en tiempo de ejecución.
+        CS_SEL_USER equ $-GDT+0x03  ; Selector de codigo de usuario nulo. Se
+        resb 8                      ;   carga en tiempo de ejecución.
+        DS_SEL_USER equ $-GDT+0x03  ; Selector de datos de usuario nulo. Se 
+        resb 8                      ;   carga en tiempo de ejecución.
         TSS_SEL equ $-GDT           
         resb 8                      ; Selector de TSS.
 

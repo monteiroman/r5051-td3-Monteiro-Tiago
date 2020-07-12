@@ -29,7 +29,7 @@
 %define m_gs_idx        0x5C
 %define m_ldtr_idx      0x60
 %define m_bitmapIO_idx  0x64
-%define m_simd          0x68
+%define m_at_syscall    0x68
 
 GLOBAL scheduler_init
 GLOBAL current_task
@@ -39,6 +39,9 @@ GLOBAL m_simd_task1
 GLOBAL m_simd_task2
 GLOBAL m_tss_length
 GLOBAL m_tss_kernel
+GLOBAL at_syscall_t1
+GLOBAL at_syscall_t2
+GLOBAL at_syscall_t3
 
 ; Desde keyboard.asm
 EXTERN enter_key_flag                         ; Al enter lo considero como inicio de mi tarea
@@ -96,6 +99,7 @@ section .scheduler
 ; Inicializacion del Scheduler
 ;________________________________________
 scheduler_init:
+
         mov     dword [current_task], 0x00          ; Me voy del Kernel
         mov     dword [future_task], 0x03           ; A la tarea idle
 
@@ -118,9 +122,38 @@ scheduler_init:
 ; Scheduler
 ;________________________________________
 m_scheduler:
-    ; Guardo el contexto de la tarea saliente __________________________________________________________________________
+
+    ; Guardo el contexto de la tarea saliente __________________________________
+        jmp    save_old_context                     ; En los lugares donde uso jmp en vez de call 
+        save_old_context_done:                      ;   busco no desorganizar la pila.
+
+    ; Muestro en pantalla ______________________________________________________
+        call    refresh_screen
+
+    ; Decido que tarea ejecutar ________________________________________________
+        call    scheduler_logic
+
+    ; Cargo el contexto de la tarea entrante ___________________________________
+
+        jmp     load_new_context
+        load_new_context_done:
+
+        jmp     m_scheduler_int_end                 ; Vuelvo al manejador de 
+                                                    ;   interrupcion (ver 
+                                                    ;   irq_handlers.asm).
+
+;______________________________________________________________________________;
+;                        Funciones del Scheduler                               ;
+;______________________________________________________________________________;
+
+;________________________________________
+; Guardado del Contexto
+;________________________________________
+save_old_context:
+
         push    eax                                     ; Guardo eax en la pila para usarlo de
 
+    ; Registros de SIMD_________________________________________________________
         mov     eax, cr0                                ; Miro si se cambio el bit CR0.3 (TS). Si esta en cero es porque 
         and     eax, 0x08                               ;   se uso SIMD. 
         cmp     eax, 0x08                               ; Comparo si TS esta en 1.
@@ -140,6 +173,7 @@ m_scheduler:
         or      eax, 0x08		                        ; Pongo en 1 el bit 3 (Task Switched) para que entre en #NM.
         mov     cr0, eax
 
+    ; Identifico la tarea_______________________________________________________
         cmp     dword [current_task], 0x00              ; Me fijo si vengo desde Kernel
         jne     not_kernel
             mov     eax, m_tss_kernel                   ; Guardo la dirección del contexto de Kernel
@@ -164,7 +198,8 @@ m_scheduler:
             jmp     save_context
         not_task3:                                         
 
-        save_context:                                   ; Guardo el contexto de la tarea que esta por dejar de usarse.
+    ; Guardo el contexto________________________________________________________
+        save_context:                                   
         ; Guardo registros (menos eax que lo guardo al final).
         mov     [eax + m_ebx_idx], ebx
         mov     [eax + m_ecx_idx], ecx
@@ -174,13 +209,16 @@ m_scheduler:
         mov     [eax + m_edi_idx], edi
 
         ; Ya puedo usar los registros, los uso para guardar los selectores de segmentos.
-        mov     ebx, [esp + 0x08]                       ; Saco de la pila la direccion donde vendra "cs"
-        mov     [eax + m_cs_idx], bx                    ; Lo guardo en el contexto
         mov     [eax + m_ds_idx], ds
         mov     [eax + m_es_idx], es
         mov     [eax + m_fs_idx], fs
         mov     [eax + m_gs_idx], gs
         mov     [eax + m_ss_idx], ss
+
+    ; Desarmo la pila___________________________________________________________
+        ; Guardo cs
+        mov     ebx, [esp + 0x08]                       ; Saco de la pila la direccion donde vendra "cs"
+        mov     [eax + m_cs_idx], bx                    ; Lo guardo en el contexto
 
         ; Guardo eflags
         mov     ebx, [esp + 0x0C]                       ; Saco los eflags de pila
@@ -198,23 +236,26 @@ m_scheduler:
         pop     ebx                                     ; | Balanceo la pila
         pop     ebx                                     ; |
 
-        mov     [eax + m_esp_idx], esp                  ; La guardo en el contexto
+        mov     [eax + m_esp_idx], esp
+
+        cmp     dword [eax + m_at_syscall], 0x01
+        je      save_old_context_done                   ; -Si vengo de una syscall estoy hecho.
+        ; Guardo la pila.
+            pop     ebx                                 ; -Si no vengo de una syscall, saco los  
+            mov     [eax + m_esp_idx], ebx              ;   valores de ss y de esp de la tarea que
+        ; Guardo ss.                                    ;   aun se encuentran en la pila y los guardo
+            pop     ebx                                 ;   en el contexto.
+            mov     [eax + m_ss_idx], ebx               
+                                                        
+            jmp     save_old_context_done               ; Punto de retorno.
 
 
-    ; Muestro en pantalla ______________________________________________________________________________________________
-        call    refresh_screen
+;________________________________________
+; Carga de contexto nuevo.
+;________________________________________
+load_new_context:
 
-
-    ; Decido que tarea ejecutar ________________________________________________________________________________________
-        call    scheduler_logic
-
-    ; Cargo el contexto de la tarea entrante ___________________________________________________________________________
-        ;cmp     dword [future_task], 0x00
-        ;jne     not_kernel_load
-        ;    mov     eax, m_tss_kernel                   ; Contexto de kernel
-        ;    jmp     load_context
-        ;not_kernel_load:
-
+    ; Identifico la tarea_______________________________________________________
         cmp     dword [future_task], 0x01
         jne     not_task1_load
             mov     eax, m_tss_1                        ; Contexto de tarea 1
@@ -232,6 +273,7 @@ m_scheduler:
             mov     eax, m_tss_3                        ; Contexto de tarea 3
         not_task3_load:
     
+    ; Cargo el contexto_________________________________________________________
         load_context:
         ; Cargo registros
         mov     ecx, [eax + m_ecx_idx]
@@ -250,25 +292,35 @@ m_scheduler:
         mov     fs, bx
         mov     bx, [eax + m_gs_idx]
         mov     gs, bx
-    
-         
 
         ; Cambio CR3
         mov     ebx, [eax + m_CR3_idx]
         mov     CR3, ebx
-;BKPT       
+
+    ; Armo la pila______________________________________________________________
+        cmp     dword [eax + m_at_syscall], 0x01        
+        jne     not_at_syscall                          
+            mov     ebx, [eax + m_esp_idx]              ; Si vengo desde una syscall, cargo la direccion de pila que 
+            mov     esp, ebx                            ;   corresponde. Esta direccion aun tiene los valores de retorno 
+            jmp     at_syscall                          ;   de la tarea que llamo a la syscall.
+        not_at_syscall:
+        
+    ; Si no estaba en una syscall tengo que cargar mas valores a la pila ya que hay cambio de privilegio.
         ; Cargo la pila de kernel de la tarea corespondiente
         mov     ebx, [eax + m_esp0_idx]
         mov     esp, ebx
-        
+
         ; Cargo ss.
         xor     ebx, ebx
         mov     ebx, [eax + m_ss_idx]
         push    ebx  
+
         ; Cargo dirección de pila.    
         mov     ebx, [eax + m_esp_idx]
         push    ebx  
-;BKPT       
+
+    ; Si estaba en una syscall tengo que cargar menos valores a la pila ya que no hay cambio de privilegio.
+        at_syscall:    
                                                         ;               ________________
         mov     ebx, [eax + m_eflags_idx]               ; Pusheo "eflags"               |
         push    ebx                                     ;                               |
@@ -295,6 +347,7 @@ m_scheduler:
         reset_return_point:                             ;                               |
         push    ebx                                     ; pusheo "eip".                 |
                                                         ;               ________________|
+    ; Finalizo el armado del contexto___________________________________________
         ; Seteo la tarea actual
         mov     ebx, [future_task]
         mov     [current_task], ebx
@@ -302,8 +355,8 @@ m_scheduler:
         ; Una vez que termino de usar los registros, los completo con los valores del contexto nuevo.
         mov     ebx, [eax + m_ebx_idx]                  ; Cargo el ebx nuevo.
         mov     eax, [eax + m_eax_idx]                  ; Cargo el eax nuevo.
-        
-        jmp     m_scheduler_int_end                     ; Vuelvo al manejador de interrupcion (ver irq_handlers.asm).
+
+        jmp     load_new_context_done                   ; Punto de retorno.
 
 
 ;________________________________________
@@ -316,6 +369,13 @@ scheduler_logic:
             mov     dword [future_task], 0x03
             ret
         not_kernel_round:
+; --->  
+;BKPT
+        jmp     default_task
+; --->  
+
+
+
 
         ; Desde la Tarea 3 salto a la Tarea 1 o a la Tarea 2 según corresponda.
         cmp     dword [current_task], 0x03
@@ -372,24 +432,17 @@ scheduler_logic:
 
 
 ;________________________________________
-; Rutina de finalizacion de tarea
+; Rutina de Inicializacion de contextos
 ;________________________________________
 contexts_init:
+
     ; Kernel. Aqui es donde estaran las direcciones lineales de las pilas de 
     ;           PL=0 y PL=3 que no cambian entre tareas.
         mov     eax, m_tss_kernel
 
-        ; Inicializacion de segmentos
-
         ; Inicializacion de la pila de PL=0
         mov     dword [eax + m_esp0_idx], __TASK3_KERNEL_STACK_END
         mov     word [eax + m_ss0_idx], DS_SEL_KERNEL
-
-        ; Inicializacion de la pila de PL=3
-        ;mov     dword [eax + m_esp_idx], __TASK3_STACK_END
-        ;mov     word [eax + m_ss_idx], DS_SEL_USER
-
-
 
     ; Tarea 1
         mov     eax, m_tss_1
@@ -465,29 +518,51 @@ contexts_init:
         mov     dword [eax + m_esp_idx], __TASK3_STACK_END
 
         ; Inicializo la pila de PL=0
-        mov     dword [eax + m_esp0_idx], __TASK3_KERNEL_STACK_END 
- 
+        mov     dword [eax + m_esp0_idx], __TASK3_KERNEL_STACK_END
 
+        ; Inicializo el flag de syscall activa
+        mov     dword [eax + m_at_syscall], 0x00
+ 
         ret
 
 
 ;______________________________________________________________________________;
-;                                Mi TSS                                        ;
+;                                Datos                                         ;
 ;______________________________________________________________________________;
 section .scheduler_tables nobits
+;________________________________________
+; Flags de Tareas
+;________________________________________
 current_task:
         resd 1                  ; Marcador de tarea en curso    |   0 = Kernel          1 = Task 1
 future_task:                    ;                               |         
         resd 1                  ; Marcador de tarea futura      |   3 = Task 3 (idle)   2 = Task 2
+
+
+;________________________________________
+; Mi TSS
+;________________________________________
 m_tss_kernel:
-        resd 26
+        resd 26                         ; TSS identica a la de intel.
     m_tss_length equ $-m_tss_kernel     ; Largo de la tss que voy a usar en tr.
+
 m_tss_1:
-        resd 26
+        resd 26                 ; TSS identica a la de intel.
+at_syscall_t1:                     
+        resd 1                  ; Flag para saber si se produjo el salto al scheduler durante la syscall en Tarea 1.
+
 m_tss_2:
-        resd 26
+        resd 26                 ; TSS identica a la de intel.
+at_syscall_t2:                     
+        resd 1                  ; Flag para saber si se produjo el salto al scheduler durante la syscall en Tarea 2.
+
+
 m_tss_3:
-        resd 26
+        resd 26                 ; TSS identica a la de intel.
+at_syscall_t3:                     
+        resd 1                  ; Flag para saber si se produjo el salto al scheduler durante la syscallen Tarea 3.
+
+
 ALIGN 512                       ; Alineo los espacios de memoria para SIMD
 m_simd_task1:
         resb 512
