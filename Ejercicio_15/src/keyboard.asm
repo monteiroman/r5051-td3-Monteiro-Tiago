@@ -124,7 +124,7 @@ keyboard_routine:
         ;de nuevo para seguir chequeando.
 
         in      al, Keyb_Out_Buffer_Reg     ;Miro el puerto 0x60 "Keyboard Output Buffer Register".
-        mov     bl, al                      ;Copio lo leído en otro registro por prolijidad.
+        mov     bl, al                      ;Copio lo leído en otro registro para hacerle una AND.
         and     bl, 0x80                    ;Obtengo el bit 7 "BRK" haciendo una AND.
         cmp     bl, 0x80                    ;0 -> Make (se presiono la tecla), 1 -> Break (se libero la tecla).
         jz      exit                        ;Se desea detectar cuando la tecla se suelta. Si fue presionada vuelvo a buffer_check.

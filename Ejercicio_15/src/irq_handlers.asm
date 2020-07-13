@@ -89,7 +89,7 @@ irq#01_keyboard_handler:
 
 irq#80_syscall:
         pushad
-    
+
     ; Pongo en 1 el flag de syscall en proceso de la tarea que corresponda    
         mov     eax, [current_task]
         cmp     eax, 0x01
