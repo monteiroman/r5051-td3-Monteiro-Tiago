@@ -136,39 +136,13 @@ scheduler_init:
 m_scheduler:
 
     ; Guardo el contexto de la tarea saliente __________________________________
-;cmp     dword [current_task], 0x03
-;jne     debug
-;BKPT
-;debug:
         jmp    save_old_context                     ; En los lugares donde uso jmp en vez de call 
         save_old_context_done:                      ;   busco no desorganizar la pila.
 
     ; Decido que tarea ejecutar ________________________________________________
-        ;call    scheduler_logic
-        cmp     dword [current_task], 0x00
-        jne     notKernel
-            mov     dword [future_task], 0x03
-        notKernel:
-
-        cmp     dword [current_task], 0x01
-        jne     notTask1
-            ;mov     dword [future_task], 0x03
-            mov     dword [future_task], 0x02
-        notTask1:
-
-        cmp     dword [current_task], 0x02
-        jne     notTask2
-            mov     dword [future_task], 0x03
-        notTask2:
-
-        cmp     dword [current_task], 0x03
-        jne     notTask3
-            mov     dword [future_task], 0x01
-        notTask3:
-
-
+        call    scheduler_logic
+        
     ; Cargo el contexto de la tarea entrante ___________________________________
-;BKPT
         jmp     load_new_context
         load_new_context_done:
 
@@ -427,14 +401,8 @@ scheduler_logic:
             jne     not_3_to_1
                 mov     dword [future_task], 0x01
                 mov     dword [timer_flag], 0x00
-;BKPT
                 ret
             not_3_to_1:
-
-; --->  
-;BKPT
-            jmp     default_task
-; --->  
 
             ; Salto a Tarea 2
             cmp     dword [timer_flag_2], 0x01
@@ -448,13 +416,6 @@ scheduler_logic:
         ; Desde la Tarea 1 salto a la Tarea 2 o a la Tarea 3 según corresponda.
         cmp     dword [current_task], 0x01
         jne     not_task1_round
-
-; --->  
-;BKPT
-            jmp     default_task
-; --->  
-
-
             ; Salto a Tarea 2
             cmp     dword [timer_flag_2], 0x01
             jne     not_1_to_2
@@ -467,13 +428,6 @@ scheduler_logic:
             ret
         not_task1_round:
 
-
-; --->  
-;BKPT
-        jmp     default_task
-; --->  
-
-        
         ; Desde la Tarea 2 salto a la Tarea 1 o a la Tarea 3 según corresponda.
         cmp     dword [current_task], 0x02
         jne     not_task2_round
