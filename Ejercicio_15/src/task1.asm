@@ -6,18 +6,10 @@
 
 GLOBAL sum_routine
 GLOBAL sum_stored
-;GLOBAL task1_end_flag
 
 ; Desde keyboard.asm
 EXTERN saved_digits_table
 EXTERN saved_digits_table_index
-EXTERN enter_key_flag
-
-; Desde timer.asm
-EXTERN timer_flag
-
-; esto despues hay que sacarlo
-EXTERN task1_end_flag
 
 USE32
 ;______________________________________________________________________________;

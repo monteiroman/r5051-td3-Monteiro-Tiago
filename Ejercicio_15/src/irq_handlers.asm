@@ -107,7 +107,6 @@ irq#80_syscall:
             mov     dword [at_syscall_t3], 0x01
         not_t3_running:
 
-        
     ; Traigo la pila de PL=3
         mov     ebp, esp
         mov     esi, [ebp + 0x2C]                   
@@ -173,7 +172,6 @@ m_td3_halt:
 
         sti                                             ; Enciendo las interrupciones.
         hlt
-        ;jmp     m_td3_halt
         jmp     finish_syscall                          ; Me voy de la syscall.
 
 
@@ -241,6 +239,7 @@ m_td3_print:
 ; Funcion Read
 ;________________________________________
 m_td3_read:
+        sti                                             ; Enciendo las interrupciones
     ; Chequeo que haya pendiente un dato.
         mov     ebx, [esi + 0x08]                       ; Saco el indice a leer de la pila de PL=3.
         mov     ecx, [saved_digits_table_index]         ; Traigo el indice de la tabla
@@ -249,33 +248,41 @@ m_td3_read:
         je      no_new_data
 
     ; Chequeo que la ubicacion del buffer este permitida para la tarea.
-            mov     edx, [esi + 4]                          ; Saco el buffer a imprimir de la pila de PL=3.
+            mov     edx, [esi + 4]                      ; Saco el buffer a imprimir de la pila de PL=3.
             ; Si se trata de la Tarea 1.
             cmp     eax, 0x01
             jne     not_t1_data
-                cmp     edx, __TASK1_DATA_RW_LIN            ; Si el buffer esta por debajo de la zona permitida, me voy.
+                cmp     edx, __TASK1_DATA_RW_LIN        ; Si el buffer esta por debajo de la zona permitida, me voy.
                 jl      no_new_data
-                cmp     edx, __TASK1_DATA_RW_END - 4        ; Si el buffer esta por arriba de la zona permitida, me voy.
-                jg      no_new_data                         ;   (la ultima posicion posible es la del final - 4).
-
-                mov     ecx, [saved_digits_table + ebx]         ; Leo parte baja
-                mov     ebx, [saved_digits_table + ebx + 0x04]  ; Leo parte alta
+                cmp     edx, __TASK1_DATA_RW_END - 4    ; Si el buffer esta por arriba de la zona permitida, me voy.
+                jg      no_new_data                     ;   (la ultima posicion posible es la del final - 4).
                 jmp     new_data
             not_t1_data:
 
+            ; Si se trata de la Tarea 2.
+            cmp     eax, 0x02
+            jne     not_t2_data
+                cmp     edx, __TASK2_DATA_RW_LIN        ; Si el buffer esta por debajo de la zona permitida, me voy.
+                jl      no_new_data
+                cmp     edx, __TASK2_DATA_RW_END - 4    ; Si el buffer esta por arriba de la zona permitida, me voy.
+                jg      no_new_data                     ;   (la ultima posicion posible es la del final - 4).
+                jmp     new_data
+            not_t2_data:
 
             jmp no_new_data
         
     new_data:
-;BKPT
-        mov     [edx], ecx  ; Escribo la parte baja
-        mov     [edx + 4], ebx ; Escribo la parte alta
+        mov     ecx, [saved_digits_table + ebx]         ; Leo parte baja
+        mov     ebx, [saved_digits_table + ebx + 0x04]  ; Leo parte alta
 
-        mov     dword [esi + 0x0C], 0x00            ; Valor de retorno = 0 (dato leido).
-        jmp     finish_syscall                      ; Me voy de la syscall.
+        mov     [edx], ecx                              ; Escribo la parte baja
+        mov     [edx + 4], ebx                          ; Escribo la parte alta
+
+        mov     dword [esi + 0x0C], 0x00                ; Valor de retorno = 0 (dato leido).
+        jmp     finish_syscall                          ; Me voy de la syscall.
 
     ; Me voy de la syscall, ya sea porque no hay nada que leer o porque el buffer 
     ;   es de una zona de memoria no permitida.
     no_new_data:
-        mov     dword [esi + 0x0C], 0x01            ; Valor de retorno = 1 (nada que leer).
-        jmp     finish_syscall                      ; Me voy de la syscall.
+        mov     dword [esi + 0x0C], 0x01                ; Valor de retorno = 1 (nada que leer).
+        jmp     finish_syscall                          ; Me voy de la syscall.

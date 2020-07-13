@@ -237,7 +237,7 @@ SECTIONS
     .task2_bss 0x01311000 :                             /* Seccion de datos no inicializados. */
         {
             __TASK2_BSS_LIN = .;
-            /*bin/task2.elf(.sum_store_2);*/
+
         }
         __TASK2_BSS_LENGTH = SIZEOF(.task2_bss);
 
@@ -255,7 +255,7 @@ SECTIONS
         {
             __TASK2_DATA_RW_LIN = .;
             __TASK2_DATA_RW_ORIG = LOADADDR(.task2_data_rw);
-
+            bin/task2.elf(.task2_data);
         } AT >rom
         __TASK2_DATA_RW_LENGTH = SIZEOF(.task2_data_rw);
         __TASK2_DATA_RW_END = __TASK2_DATA_RW_LIN + __TASK2_DATA_RW_LENGTH;
