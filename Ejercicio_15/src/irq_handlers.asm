@@ -37,9 +37,13 @@ EXTERN m_scheduler
 
 ; Desde scheduler.asm
 EXTERN current_task
-EXTERN m_tss_1
-EXTERN m_tss_2
-EXTERN m_tss_3
+EXTERN at_syscall_t1
+EXTERN at_syscall_t2
+EXTERN at_syscall_t3
+EXTERN task1_end_flag
+EXTERN task2_end_flag
+EXTERN task3_end_flag
+
 
 ; Desde biosLS.lds
 EXTERN __TASK1_DATA_RW_LIN
@@ -49,6 +53,10 @@ EXTERN __TASK2_DATA_RW_END
 
 ; Desde screen.asm
 EXTERN print_result
+
+; Desde keyboard.asm
+EXTERN saved_digits_table
+EXTERN saved_digits_table_index
 
 USE32
 
@@ -86,26 +94,23 @@ irq#80_syscall:
         mov     eax, [current_task]
         cmp     eax, 0x01
         jne     not_t1_running
-            mov     edi, m_tss_1
+            mov     dword [at_syscall_t1], 0x01
         not_t1_running:
 
         cmp     eax, 0x02
         jne     not_t2_running
-            mov     edi, m_tss_2
+            mov     dword [at_syscall_t2], 0x01
         not_t2_running:
         
         cmp     eax, 0x03
         jne     not_t3_running
-            mov     edi, m_tss_3
+            mov     dword [at_syscall_t3], 0x01
         not_t3_running:
 
-    ; Seteo el flag de syscall en curso.
-        mov     dword [edi + m_at_syscall], 0x01        ; Pusheo la direccion de la tss de la tarea que llamo a la 
-        push    edi                                     ;   syscall es aqui donde se encuentra el flag de syscall 
-                                                        ;   terminada y que tengo que usar al final de la misma.
+        
     ; Traigo la pila de PL=3
         mov     ebp, esp
-        mov     esi, [ebp + 0x30]                   
+        mov     esi, [ebp + 0x2C]                   
 
     ; Saco el primer elemento.
         mov     ecx, [esi]
@@ -122,9 +127,23 @@ irq#80_syscall:
         cmp     ecx, td3_read
         je      m_td3_read
 
-        finish_syscall:
-        pop     edi
-        mov     dword [edi + m_at_syscall], 0x00        ; Reseteo el flag de syscall en proceso.
+    finish_syscall:
+        mov     eax, [current_task]
+        cmp     eax, 0x01
+        jne     not_t1_running_0
+            mov     dword [at_syscall_t1], 0x00
+        not_t1_running_0:
+
+        cmp     eax, 0x02
+        jne     not_t2_running_0
+            mov     dword [at_syscall_t2], 0x00
+        not_t2_running_0:
+        
+        cmp     eax, 0x03
+        jne     not_t3_running_0
+            mov     dword [at_syscall_t3], 0x00
+        not_t3_running_0:
+
         popad
         iret
 
@@ -136,8 +155,22 @@ irq#80_syscall:
 ; Funcion Halt
 ;________________________________________
 m_td3_halt:
-        mov     dword [edi + m_task_end], 0x01          ; Aviso que la tarea llego al final de su ejecución (para que se
-                                                        ;   resetee).
+        mov     eax, [current_task]
+        cmp     eax, 0x01
+        jne     not_t1_finish
+            mov     dword [task1_end_flag], 0x01
+        not_t1_finish:
+
+        cmp     eax, 0x02
+        jne     not_t2_finish
+            mov     dword [task2_end_flag], 0x01
+        not_t2_finish:
+        
+        cmp     eax, 0x03
+        jne     not_t3_finish
+            mov     dword [task3_end_flag], 0x01
+        not_t3_finish:
+
         sti                                             ; Enciendo las interrupciones.
         hlt
         ;jmp     m_td3_halt
@@ -148,7 +181,6 @@ m_td3_halt:
 ; Funcion Print
 ;________________________________________
 m_td3_print:
-;BKPT
         sti                                             ; Enciendo las interrupciones.
 
     ; Chequeo cantidad de bytes.
@@ -158,7 +190,7 @@ m_td3_print:
             jmp     print_error                          
         print_buffer:
 
-    ; Chequeo ubicacion del buffer.
+    ; Chequeo que la ubicacion del buffer este permitida para la tarea.
         mov     edx, [esi + 4]                          ; Saco el buffer a imprimir de la pila de PL=3.
 
         ; Si se trata de la Tarea 1.
@@ -180,13 +212,24 @@ m_td3_print:
             pop     eax
         not_t1_print:
 
+        ; Si se trata de la Tarea 2.
         cmp     eax, 0x02
         jne     not_t2_print
-            mov     edi, m_tss_2
+            cmp     edx, __TASK2_DATA_RW_LIN            ; Si el buffer esta por debajo de la zona permitida, me voy.
+            jl      print_error
+            cmp     edx, __TASK2_DATA_RW_END - 4        ; Si el buffer esta por arriba de la zona permitida, me voy.
+            jg      print_error                         ;   (la ultima posicion posible es la del final - 4).
+
+            push    task2_id                            ; Identificador de Tarea a imprimir.
+            push    num_row_offset_2                    ; Fila donde se imprimira.
+            push    num_column_offset_2                 ; Columna donde se imprimira.
+            push    edx                                 ; Buffer a imprimir.
+            call    print_result                        ; Llamo a la funcion.
+            pop     eax
+            pop     eax
+            pop     eax
+            pop     eax
         not_t2_print:
-
-
-        jmp     finish_syscall                          ; Me voy de la syscall.
 
     ; Salida con error.
     print_error:
@@ -194,10 +237,45 @@ m_td3_print:
         jmp     finish_syscall                          ; Me voy de la syscall.
 
 
-
 ;________________________________________
 ; Funcion Read
 ;________________________________________
 m_td3_read:
+    ; Chequeo que haya pendiente un dato.
+        mov     ebx, [esi + 0x08]                       ; Saco el indice a leer de la pila de PL=3.
+        mov     ecx, [saved_digits_table_index]         ; Traigo el indice de la tabla
 
-        jmp     finish_syscall
+        cmp     ecx, ebx                                ; Si son iguales no hay datos que leer.
+        je      no_new_data
+
+    ; Chequeo que la ubicacion del buffer este permitida para la tarea.
+            mov     edx, [esi + 4]                          ; Saco el buffer a imprimir de la pila de PL=3.
+            ; Si se trata de la Tarea 1.
+            cmp     eax, 0x01
+            jne     not_t1_data
+                cmp     edx, __TASK1_DATA_RW_LIN            ; Si el buffer esta por debajo de la zona permitida, me voy.
+                jl      no_new_data
+                cmp     edx, __TASK1_DATA_RW_END - 4        ; Si el buffer esta por arriba de la zona permitida, me voy.
+                jg      no_new_data                         ;   (la ultima posicion posible es la del final - 4).
+
+                mov     ecx, [saved_digits_table + ebx]         ; Leo parte baja
+                mov     ebx, [saved_digits_table + ebx + 0x04]  ; Leo parte alta
+                jmp     new_data
+            not_t1_data:
+
+
+            jmp no_new_data
+        
+    new_data:
+;BKPT
+        mov     [edx], ecx  ; Escribo la parte baja
+        mov     [edx + 4], ebx ; Escribo la parte alta
+
+        mov     dword [esi + 0x0C], 0x00            ; Valor de retorno = 0 (dato leido).
+        jmp     finish_syscall                      ; Me voy de la syscall.
+
+    ; Me voy de la syscall, ya sea porque no hay nada que leer o porque el buffer 
+    ;   es de una zona de memoria no permitida.
+    no_new_data:
+        mov     dword [esi + 0x0C], 0x01            ; Valor de retorno = 1 (nada que leer).
+        jmp     finish_syscall                      ; Me voy de la syscall.

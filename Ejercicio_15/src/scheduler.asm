@@ -46,6 +46,9 @@ GLOBAL at_syscall_t3
 GLOBAL m_tss_1
 GLOBAL m_tss_2
 GLOBAL m_tss_3
+GLOBAL task1_end_flag
+GLOBAL task2_end_flag
+GLOBAL task3_end_flag
 
 ; esto despues hay que sacarlo
 GLOBAL task1_end_flag
@@ -133,14 +136,33 @@ scheduler_init:
 m_scheduler:
 
     ; Guardo el contexto de la tarea saliente __________________________________
+;cmp     dword [current_task], 0x03
+;jne     debug
+;BKPT
+;debug:
         jmp    save_old_context                     ; En los lugares donde uso jmp en vez de call 
         save_old_context_done:                      ;   busco no desorganizar la pila.
 
-    ; Muestro en pantalla ______________________________________________________
-        ;call    refresh_screen
-
     ; Decido que tarea ejecutar ________________________________________________
-        call    scheduler_logic
+        ;call    scheduler_logic
+        cmp     dword [current_task], 0x00
+        jne     notKernel
+;BKPT
+            mov     dword [future_task], 0x03
+        notKernel:
+
+        cmp     dword [current_task], 0x01
+;BKPT
+        jne     notTask1
+            mov     dword [future_task], 0x03
+;BKPT
+        notTask1:
+        cmp     dword [current_task], 0x03
+        jne     notTask3
+;BKPT
+            mov     dword [future_task], 0x01
+        notTask3:
+
 
     ; Cargo el contexto de la tarea entrante ___________________________________
 ;BKPT
@@ -160,6 +182,32 @@ m_scheduler:
 ; Guardado del Contexto
 ;________________________________________
 save_old_context:
+;BKPT
+;        cmp     dword [current_task],0x01
+;        jne     debug
+;BKPT
+;        pop     eax
+;        pop     eax
+;        pop     eax
+;        pop     eax
+;        pop     eax
+;        pop     eax
+;        pop     eax
+;        pop     eax
+;        pop     eax
+;        pop     eax
+;        pop     eax
+;        pop     eax
+;        pop     eax
+;        pop     eax
+;        pop     eax
+;        pop     eax
+
+
+;debug:
+
+
+
 
         push    eax                                     ; Guardo eax en la pila para usarlo de
 
@@ -187,26 +235,34 @@ save_old_context:
         cmp     dword [current_task], 0x00              ; Me fijo si vengo desde Kernel
         jne     not_kernel
             mov     eax, m_tss_kernel                   ; Guardo la dirección del contexto de Kernel
-            jmp     save_context
+            jmp     save_old_context_done               ; No toco la TSS de kernel que es la que uso en TR.
         not_kernel:                         
 
         cmp     dword [current_task], 0x01              ; Me fijo si vengo desde la Tarea 1
         jne     not_task1
             mov     eax, m_tss_1                        ; Guardo la dirección del contexto de Tarea 1
-            jmp     save_context
+            jmp     check_reset
         not_task1:
 
         cmp     dword [current_task], 0x02              ; Me fijo si vengo desde la Tarea 2
         jne     not_task2
             mov     eax, m_tss_2                        ; Guardo la dirección del contexto de Tarea 2
-            jmp     save_context
+            jmp     check_reset
         not_task2:
 
         cmp     dword [current_task], 0x03              ; Me fijo si vengo desde la Tarea 3
         jne     not_task3
             mov     eax, m_tss_3                        ; Guardo la dirección del contexto de Tarea 3
-            jmp     save_context
-        not_task3:                                         
+            jmp     check_reset
+        not_task3:
+
+    ; Me fijo si tengo que resetear la tarea____________________________________
+        check_reset:
+        cmp     dword [eax + m_task_end], 0x01
+        jne     dont_reset
+            call    reset_contexts
+            jmp     save_old_context_done
+        dont_reset:                                         
 
     ; Guardo el contexto________________________________________________________
         save_context:                                   
@@ -226,38 +282,66 @@ save_old_context:
         mov     [eax + m_ss_idx], ss
 
     ; Desarmo la pila___________________________________________________________
-        ; Guardo cs
-        mov     ebx, [esp + 0x08]                       ; Saco de la pila la direccion donde vendra "cs"
-        mov     [eax + m_cs_idx], bx                    ; Lo guardo en el contexto
 
-        ; Guardo eflags
-        mov     ebx, [esp + 0x0C]                       ; Saco los eflags de pila
-        mov     [eax + m_eflags_idx], ebx               ; Los guardo en el contexto
+        cmp    dword [eax + m_at_syscall], 0x01 
+        jne    not_at_syscall_save
+            ; Guardo cs
+            mov     ebx, [esp + 0x08]                       ; Saco de la pila la direccion donde vendra "cs"
+            mov     [eax + m_cs_idx], bx                    ; Lo guardo en el contexto
 
-        ; Guardo eip
-        mov     ebx, [esp + 0x04]                       ; Saco de la cola la direccion de reinicio de la tarea
-        mov     [eax + m_eip_idx], ebx                  ; la guardo en el contexto
+            ; Guardo eflags
+            mov     ebx, [esp + 0x0C]                       ; Saco los eflags de pila
+            mov     [eax + m_eflags_idx], ebx               ; Los guardo en el contexto
 
-        ; Guardo eax.
-        pop     ebx                                     ; Saco el valor de "eax" de pila
-        mov     [eax + m_eax_idx], ebx                  ; Lo guardo en el contexto
+            ; Guardo eip
+            mov     ebx, [esp + 0x04]                       ; Saco de la cola la direccion de reinicio de la tarea
+            mov     [eax + m_eip_idx], ebx                  ; la guardo en el contexto
 
-        pop     ebx                                     ; |
-        pop     ebx                                     ; | Balanceo la pila
-        pop     ebx                                     ; |
+            ; Guardo eax.
+            pop     ebx                                     ; Saco el valor de "eax" de pila
+            mov     [eax + m_eax_idx], ebx                  ; Lo guardo en el contexto
 
-        mov     [eax + m_esp_idx], esp
+            pop     ebx                                     ; |
+            pop     ebx                                     ; | Balanceo la pila
+            pop     ebx                                     ; |
 
-        cmp     dword [eax + m_at_syscall], 0x01
-        je      save_old_context_done                   ; -Si vengo de una syscall estoy hecho.
-        ; Guardo la pila.
-            pop     ebx                                 ; -Si no vengo de una syscall, saco los  
-            mov     [eax + m_esp_idx], ebx              ;   valores de ss y de esp de la tarea que
-        ; Guardo ss.                                    ;   aun se encuentran en la pila y los guardo
-            pop     ebx                                 ;   en el contexto.
-            mov     [eax + m_ss_idx], ebx               
-                                                        
+            mov     [eax + m_esp_idx], esp
+
             jmp     save_old_context_done               ; Punto de retorno.
+
+    not_at_syscall_save:
+            ; Guardo eip
+            mov     ebx, [esp + 0x04]                       ; Saco de la cola la direccion de reinicio de la tarea
+            mov     [eax + m_eip_idx], ebx                  ; la guardo en el contexto
+
+            ; Guardo cs
+            mov     ebx, [esp + 0x08]                       ; Saco de la pila la direccion donde vendra "cs"
+            mov     [eax + m_cs_idx], bx                    ; Lo guardo en el contexto
+
+            ; Guardo eflags
+            mov     ebx, [esp + 0x0C]                       ; Saco los eflags de pila
+            mov     [eax + m_eflags_idx], ebx               ; Los guardo en el contexto
+
+            ; Guardo la pila.
+            mov     ebx, [esp + 0x10]                    
+            mov     [eax + m_esp_idx], ebx              
+            
+            ; Guardo ss.                                
+            mov     ebx, [esp + 0x14]                                                     
+            mov     [eax + m_ss_idx], ebx
+
+            pop     ebx                                     ; Saco el valor de "eax" de pila
+            mov     [eax + m_eax_idx], ebx                  ; Lo guardo en el contexto
+
+            pop     ebx                                     ; |
+            pop     ebx                                     ; | Balanceo la pila
+            pop     ebx                                     ; |
+            pop     ebx                                     ; |
+            pop     ebx                                     ; |
+
+            mov     [eax + m_esp0_idx], esp
+                                                        
+        jmp     save_old_context_done               ; Punto de retorno.
 
 
 ;________________________________________
@@ -334,29 +418,31 @@ load_new_context:
                                                         ;               ________________
         mov     ebx, [eax + m_eflags_idx]               ; Pusheo "eflags"               |
         push    ebx                                     ;                               |
-        push    dword [eax + m_cs_idx]                  ; Pusheo "cs".                  |   
+        mov     ebx, [eax + m_cs_idx]                   ; Pusheo "cs".                  |
+        push    ebx                                     ;                               |
                                                         ;                               |
-        cmp     dword [future_task], 0x03               ; -Si es la tarea 3 que vuelva  | 
-        je      prev_return_point                       ;   al punto de donde salio.    |
-            cmp     dword [future_task], 0x02           ; _                             |
-            jne     not_task2_return                    ;  |                            |
-            cmp     dword [task2_end_flag], 0x01        ;  | Si la tarea futura es la   |   Preparo la pila para 
-            jne     prev_return_point                   ;  | tarea 2 y llego hasta el   |   el "iret".
-                mov     ebx, sum_routine_2              ;  | final se resetea.          |
-                mov     dword [task2_end_flag], 0x00    ;  |                            |
-                jmp     reset_return_point              ; _|                            |
-            not_task2_return:                           ;                               |
-                                                        ;                               |
-            cmp     dword [future_task], 0x01           ; _                             |
-            jne     prev_return_point                   ;  |                            |
-            cmp     dword [task1_end_flag], 0x01        ;  | Si la tarea futura es la   |
-            jne     prev_return_point                   ;  | tarea 1 y llego hasta el   |
-                mov     ebx, sum_routine                ;  | final se resetea.          |
-                mov     dword [task1_end_flag], 0x00    ;  |                            |
-                jmp     reset_return_point              ; _|                            |
-        prev_return_point:                              ;                               |
+        ;cmp     dword [future_task], 0x03               ; -Si es la tarea 3 que vuelva  | 
+        ;je      prev_return_point                       ;   al punto de donde salio.    |
+        ;    cmp     dword [future_task], 0x02           ; _                             |
+        ;    jne     not_task2_return                    ;  |                            |
+        ;    cmp     dword [task2_end_flag], 0x01        ;  | Si la tarea futura es la   |   Preparo la pila para 
+        ;    jne     prev_return_point                   ;  | tarea 2 y llego hasta el   |   el "iret".
+        ;        mov     ebx, sum_routine_2              ;  | final se resetea.          |
+        ;        mov     dword [task2_end_flag], 0x00    ;  |                            |
+        ;        jmp     reset_return_point              ; _|                            |
+        ;    not_task2_return:                           ;                               |
+;BKPT                                                        ;                               |
+        ;    cmp     dword [future_task], 0x01           ; _                             |
+        ;    jne     prev_return_point                   ;  |                            |
+        ;    cmp     dword [task1_end_flag], 0x01        ;  | Si la tarea futura es la   |
+        ;    jne     prev_return_point                   ;  | tarea 1 y llego hasta el   |
+        ;        mov     ebx, sum_routine                ;  | final se resetea.          |
+;BKPT
+        ;        mov     dword [task1_end_flag], 0x00    ;  |                            |
+        ;        jmp     reset_return_point              ; _|                            |
+        ;prev_return_point:                              ;                               |
         mov     ebx, [eax + m_eip_idx]                  ;                               |
-        reset_return_point:                             ;                               |
+        ;reset_return_point:                             ;                               |
         push    ebx                                     ; pusheo "eip".                 |
                                                         ;               ________________|
     ; Finalizo el armado del contexto___________________________________________
@@ -390,6 +476,7 @@ scheduler_logic:
             jne     not_3_to_1
                 mov     dword [future_task], 0x01
                 mov     dword [timer_flag], 0x00
+;BKPT
                 ret
             not_3_to_1:
 
@@ -468,7 +555,6 @@ contexts_init:
         ; Inicializacion de la pila de PL=0
         mov     dword [eax + m_esp0_idx], __TASK3_KERNEL_STACK_END
         mov     word [eax + m_ss0_idx], DS_SEL_KERNEL
-
 
     ; Tarea 1
         mov     eax, m_tss_1
@@ -561,6 +647,96 @@ contexts_init:
         mov     dword [eax + m_at_syscall], 0x00
  
         ret
+
+
+;________________________________________
+; Rutina de Reset de contextos
+;________________________________________
+reset_contexts:
+
+        cmp     eax, m_tss_1
+        jne     not_t1_reset
+            ; Inicializo/Reseteo CR3
+            mov     dword [eax + m_CR3_idx], task1_page_directory
+            ;Inicializo/Reseteo eip
+            mov     dword [eax + m_eip_idx], sum_routine
+        not_t1_reset:
+
+        cmp     eax, m_tss_2
+        jne     not_t2_reset
+            ; Inicializo/Reseteo CR3
+            mov     dword [eax + m_CR3_idx], task2_page_directory
+            ;Inicializo/Reseteo eip
+            mov     dword [eax + m_eip_idx], sum_routine_2
+        not_t2_reset:
+
+        cmp     eax, m_tss_3
+        jne     not_t3_reset
+            ; Inicializo/Reseteo CR3
+            mov     dword [eax + m_CR3_idx], task3_page_directory
+            ;Inicializo/Reseteo eip
+            mov     dword [eax + m_eip_idx], idle_task
+        not_t3_reset:
+
+
+        ; Inicializo/Reseteo registros
+        mov     dword [eax + m_eax_idx], 0x00
+        mov     dword [eax + m_ebx_idx], 0x00
+        mov     dword [eax + m_ecx_idx], 0x00
+        mov     dword [eax + m_edx_idx], 0x00
+        mov     dword [eax + m_ebp_idx], 0x00
+        mov     dword [eax + m_esi_idx], 0x00
+        mov     dword [eax + m_edi_idx], 0x00
+
+        ; Inicializo/Reseteo segmentos
+        mov     cx, DS_SEL_USER
+        mov     bx, CS_SEL_USER
+        mov     [eax + m_cs_idx], bx
+        mov     [eax + m_ds_idx], cx
+        mov     [eax + m_es_idx], cx
+        mov     [eax + m_fs_idx], cx
+        mov     [eax + m_gs_idx], cx
+        mov     [eax + m_ss_idx], cx
+
+        ; Inicializo/Reseteo eflags
+        mov     dword [eax + m_eflags_idx], 0x202       ; Por lo menos le pongo el bit 9 (IF) a 1 para que interrumpa el
+                                                        ; timer.
+        ; Inicializo/Reseteo la pila
+        mov     dword [eax + m_esp_idx], __TASK3_STACK_END
+
+        ; Inicializo/Reseteo la pila de PL=0
+        mov     dword [eax + m_esp0_idx], __TASK3_KERNEL_STACK_END
+
+        ; Inicializo/Reseteo el flag de syscall activa en cero.
+        mov     dword [eax + m_at_syscall], 0x00
+
+        mov     dword [eax + m_task_end], 0x00
+ 
+        ret
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ;______________________________________________________________________________;

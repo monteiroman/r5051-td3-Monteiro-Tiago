@@ -559,7 +559,7 @@ paging_init:
         push    __KERNEL_LENGTH
         push    __KERNEL_PHY
         push    __KERNEL_LIN
-        push    SUP_R__PRES_TableAttrib
+        push    SUP_RW_PRES_TableAttrib
         push    SUP_R__PRES_PageAttrib
         call    paging
         pop     eax
@@ -1505,35 +1505,6 @@ paging_init:
         pop     eax
         pop     eax
         pop     eax
-
-
-
-;--->>>> OJO ACA
-        push    task3_page_tables
-        push    task3_page_directory       
-        push    count_task3_created_tables
-        push    __TASK1_DATA_RW_LENGTH
-        push    __TASK1_DATA_RW_PHY
-        push    __TASK1_DATA_RW_LIN
-        push    SUP_RW_PRES_TableAttrib
-        push    SUP_RW_PRES_PageAttrib
-        call    paging
-        pop     eax
-        pop     eax
-        pop     eax
-        pop     eax
-        pop     eax
-        pop     eax
-        pop     eax
-        pop     eax
-;--->>>> OJO ACA
-
-
-
-
-
-
-
 
         ret
 

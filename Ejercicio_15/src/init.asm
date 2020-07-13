@@ -96,7 +96,7 @@ DS_SEL_KERNEL_ROM  equ $-GDT_ROM    ; Defino el selector de Datos flat de KERNEL
         db 10010010b                ; Derechos de acceso.
                                     ;   Bit 7 = 1 (Presente)
                                     ;   Bits 6-5 = 0 (DPL)
-                                    ;   Bit 4 = 1 (Todavia no vimos por qué)
+                                    ;   Bit 4 = 1 
                                     ;   Bit 3 = 0 (Datos)
                                     ;   Bit 2 = 0 (dirección de expansión normal)
                                     ;   Bit 1 = 1 (R/W)
@@ -130,7 +130,7 @@ DS_SEL_USER_ROM  equ $-GDT_ROM+0x03 ; Defino el selector de Datos flat de USUARI
         db 11110010b                ; Derechos de acceso.
                                     ;   Bit 7 = 1 (Presente)
                                     ;   Bits 6-5 = 11 (DPL)
-                                    ;   Bit 4 = 1 (Todavia no vimos por qué)
+                                    ;   Bit 4 = 1 
                                     ;   Bit 3 = 0 (Datos)
                                     ;   Bit 2 = 0 (dirección de expansión normal)
                                     ;   Bit 1 = 1 (R/W)
