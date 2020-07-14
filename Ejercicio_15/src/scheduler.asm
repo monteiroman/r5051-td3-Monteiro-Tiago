@@ -29,8 +29,7 @@
 %define m_gs_idx        0x5C
 %define m_ldtr_idx      0x60
 %define m_bitmapIO_idx  0x64
-%define m_at_syscall    0x68
-%define m_task_end      0x6C
+%define m_task_end      0x68
 
 GLOBAL scheduler_init
 GLOBAL current_task
@@ -245,15 +244,15 @@ save_old_context:
         mov     ebx, [esp + 0x0C]                       ; Saco los eflags de pila
         mov     [eax + m_eflags_idx], ebx               ; Los guardo en el contexto
 
-    ; Si vengo de una syscall no hay cambio de privilegio y por ende la pila tiene "eip", "cs" y "eflags"
-    ;   de la syscall que fue interrumpida.
-    ; Si no vengo de una syscall, tengo que sacar "eip", "cs", "eflags" como tambien "esp" y "ss" de la pila 
-    ;   vieja (pila PL=3 de la tarea).
+    ; Si vengo de un codigo de PL=0 no hay cambio de privilegio y por ende la pila tiene "eip", "cs" y "eflags"
+    ;   del codigo que fue interrumpido.
+    ; Si vengo de un codigo de PL=3, tengo que sacar de la pila de PL=0: "eip", "cs", "eflags" asi como tambien "esp"  
+    ;   y "ss" de la pila vieja (pila PL=3 de la tarea).
 
-        ; En el caso de venir de una syscall.
-        cmp    dword [eax + m_at_syscall], 0x01 
-        jne    not_at_syscall_save
+        cmp     dword [eax + m_cs_idx], CS_SEL_KERNEL    
+        jne     not_PL0_save
 
+        ; En el caso de venir de un codigo de PL=0.
             ; Guardo eax.
             pop     ebx                                 ; Saco el valor de "eax" de pila
             mov     [eax + m_eax_idx], ebx              ; Lo guardo en el contexto
@@ -266,9 +265,9 @@ save_old_context:
 
             jmp     save_old_context_done               ; Punto de retorno.
 
-        ; Si no vengo de una syscall.
-        not_at_syscall_save:
-           
+        ; En el caso de venir de un codigo de PL=0.
+        not_PL0_save:
+
             ; Guardo la pila.
             mov     ebx, [esp + 0x10]                    
             mov     [eax + m_esp_idx], ebx              
@@ -339,14 +338,14 @@ load_new_context:
         mov     CR3, ebx
 
     ; Armo la pila______________________________________________________________
-        cmp     dword [eax + m_at_syscall], 0x01        
-        jne     not_at_syscall                          
-            mov     ebx, [eax + m_esp_idx]              ; Si vengo desde una syscall, cargo la direccion de pila que 
-            mov     esp, ebx                            ;   corresponde. Esta direccion aun tiene los valores de retorno 
-            jmp     at_syscall                          ;   de la tarea que llamo a la syscall.
-        not_at_syscall:
+        cmp     dword [eax + m_cs_idx], CS_SEL_KERNEL        
+        jne     not_PL0_load                          
+            mov     ebx, [eax + m_esp_idx]              ; Si vengo desde un codigo de PL=0, cargo la direccion de pila  
+            mov     esp, ebx                            ;   que corresponde. Esta direccion aun tiene los valores de  
+            jmp     PL0_load                            ;   retorno de la tarea que llamo a la syscall o que fue 
+        not_PL0_load:                                   ;   interrumpida.
         
-    ; Si no estaba en una syscall tengo que cargar mas valores a la pila ya que hay cambio de privilegio.
+    ; Si estaba en un codigo de PL=3 tengo que cargar mas valores a la pila ya que hay cambio de privilegio.
         ; Cargo la pila de kernel de la tarea corespondiente
         mov     ebx, [eax + m_esp0_idx]
         mov     esp, ebx
@@ -360,8 +359,8 @@ load_new_context:
         mov     ebx, [eax + m_esp_idx]
         push    ebx  
 
-    ; Si estaba en una syscall tengo que cargar menos valores a la pila ya que no hay cambio de privilegio.
-        at_syscall:    
+    ; Si estaba en un codigo de PL=0 tengo que cargar menos valores a la pila ya que no hay cambio de privilegio.
+        PL0_load:    
                                                         
         mov     ebx, [eax + m_eflags_idx]               ; Pusheo "eflags"               
         push    ebx                                     
@@ -534,9 +533,7 @@ reset_contexts:
         ; Inicializo/Reseteo la pila de PL=0
         mov     dword [eax + m_esp0_idx], __TASK3_KERNEL_STACK_END
 
-        ; Inicializo/Reseteo el flag de syscall activa en cero.
-        mov     dword [eax + m_at_syscall], 0x00
-
+        ; Inicializo/Reseteo el flag de finalizacion de tarea en cero.
         mov     dword [eax + m_task_end], 0x00
  
         ret
@@ -564,22 +561,16 @@ m_tss_kernel:
 
 m_tss_1:
         resd 26                 ; TSS identica a la de intel.
-at_syscall_t1:                     
-        resd 1                  ; Flag para saber si se produjo el salto al scheduler durante la syscall en Tarea 1.
 task1_end_flag:
         resd 1                  ; Flag para saber si la tarea ternimo de ejecutarse, en base a esto se resetea.
 
 m_tss_2:
         resd 26                 ; TSS identica a la de intel.
-at_syscall_t2:                     
-        resd 1                  ; Flag para saber si se produjo el salto al scheduler durante la syscall en Tarea 2.
 task2_end_flag:
         resd 1                  ; Flag para saber si la tarea ternimo de ejecutarse, en base a esto se resetea.
 
 m_tss_3:
         resd 26                 ; TSS identica a la de intel.
-at_syscall_t3:                     
-        resd 1                  ; Flag para saber si se produjo el salto al scheduler durante la syscallen Tarea 3.
 task3_end_flag:
         resd 1                  ; Flag para saber si la tarea ternimo de ejecutarse, en base a esto se resetea. Si bien
                                 ;   con la tarea 3 no se usa, la pongo para que los tres contextos sean igual.
