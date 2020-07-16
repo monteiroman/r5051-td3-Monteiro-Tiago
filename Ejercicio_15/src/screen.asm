@@ -63,6 +63,7 @@
 GLOBAL print_sign
 GLOBAL exc_warning
 GLOBAL print_result
+GLOBAL splash
 
 ; Desde task1.asm
 EXTERN sum_stored
@@ -85,37 +86,127 @@ print_sign:
 
         call    Title
 
-        ;push    task1_id
-        ;push    num_row_offset
-        ;push    num_column_offset
-        ;push    sum_stored
-        ;call    print_result
-        ;pop     eax
-        ;pop     eax
-        ;pop     eax
-        ;pop     eax
+        call    splash
 
-        ;push    task2_id
-        ;push    num_row_offset_2
-        ;push    num_column_offset_2
-        ;push    sum_stored_2             
-        ;call    print_result
-        ;pop     eax
-        ;pop     eax
-        ;pop     eax
-        ;pop     eax
+        ;call    Title_2
 
+        ret
+
+
+;________________________________________
+; BUINDON TUX 2020
+;________________________________________
+splash:
+        mov     bl, fontColor_Green             ; Agrego el color de la fuente
+        or      bl, fontBackground_Black        ; No es necesario pero para futuro
+
+        mov     edi, __VIDEO_BUFFER_LIN
+        add     edi, 0x682
+        mov     al, ASCII_B
+        call    print_char
+        mov     al, ASCII_U
+        call    print_char
+        mov     al, ASCII_I
+        call    print_char
+        mov     al, ASCII_N
+        call    print_char
+        mov     al, ASCII_D
+        call    print_char
+        mov     al, ASCII_O
+        call    print_char
+        mov     al, ASCII_N
+        call    print_char
+        mov     al, ASCII_BLANK
+        call    print_char
+        mov     al, ASCII_T
+        call    print_char
+        mov     al, ASCII_U
+        call    print_char
+        mov     al, ASCII_X
+        call    print_char
+        mov     al, ASCII_BLANK
+        call    print_char
+        mov     al, ASCII_0
+        add     al, 0x02
+        call    print_char
+        mov     al, ASCII_0
+        call    print_char
+        mov     al, ASCII_0
+        add     al, 0x02
+        call    print_char
+        mov     al, ASCII_0
+        call    print_char
         
-        
+        ret
+
+
+;________________________________________
+; TP 1 TDIII UTN FRBA 2020
+;________________________________________
+Title:
+        mov     edi, __VIDEO_BUFFER_LIN
+        add     edi, 0x21A
+        mov     al, ASCII_T
+        call    print_char
+        mov     al, ASCII_P
+        call    print_char
+        mov     al, ASCII_BLANK
+        call    print_char
+        mov     al, ASCII_0
+        add     al, 0x01
+        call    print_char
+        mov     al, ASCII_BLANK
+        call    print_char
+        mov     al, ASCII_T
+        call    print_char
+        mov     al, ASCII_D
+        call    print_char
+        mov     al, ASCII_I
+        call    print_char
+        mov     al, ASCII_I
+        call    print_char
+        mov     al, ASCII_I
+        call    print_char
+        mov     al, ASCII_BLANK
+        call    print_char
+        mov     al, ASCII_U
+        call    print_char
+        mov     al, ASCII_T
+        call    print_char
+        mov     al, ASCII_N
+        call    print_char
+        mov     al, ASCII_BLANK
+        call    print_char
+        mov     al, ASCII_F
+        call    print_char
+        mov     al, ASCII_R
+        call    print_char
+        mov     al, ASCII_B
+        call    print_char
+        mov     al, ASCII_A
+        call    print_char
+        mov     al, ASCII_BLANK
+        call    print_char
+        mov     al, ASCII_0
+        add     al, 0x02
+        call    print_char
+        mov     al, ASCII_0
+        call    print_char
+        mov     al, ASCII_0
+        add     al, 0x02
+        call    print_char
+        mov     al, ASCII_0
+        call    print_char
+
         ret
 
 
 ;________________________________________
 ; MBI supercompiuter
 ;________________________________________
-Title:
+Title_2:
         mov     edi, __VIDEO_BUFFER_LIN
-        add     edi, 0x32A
+        add     edi, 0x2BC
         mov     al, ASCII_S
         call    print_char
         mov     al, ASCII_U
@@ -162,6 +253,7 @@ Title:
         call    print_char
 
         ret
+
 
 ;________________________________________
 ; Imprimir el Resultado de la Suma

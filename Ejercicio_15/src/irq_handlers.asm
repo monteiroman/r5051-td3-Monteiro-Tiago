@@ -32,6 +32,7 @@ EXTERN keyboard_routine
 
 ; Desde timer.asm
 EXTERN timer_routine
+EXTERN timer_splash_flag
 
 ; Desde Scheduler
 EXTERN m_scheduler
@@ -66,21 +67,24 @@ section .irq_handlers
 irq#00_timer_handler:
         call    timer_routine
     
-        jmp     m_scheduler         ; Voy al scheduler (ver scheduler.asm).
-        m_scheduler_int_end:        ; Punto de retorno
+        cmp     dword [timer_splash_flag], 0x01         ; Mientras se muestra el splash no hay scheduler.
+        jne     spl_not_sch_time
+            jmp     m_scheduler                         ; Voy al scheduler (ver scheduler.asm).
+            m_scheduler_int_end:                        ; Punto de retorno
+        spl_not_sch_time:
 
-        push    eax                 ; Pusheo a pila eax porq lo voy a usar para otra cosa.
+        push    eax                                     ; Pusheo a pila eax porq lo voy a usar para otra cosa.
 
-        mov     al, 0x20            ; Le viso al pic que ya trate la interrupcion.
+        mov     al, 0x20                                ; Le viso al pic que ya trate la interrupcion.
         out     Master_PIC_Command, al
 
-        pop     eax                 ; Popeo para mantener el eax del contexto.
+        pop     eax                                     ; Popeo para mantener el eax del contexto.
         iret
 
 irq#01_keyboard_handler:
         pushad
-        call    keyboard_routine    ; Ver keyboard.asm.
-        mov     al, 0x20            ; Le viso al pic que ya trate la interrupcion
+        call    keyboard_routine                        ; Ver keyboard.asm.
+        mov     al, 0x20                                ; Le viso al pic que ya trate la interrupcion
         out     Master_PIC_Command, al
         popad
         iret
@@ -163,8 +167,8 @@ m_td3_print:
         jne     not_t1_print
             cmp     edx, __TASK1_DATA_RW_LIN            ; Si el buffer esta por debajo de la zona permitida, me voy.
             jl      print_error
-            cmp     edx, __TASK1_DATA_RW_END - 4        ; Si el buffer esta por arriba de la zona permitida, me voy.
-            jg      print_error                         ;   (la ultima posicion posible es la del final - 4).
+            cmp     edx, __TASK1_DATA_RW_END - 0x08     ; Si el buffer esta por arriba de la zona permitida, me voy.
+            jg      print_error                         ;   (la ultima posicion posible es la del final - 8 bytes).
 
             push    TASK1_ID                            ; Identificador de Tarea a imprimir.
             push    num_row_offset                      ; Fila donde se imprimira.
@@ -182,8 +186,8 @@ m_td3_print:
         jne     not_t2_print
             cmp     edx, __TASK2_DATA_RW_LIN            ; Si el buffer esta por debajo de la zona permitida, me voy.
             jl      print_error
-            cmp     edx, __TASK2_DATA_RW_END - 4        ; Si el buffer esta por arriba de la zona permitida, me voy.
-            jg      print_error                         ;   (la ultima posicion posible es la del final - 4).
+            cmp     edx, __TASK2_DATA_RW_END - 0x08     ; Si el buffer esta por arriba de la zona permitida, me voy.
+            jg      print_error                         ;   (la ultima posicion posible es la del final - 8 bytes).
 
             push    TASK2_ID                            ; Identificador de Tarea a imprimir.
             push    num_row_offset_2                    ; Fila donde se imprimira.
@@ -223,8 +227,8 @@ m_td3_read:
             jne     not_t1_data
                 cmp     edx, __TASK1_DATA_RW_LIN        ; Si el buffer esta por debajo de la zona permitida, me voy.
                 jl      no_new_data
-                cmp     edx, __TASK1_DATA_RW_END - 4    ; Si el buffer esta por arriba de la zona permitida, me voy.
-                jg      no_new_data                     ;   (la ultima posicion posible es la del final - 4).
+                cmp     edx, __TASK1_DATA_RW_END - 0x08 ; Si el buffer esta por arriba de la zona permitida, me voy.
+                jg      no_new_data                     ;   (la ultima posicion posible es la del final - 8 bytes).
                 jmp     new_data
             not_t1_data:
 
@@ -233,8 +237,8 @@ m_td3_read:
             jne     not_t2_data
                 cmp     edx, __TASK2_DATA_RW_LIN        ; Si el buffer esta por debajo de la zona permitida, me voy.
                 jl      no_new_data
-                cmp     edx, __TASK2_DATA_RW_END - 4    ; Si el buffer esta por arriba de la zona permitida, me voy.
-                jg      no_new_data                     ;   (la ultima posicion posible es la del final - 4).
+                cmp     edx, __TASK2_DATA_RW_END - 8    ; Si el buffer esta por arriba de la zona permitida, me voy.
+                jg      no_new_data                     ;   (la ultima posicion posible es la del final - 8 bytes).
                 jmp     new_data
             not_t2_data:
 

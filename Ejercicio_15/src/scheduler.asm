@@ -60,6 +60,7 @@ EXTERN enter_key_flag_2
 ; Desde timer.asm
 EXTERN timer_flag                             
 EXTERN timer_flag_2
+EXTERN timer_splash_flag
 
 ; Desde biosLS.lds
 EXTERN __TASK1_STACK_END
@@ -90,6 +91,7 @@ EXTERN idle_task
 
 ; Desde screen.asm
 EXTERN print_sign
+EXTERN splash
 
 ; Desde init.asm
 EXTERN TSS_SEL
@@ -109,7 +111,7 @@ section .scheduler
 ;________________________________________
 scheduler_init:
 
-        call    print_sign                          ; Imprimo la firma en pantalla.
+        call    print_sign                          ; Imprimo la firma en pantalla (ver screen.asm).
 
         mov     dword [current_task], 0x00          ; Me voy del Kernel
         mov     dword [future_task], 0x03           ; A la tarea idle
@@ -119,15 +121,12 @@ scheduler_init:
         mov     ax, TSS_SEL
         ltr     ax                                  ; Cargo el registro de tarea.
 
-        pushfd                                      ; Pusheo flags                  |
-        push    cs                                  ; Pusheo Code Segment           |   Lo hago asi de entrada porque es
-        push    m_scheduler                         ; Pusheo dirección de destino   |   asi como va a funcionar siempre
-                                                    ; La proxima vez que entre al   |   mi funcion.
-                                                    ; kernel tengo que decidir que  |
-                                                    ; Tarea se ejecutara y eso lo   |
-                                                    ; hago desde "m_scheduler"      |
-        jmp     m_scheduler                         ; salto                         |   
+        sti                                         ; Habilito las interrupciones
 
+        wait_for_sched:                             ; Espero a que termine el splash.
+            hlt
+            jmp     wait_for_sched
+        
 
 ;________________________________________
 ; Scheduler
@@ -280,8 +279,8 @@ save_old_context:
             mov     [eax + m_eax_idx], ebx              ; Lo guardo en el contexto
 
             pop     ebx                                 ; |
+            pop     ebx                                 ; | 
             pop     ebx                                 ; | Balanceo la pila
-            pop     ebx                                 ; |
             pop     ebx                                 ; |
             pop     ebx                                 ; |
 

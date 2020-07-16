@@ -6,6 +6,7 @@ GLOBAL timer_routine
 GLOBAL timer_count
 GLOBAL timer_flag
 GLOBAL timer_flag_2
+GLOBAL timer_splash_flag
 
 ; Desde scheduler.asm
 EXTERN future_task
@@ -29,6 +30,10 @@ section .counter_bytes nobits               ; Las variables usadas son mucho mas
         resb 4
     timer_flag_2:
         resb 4
+    timer_splash:
+        resb 4
+    timer_splash_flag:
+        resb 4   
 
 
 ;________________________________________
@@ -60,6 +65,17 @@ timer_routine:
         mov word    [timer_flag_2], 0x01      ; Una vez terminada la cuenta pongo a 1 el flag1
     continue_2:
     mov     [timer_count_2], ax
-
+    
+    ; Contador de Splash
+    xor     eax, eax
+    mov     ax, [timer_splash]
+    cmp     ax, 0x275                           
+    jl      sum_splash                          
+         mov    word [timer_splash_flag], 0x01  ; Una vez terminada la cuenta pongo a 1 el flag.
+         jmp    end_splash_count
+    sum_splash:
+    inc     word [timer_splash]
+    end_splash_count:
+    
     popad
     ret

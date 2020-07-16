@@ -193,9 +193,6 @@ Inicio_32bits:
         or      eax, 0x600          ; Pongo en 1 el bit 9 (osfxsr) y 10 (osxmmexcpt)
         mov     cr4, eax            
 
-        ; Habilito las interrupciones
-        sti
-
         jmp     CS_SEL_KERNEL:Main
 
 ;________________________________________

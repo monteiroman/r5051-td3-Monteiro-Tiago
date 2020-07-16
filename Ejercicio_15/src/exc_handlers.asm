@@ -44,8 +44,8 @@ handler#DE:
         xor     edi, edi
         xor     esi, esi
         xor     ebp, ebp
-        mov     dx, 0x01
-
+        mov     dx, 0x01            ; Si mando un cero no veo nada. Pongo 1 para 
+                                    ;   saber que vengo de la excepcion 0.
 BKPT
 
         hlt
