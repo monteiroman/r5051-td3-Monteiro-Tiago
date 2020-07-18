@@ -25,13 +25,13 @@ La función "save_number_in_buffer" usa la tabla que se define al principio del 
 
 * scheduler.asm: En él se encuentran todas las funciones encargadas del manejo de tareas en el tiempo.
 Las funciones que contiene se explican a continuación:
-+ scheduler_init: Se encarga de inicializar las variables de tarea en curso y tarea futura así como tambien imprimir títulos en pantalla, cargar el registro "ltr" y encender las interrupciones. Termina en un loop de halt para esperar el tiempo dedicado a la presentación del programa.
-+ m_scheduler: Llama a las diferentes partes del scheduler y es la función llamada por el timer al momento de cumplirse el tiempo de timer tick.
-+ save_old_context: Guarda el contexto de la tarea saliente.
-+ load_new_context: Carga el contexto de la tarea entrante.
-+ scheduler_logic: Define la política de cambio de taréas del scheduler.
-+ contexts_init: Función que es llamada por "scheduler_init". Se encarga de cargar los contextos por primera vez, tanto de tareas como el de Kernel (en realidad carga la TSS que luego es cargada en ltr).
-+ reset_contexts: Una vez terminadas las tareas (o sea que llegaron a halt) tienen que ser reseteados sus contextos. De esto se encarga la función citada.
+> scheduler_init: Se encarga de inicializar las variables de tarea en curso y tarea futura así como tambien imprimir títulos en pantalla, cargar el registro "ltr" y encender las interrupciones. Termina en un loop de halt para esperar el tiempo dedicado a la presentación del programa.
+> m_scheduler: Llama a las diferentes partes del scheduler y es la función llamada por el timer al momento de cumplirse el tiempo de timer tick.
+> save_old_context: Guarda el contexto de la tarea saliente.
+> load_new_context: Carga el contexto de la tarea entrante.
+> scheduler_logic: Define la política de cambio de taréas del scheduler.
+> contexts_init: Función que es llamada por "scheduler_init". Se encarga de cargar los contextos por primera vez, tanto de tareas como el de Kernel (en realidad carga la TSS que luego es cargada en ltr).
+> reset_contexts: Una vez terminadas las tareas (o sea que llegaron a halt) tienen que ser reseteados sus contextos. De esto se encarga la función citada.
 
 * screen.asm: Este archivo contiene todo el código encargado de mostrar en pantalla las letras y números requeridos en el proyecto.
 
