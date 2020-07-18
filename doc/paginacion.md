@@ -43,6 +43,13 @@ Base del Directorio: mem.fis. 0x00110000
    
 Base de la Tabla de Paginas: mem.fis. 0x00114000
 
+|Entrada en Directorio|Ubicacion en Directorio|Va a guardar la direccion|Entrada de Tabla|Ubicacion en la Tabla|Va a guardar la direccion|
+|:---:|:---:|:---:|:---:|:---:|:---:|
+|Tabla 1|IdxDir = 0x3FF (0x00110FFC)|0x00114000 + Atributos|Inicializacion ROM|IdxTab = 0x3F0 (0x00114FC0)|0xFFFF0000 + Atributos|
+
+
+
+
 
   __________________________________________________________________________________________________
   |      Entrada en Directorio de Tabla 1         |    Inicio Paginas 1 (Para Inicializacion ROM)  |
