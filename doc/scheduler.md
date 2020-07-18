@@ -1,9 +1,9 @@
-### Scheduler
+## Scheduler
 
-##### Funcionamiento del scheduler
+#### Funcionamiento del scheduler
 
-##### Cargado de contexto entrante a memoria
+#### Cargado de contexto entrante a memoria
 
-##### Guardado de contexto saliente
+#### Guardado de contexto saliente
 
-##### Politica del scheduler
+#### Politica del scheduler
