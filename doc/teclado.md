@@ -22,10 +22,31 @@ En esta lista los números tienen que ser guardados en el orden correcto para qu
 
 En este caso puedo levantar byte a byte desde el buffer circular. RECORRO EN DIRECCION INVERSA AL LLENADO.
 
-Ejemplo:
+Ejemplo: En este caso se ingresaron 20 números y se tienen que guardar los ultimos 16 en memoria, es por esto que los números del byte 1 no son de importancia. 
+
 Buffer circular:
 
 ![Alt text](/doc/img/buf_circ_par.png)
+
+Número guardado en memoria: (Para poder levantarlo en un registro)
+
+![Alt text](/doc/img/en_mem.png)
+
+Siendo:
+
+X: un nible que no tengo que cargar en la tabla.
+
+nX: nible a guardar cuyo número denota su orden de entrada al buffer circular.
+
+###### Que la cantidad de nibles en el buffer sea impar
+
+Cuando la cantidad de nibles es impar el problema que se presenta es que quedan dos nibles cruzados. Estos los tengo que tratar especialmente.
+
+Ejemplo: En este caso se ingresaron 21 números y se tienen que guardar los ultimos 16 en memoria, es por esto que los números del byte 1 no son de importancia. 
+
+Buffer circular:
+
+![Alt text](/doc/img/buf_circ_impar.png)
 
 Número guardado en memoria: (Para poder levantarlo en un registro)
 
