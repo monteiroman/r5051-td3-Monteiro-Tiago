@@ -5,15 +5,15 @@
 Las explicaciones que se encuentran en este readme hacen referencia al ejercicio 15 que es el integrador.
 Todos los archivos del mismo se encuentran en Ejercicios/Ejercicio_15.
 
-### Archivos del proyecto
+### [Archivos del proyecto](/doc/archivos.md)
 
-### Paginación
+### [Paginación](/doc/paginacion.md)
 
-### Pantalla
+### [Pantalla](/doc/pantalla.md)
 
-### Scheduler
+### [Scheduler](/doc/scheduler.md)
 
-### Teclado
+### [Teclado](/doc/teclado.md)
 
 ### Makefile
 
