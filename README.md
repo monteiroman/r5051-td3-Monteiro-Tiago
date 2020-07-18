@@ -15,7 +15,9 @@ Todos los archivos del mismo se encuentran en Ejercicios/Ejercicio_15.
 
 ### [Teclado](/doc/teclado.md)
 
-### Makefile
+### [Makefile](/doc/makefile.md)
+
+### [Linkerscript](/doc/linker.md)
 
 
 
