@@ -35,3 +35,5 @@ El mapa de paginación propuesto para este proyecto se muestra a continuación. 
 
 
 ##### Estructura de tablas para Kernel
+
+Como se mencionó anteriormente, solo se explica la estructura de tablas para kernel ya que para las tareas es igual salvo porque no se incluyen en el directorio las secciones de memoria que no correspondan a la tarea en ejecución.
