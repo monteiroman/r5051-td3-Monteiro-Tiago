@@ -88,7 +88,7 @@ print_sign:
 
         call    splash
 
-        ;call    Title_2
+        call    Title_2
 
         ret
 
@@ -206,7 +206,7 @@ Title:
 ;________________________________________
 Title_2:
         mov     edi, __VIDEO_BUFFER_LIN
-        add     edi, 0x2BC
+        add     edi, 0x71C
         mov     al, ASCII_S
         call    print_char
         mov     al, ASCII_U
