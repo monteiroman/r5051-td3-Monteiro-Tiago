@@ -24,7 +24,9 @@ La función "save_number_in_buffer" usa la tabla que se define al principio del 
 * pic_init.asm: Contiene todo el código dedicado a la inicialixación de los pics encargados del teclado y del timer del sistema.
 
 * scheduler.asm: En él se encuentran todas las funciones encargadas del manejo de tareas en el tiempo.
+
 Las funciones que contiene se explican a continuación:
+
 > scheduler_init: Se encarga de inicializar las variables de tarea en curso y tarea futura así como tambien imprimir títulos en pantalla, cargar el registro "ltr" y encender las interrupciones. Termina en un loop de halt para esperar el tiempo dedicado a la presentación del programa.
 > m_scheduler: Llama a las diferentes partes del scheduler y es la función llamada por el timer al momento de cumplirse el tiempo de timer tick.
 > save_old_context: Guarda el contexto de la tarea saliente.
