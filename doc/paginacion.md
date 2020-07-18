@@ -40,36 +40,17 @@ Como se mencionó anteriormente, solo se explica la estructura de tablas para ke
 
 
 Base del Directorio: mem.fis. 0x00110000
-   
 Base de la Tabla de Paginas: mem.fis. 0x00114000
 
-|Entrada en Directorio|Ubicacion en Directorio|Va a guardar la direccion|Entrada de Tabla|Ubicacion en la Tabla|Va a guardar la direccion|
+|Entrada en Directorio|Ubicacion en Directorio (direccion física)|Va a guardar la direccion|Entrada de Tabla|Ubicacion en la Tabla (direccion física)|Va a guardar la direccion|
 |:---:|:---:|:---:|:---:|:---:|:---:|
 |Tabla 1|IdxDir = 0x3FF (0x00110FFC)|0x00114000 + Atributos|Inicializacion ROM|IdxTab = 0x3F0 (0x00114FC0)|0xFFFF0000 + Atributos|
+|Tabla 1|IdxDir = 0x3FF (0x00110FFC)|0x00114000 + Atributos|Reset|IdxTab = 0x3FF (0x00114FFC)|0xFFFFF000 + Atributos|
 
 
 
 
-
-  __________________________________________________________________________________________________
-  |      Entrada en Directorio de Tabla 1         |    Inicio Paginas 1 (Para Inicializacion ROM)  |
-  |                                               |                                                |
-  | Ubicacion en Directorio:                      | Ubicacion en la Tabla:                         |
-  |        (IdxDir = 0x3FF)                       |        (IdxTab = 0x3F0)                        |
-  |        0x00110000 + IdxDir * 4 = 0x00110FFC   |        0x00114000 + IdxTab * 4 = 0x00114FC0    |
-  |                                               |                                                |
-  | Va a guardar la direccion:                    | Va a guardar la direccion:                     |
-  |        0x00114000  (Tabla 1)                  |        0xFFFF0000  (Inicializacion ROM)        |
-  |                                               |________________________________________________|
-  |                                               |    Inicio Paginas 2 (Para Reset)               |
-  |                                               |                                                |
-  |                                               | Ubicacion en la Tabla:                         |
-  |                                               |        (IdxTab = 0x3FF)                        |
-  |                                               |        0x00114000 + IdxTab * 4 = 0x00114FFC    |
-  |                                               |                                                |
-  |                                               | Va a guardar la direccion:                     |
-  |                                               |        0xFFFFFFF0  (Reset)                     |
-  |_______________________________________________|________________________________________________|
+  
   |_______________________________________________|________________________________________________|
   |  Tabla 2 (está 4k mas arriba que la anterior) |    Inicio Paginas 1 (Para ISR)                 |
   |                                               |                                                |
