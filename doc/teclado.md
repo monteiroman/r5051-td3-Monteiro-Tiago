@@ -14,29 +14,28 @@ Luego de presionar la tecla Enter el programa salta directamente a la función "
 
 #### Guardado de caractes en la lista
 
-En el proyecto se dispone de una lista de 64kb para guardar los números ingresados. Esta lista es circular, es decir, que una vez que se llena hay que comenzar nuevamente desde el principio a guardar los caracteres.
+En el proyecto se dispone de una lista de 64kb para guardar los números ingresados, cada uno de 64 bits, es decir, 8 bytes. Esta lista es circular, por ende una vez que se llena hay que comenzar nuevamente desde el principio a guardar los números.
 
 En esta lista los números tienen que ser guardados en el orden correcto para que los registros puedan levantar el numero directamente desde ella. Por esta razón (y por lo explicado en la sección anterior) se realizó el guardado de los dígitos teniendo en cuenta dos posibilidades.
 
-###### Que la cantidad de nibles sea par
+###### Que la cantidad de nibles en el buffer sea par
 
-En este casp puedo levanta byte a byte desde el buffer circular. RECORRO EN DIRECCION INVERSA AL LLENADO.
+En este caso puedo levantar byte a byte desde el buffer circular. RECORRO EN DIRECCION INVERSA AL LLENADO.
 
 Ejemplo:
 Buffer circular:
- __________________________________________________________________________________________________________
-|          ||          ||         ||          ||           ||         ||         ||           ||           |
-| n14  n15 ||  X    X  || n0   n1 || n2   n3  ||  n4   n5  || n6   n7 || n8   n9 || n10   n11 || n12   n13 |
-|____·_____||____·_____||____·____||_____·____||_____·_____||____·____||____·____||_____·_____||_____·_____|
-   Byte 0     Byte 1     Byte 2      Byte 3      Byte 4       Byte 5      Byte 6      Byte 7       Byte 8
 
+![Alt text](/doc/img/buf_circ_par.png)
 
-Posicion de memoria: (Para poder levantarlo en un registro)
- ______________________________________________________________________________________________
-|          ||          ||           ||          ||           ||         ||         ||          |
-| n14  n15 || n12  n13 || n10   n11 || n8   n9  ||  n6   n7  || n4   n5 || n2   n3 || n0    n1 |
-|____·_____||____·_____||_____·_____||_____·____||_____·_____||____·____||____·____||_____·____|
-   Byte 0     Byte 1       Byte 2       Byte 3      Byte 4       Byte 5     Byte 6     Byte 7
+Número guardado en memoria: (Para poder levantarlo en un registro)
+
+![Alt text](/doc/img/en_mem.png)
+
+Siendo:
+
+X: un nible que no tengo que cargar en la tabla.
+
+nX: nible a guardar cuyo número denota su orden de entrada al buffer circular.
 
 
 
