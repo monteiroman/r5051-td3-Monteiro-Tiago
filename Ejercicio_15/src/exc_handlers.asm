@@ -178,7 +178,7 @@ BKPT
         popad
         iret
 
-;Excepcion #GP (Page Fault, [0x0E])
+;Excepcion #PF (Page Fault, [0x0E])
 handler#PF:
         pushad                          ; Guardo los registros en pila
         call    exc_warning

@@ -65,12 +65,12 @@ USE32
 section .irq_handlers
 
 irq#00_timer_handler:
-        call    timer_routine
+        call    timer_routine                           ; Ver timer.asm.
     
         cmp     dword [timer_splash_flag], 0x01         ; Mientras se muestra el splash no hay scheduler.
         jne     spl_not_sch_time
             jmp     m_scheduler                         ; Voy al scheduler (ver scheduler.asm).
-            m_scheduler_int_end:                        ; Punto de retorno
+            m_scheduler_int_end:                        ; Punto de retorno.
         spl_not_sch_time:
 
         push    eax                                     ; Pusheo a pila eax porq lo voy a usar para otra cosa.
@@ -84,7 +84,7 @@ irq#00_timer_handler:
 irq#01_keyboard_handler:
         pushad
         call    keyboard_routine                        ; Ver keyboard.asm.
-        mov     al, 0x20                                ; Le viso al pic que ya trate la interrupcion
+        mov     al, 0x20                                ; Le viso al pic que ya trate la interrupcion.
         out     Master_PIC_Command, al
         popad
         iret
