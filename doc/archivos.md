@@ -1,4 +1,4 @@
-### Archivos del proyecto
+## Archivos del proyecto
 
 Los archivos a los que se hace mención aquí se encuentran en la carpeta [/Ejercicios/Ejercicio_15/src](/Ejercicios/Ejercicio_15/src).
 
