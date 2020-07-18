@@ -61,67 +61,12 @@ Base de la Tabla de Paginas: mem.fis. 0x00114000
 |Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|BSS Tarea 2         |IdxTab = 0x311 (0x00116C44)|0x00311000 + Atributos|
 |Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|DATA R Tarea 2      |IdxTab = 0x312 (0x00116C48)|0x00312000 + Atributos|
 |Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|DATA RW Tarea 2     |IdxTab = 0x313 (0x00116C4C)|0x00313000 + Atributos|
-|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|
-|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|
-|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|
-|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|
+|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|TEXT Tarea 3        |IdxTab = 0x320 (0x00116C80)|0x00320000 + Atributos|
+|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|BSS Tarea 3         |IdxTab = 0x321 (0x00116C84)|0x00321000 + Atributos|
+|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|DATA R Tarea 3      |IdxTab = 0x322 (0x00116C88)|0x00322000 + Atributos|
+|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|DATA RW Tarea 3     |IdxTab = 0x323 (0x00116C8C)|0x00323000 + Atributos|
+|Tabla 4|IdxDir = 0x07F (0x001101FC)|0x00117000 + Atributos|Pila Nucleo         |IdxTab = 0x308 (0x00117C20)|0x1FF08000 + Atributos|
 
-
-
-
-
-
-  
- 
- 
-  |                                               |________________________________________________|
-  |                                               |    Inicio Paginas 12 (Para TEXT Tarea 3)       |
-  |                                               |                                                |
-  |                                               | Ubicacion en la Tabla:                         |
-  |                                               |        (IdxTab = 0x320)                        |
-  |                                               |        0x00116000 + IdxTab * 4 = 0x00116C80    |
-  |                                               |                                                |
-  |                                               | Va a guardar la direccion:                     |
-  |                                               |        0x00320000  (TEXT Tarea 3)              |
-  |                                               |________________________________________________|
-  |                                               |    Inicio Paginas 13 (Para BSS Tarea 3)        |
-  |                                               |                                                |
-  |                                               | Ubicacion en la Tabla:                         |
-  |                                               |        (IdxTab = 0x321)                        |
-  |                                               |        0x00116000 + IdxTab * 4 = 0x00116C84    |
-  |                                               |                                                |
-  |                                               | Va a guardar la direccion:                     |
-  |                                               |        0x00321000  (BSS Tarea 3)               |
-  |                                               |________________________________________________|
-  |                                               |    Inicio Paginas 14 (Para DATA R Tarea 3)     |
-  |                                               |                                                |
-  |                                               | Ubicacion en la Tabla:                         |
-  |                                               |        (IdxTab = 0x322)                        |
-  |                                               |        0x00116000 + IdxTab * 4 = 0x00116C88    |
-  |                                               |                                                |
-  |                                               | Va a guardar la direccion:                     |
-  |                                               |        0x00322000  (DATA R Tarea 3)            |
-  |                                               |________________________________________________|
-  |                                               |    Inicio Paginas 15 (Para DATA RW Tarea 3)    |
-  |                                               |                                                |
-  |                                               | Ubicacion en la Tabla:                         |
-  |                                               |        (IdxTab = 0x323)                        |
-  |                                               |        0x00116000 + IdxTab * 4 = 0x00116C8C    |
-  |                                               |                                                |
-  |                                               | Va a guardar la direccion:                     |
-  |                                               |        0x00323000  (DATA RW Tarea 3)           |
-  |_______________________________________________|________________________________________________|
-  |_______________________________________________|________________________________________________|
-  |  Tabla 4 (está 4k mas arriba que la anterior) |    Inicio Paginas 1 (Para Pila Nucleo)         |
-  |                                               |                                                |
-  | Ubicacion en Directorio:                      | Ubicacion en la Tabla:                         |
-  |        (IdxDir = 0x07F)                       |        (IdxTab = 0x308)                        |
-  |        0x00110000 + IdxDir * 4 = 0x001101FC   |        0x00117000 + IdxTab * 4 = 0x00117C20    |
-  |                                               |                                                |
-  | Va a guardar la direccion:                    | Va a guardar la direccion:                     |
-  |        0x00117000  (Tabla 4)                  |        0x1FF08000  (Pila Nucleo)               |
-  |_______________________________________________|________________________________________________|
-  
 
   A partir de la dirección física 0x08000000 se guardan las paginas no mapeadas
   al inicio del programa (Descomentar ultimas lineas de Task 1 y comentar 
