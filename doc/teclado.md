@@ -1,6 +1,6 @@
-### Teclado
+## Teclado
 
-##### Buffer de teclado
+#### Buffer de teclado
 
-##### Guardado de caractes en la lista
+#### Guardado de caractes en la lista
 
