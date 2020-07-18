@@ -1,8 +1,16 @@
-#	Tecnicas Digitales III 2020
+# Tecnicas Digitales III 2020
 	
-##	Tiago Monteiro - Legajo: 142035-5
+## Tiago Monteiro - Legajo: 142035-5
 
 ### Archivos del proyecto (Ejercicio_15)
+
+### Paginación
+
+### Pantalla
+
+### Scheduler
+
+### Teclado
 
 
 
