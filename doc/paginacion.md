@@ -1,5 +1,9 @@
 ### Paginación
 
+Existe una tabla de paginación propuesta por la cátedra que fue la que se siguió en este proyecto. Se utilizadon 4 directorios para el programa, cada uno correspondía a una tarea (3 en total) y un cuarto que correspondía a kernel. Este último es el que se explica con mayor detalle en la sección _Estructura de tablas para Kernel_. Los otros tres son similares pero sin las secciones correspondientes a las otras tareas.
+
+Cabe aclarar que una vez que el scheduler empieza a distribuir el uso del procesador entre las tareas, el directorio de kernel no se vuelve a utilizar.
+
 ##### Mapa de paginación
 
 El mapa de paginación propuesto para este proyecto se muestra a continuación. Se agregaron también los índices que se obtienen a partir de las direcciones lineales de cada sección.
@@ -28,3 +32,6 @@ El mapa de paginación propuesto para este proyecto se muestra a continuación. 
 |Pila Tarea 1        |1FFFF000h|00713000h|0x001|0x313|
 |Secuencia inic. ROM |FFFF0000h|FFFF0000h|0x3FF|0x3F0|
 |Vector de reset     |FFFFFFF0h|FFFFFFF0h|0x3FF|0x3FF|
+
+
+##### Estructura de tablas para Kernel
