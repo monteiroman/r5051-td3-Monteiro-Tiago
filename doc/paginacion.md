@@ -50,8 +50,22 @@ Base de la Tabla de Paginas: mem.fis. 0x00114000
 |Tabla 2|IdxDir = 0x000 (0x00110000)|0x00115000 + Atributos|Video               |IdxTab = 0x010 (0x00115040)|0x000B8000 + Atributos|
 |Tabla 2|IdxDir = 0x000 (0x00110000)|0x00115000 + Atributos|Tablas del Sistema  |IdxTab = 0x100 (0x00115400)|0x00100000 + Atributos|
 |Tabla 2|IdxDir = 0x000 (0x00110000)|0x00115000 + Atributos|Tablas de Paginacion|IdxTab = 0x110 (0x00115440)|0x00110000 + Atributos|
-
-
+|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|Nucleo              |IdxTab = 0x200 (0x00116800)|0x00200000 + Atributos|
+|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|Tablas de Digitos   |IdxTab = 0x210 (0x00116840)|0x00210000 + Atributos|
+|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|Datos               |IdxTab = 0x202 (0x00116808)|0x00202000 + Atributos|
+|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|TEXT Tarea 1        |IdxTab = 0x300 (0x00116C00)|0x00300000 + Atributos|
+|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|BSS Tarea 1         |IdxTab = 0x301 (0x00116C04)|0x00301000 + Atributos|
+|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|DATA R Tarea 1      |IdxTab = 0x302 (0x00116C08)|0x00302000 + Atributos|
+|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|
+|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|
+|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|
+|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|
+|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|
+|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|
+|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|
+|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|
+|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|
+|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|
 
 
 
