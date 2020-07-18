@@ -3,7 +3,7 @@
 ## Tiago Monteiro - Legajo: 142035-5
 
 Las explicaciones que se encuentran en este readme hacen referencia al ejercicio 15 que es el integrador.
-Todos los archivos del mismo se encuentran en Ejercicios/Ejercicio_15.
+Todos los archivos del mismo se encuentran en [Ejercicios/Ejercicio_15](/Ejercicios/Ejercicio_15).
 
 ### [Archivos del proyecto](/doc/archivos.md)
 
