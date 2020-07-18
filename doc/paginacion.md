@@ -44,50 +44,21 @@ Base de la Tabla de Paginas: mem.fis. 0x00114000
 
 |Entrada en Directorio|Ubicacion en Directorio (direccion física)|Va a guardar la direccion|Entrada de Tabla|Ubicacion en la Tabla (direccion física)|Va a guardar la direccion|
 |:---:|:---:|:---:|:---:|:---:|:---:|
-|Tabla 1|IdxDir = 0x3FF (0x00110FFC)|0x00114000 + Atributos|Inicializacion ROM|IdxTab = 0x3F0 (0x00114FC0)|0xFFFF0000 + Atributos|
-|Tabla 1|IdxDir = 0x3FF (0x00110FFC)|0x00114000 + Atributos|Reset|IdxTab = 0x3FF (0x00114FFC)|0xFFFFF000 + Atributos|
+|Tabla 1|IdxDir = 0x3FF (0x00110FFC)|0x00114000 + Atributos|Inicializacion ROM  |IdxTab = 0x3F0 (0x00114FC0)|0xFFFF0000 + Atributos|
+|Tabla 1|IdxDir = 0x3FF (0x00110FFC)|0x00114000 + Atributos|Reset               |IdxTab = 0x3FF (0x00114FFC)|0xFFFFF000 + Atributos|
+|Tabla 2|IdxDir = 0x000 (0x00110000)|0x00115000 + Atributos|ISR                 |IdxTab = 0x000 (0x00115000)|0x00000000 + Atributos|
+|Tabla 2|IdxDir = 0x000 (0x00110000)|0x00115000 + Atributos|Video               |IdxTab = 0x010 (0x00115040)|0x000B8000 + Atributos|
+|Tabla 2|IdxDir = 0x000 (0x00110000)|0x00115000 + Atributos|Tablas del Sistema  |IdxTab = 0x100 (0x00115400)|0x00100000 + Atributos|
+|Tabla 2|IdxDir = 0x000 (0x00110000)|0x00115000 + Atributos|Tablas de Paginacion|IdxTab = 0x110 (0x00115440)|0x00110000 + Atributos|
+
+
+
 
 
 
 
   
-  |_______________________________________________|________________________________________________|
-  |  Tabla 2 (está 4k mas arriba que la anterior) |    Inicio Paginas 1 (Para ISR)                 |
-  |                                               |                                                |
-  | Ubicacion en Directorio:                      | Ubicacion en la Tabla:                         |
-  |        (IdxDir = 0x000)                       |        (IdxTab = 0x000)                        |
-  |        0x00110000 + IdxDir * 4 = 0x00110000   |        0x00115000 + IdxTab * 4 = 0x00115000    |
-  |                                               |                                                |
-  | Va a guardar la direccion:                    | Va a guardar la direccion:                     |
-  |        0x00115000  (Tabla 2)                  |        0x00000000  (ISR)                       |
-  |                                               |________________________________________________|
-  |                                               |    Inicio Paginas 2 (Para Video)               |
-  |                                               |                                                |
-  |                                               | Ubicacion en la Tabla:                         |
-  |                                               |        (IdxTab = 0x010)                        |
-  |                                               |        0x00115000 + IdxTab * 4 = 0x00115040    |
-  |                                               |                                                |
-  |                                               | Va a guardar la direccion:                     |
-  |                                               |        0x000B8000  (Video)                     |
-  |                                               |________________________________________________|
-  |                                               |    Inicio Paginas 3 (Para Tablas del Sistema)  |
-  |                                               |                                                |
-  |                                               | Ubicacion en la Tabla:                         |
-  |                                               |        (IdxTab = 0x100)                        |
-  |                                               |        0x00115000 + IdxTab * 4 = 0x00115400    |
-  |                                               |                                                |
-  |                                               | Va a guardar la direccion:                     |
-  |                                               |        0x00100000  (Tablas del sistema)        |
-  |                                               |________________________________________________|
-  |                                               |    Inicio Paginas 4 (Para Tablas de Paginacion)|
-  |                                               |                                                |
-  |                                               | Ubicacion en la Tabla:                         |
-  |                                               |        (IdxTab = 0x110)                        |
-  |                                               |        0x00115000 + IdxTab * 4 = 0x00115440    |
-  |                                               |                                                |
-  |                                               | Va a guardar la direccion:                     |
-  |                                               |        0x00110000  (Tablas de Paginacion)      |
-  |_______________________________________________|________________________________________________|
+ 
   |_______________________________________________|________________________________________________|
   |  Tabla 3 (está 4k mas arriba que la anterior) |    Inicio Paginas 1 (Para Nucleo)              |
   |                                               |                                                |
