@@ -686,8 +686,8 @@ paging_init:
         push    __TASK2_TXT_LENGTH
         push    __TASK2_TXT_PHY
         push    __TASK2_TXT_LIN
-        push    SUP_R__PRES_TableAttrib
-        push    SUP_R__PRES_PageAttrib
+        push    USR_RW_PRES_TableAttrib
+        push    USR_R__PRES_PageAttrib
         call    paging
         pop     eax
         pop     eax
@@ -704,8 +704,8 @@ paging_init:
         push    __TASK2_BSS_LENGTH
         push    __TASK2_BSS_PHY
         push    __TASK2_BSS_LIN
-        push    SUP_RW_PRES_TableAttrib
-        push    SUP_RW_PRES_PageAttrib
+        push    USR_RW_PRES_TableAttrib
+        push    USR_RW_PRES_PageAttrib
         call    paging
         pop     eax
         pop     eax
@@ -722,8 +722,8 @@ paging_init:
         push    __TASK2_DATA_R_LENGTH
         push    __TASK2_DATA_R_PHY
         push    __TASK2_DATA_R_LIN
-        push    SUP_R__PRES_TableAttrib
-        push    SUP_R__PRES_PageAttrib
+        push    USR_R__PRES_TableAttrib
+        push    USR_R__PRES_PageAttrib
         call    paging
         pop     eax
         pop     eax
@@ -740,8 +740,8 @@ paging_init:
         push    __TASK2_DATA_RW_LENGTH
         push    __TASK2_DATA_RW_PHY
         push    __TASK2_DATA_RW_LIN
-        push    SUP_RW_PRES_TableAttrib
-        push    SUP_RW_PRES_PageAttrib
+        push    USR_RW_PRES_TableAttrib
+        push    USR_RW_PRES_PageAttrib
         call    paging
         pop     eax
         pop     eax
@@ -758,8 +758,8 @@ paging_init:
         push    __TASK3_TXT_LENGTH
         push    __TASK3_TXT_PHY
         push    __TASK3_TXT_LIN
-        push    SUP_R__PRES_TableAttrib
-        push    SUP_R__PRES_PageAttrib
+        push    USR_RW_PRES_TableAttrib
+        push    USR_R__PRES_PageAttrib
         call    paging
         pop     eax
         pop     eax
@@ -776,8 +776,8 @@ paging_init:
         push    __TASK3_BSS_LENGTH
         push    __TASK3_BSS_PHY
         push    __TASK3_BSS_LIN
-        push    SUP_RW_PRES_TableAttrib
-        push    SUP_RW_PRES_PageAttrib
+        push    USR_RW_PRES_TableAttrib
+        push    USR_RW_PRES_PageAttrib
         call    paging
         pop     eax
         pop     eax
@@ -794,8 +794,8 @@ paging_init:
         push    __TASK3_DATA_R_LENGTH
         push    __TASK3_DATA_R_PHY
         push    __TASK3_DATA_R_LIN
-        push    SUP_R__PRES_TableAttrib
-        push    SUP_R__PRES_PageAttrib
+        push    USR_R__PRES_TableAttrib
+        push    USR_R__PRES_PageAttrib
         call    paging
         pop     eax
         pop     eax
@@ -812,8 +812,8 @@ paging_init:
         push    __TASK3_DATA_RW_LENGTH
         push    __TASK3_DATA_RW_PHY
         push    __TASK3_DATA_RW_LIN
-        push    SUP_RW_PRES_TableAttrib
-        push    SUP_RW_PRES_PageAttrib
+        push    USR_RW_PRES_TableAttrib
+        push    USR_RW_PRES_PageAttrib
         call    paging
         pop     eax
         pop     eax
@@ -853,7 +853,7 @@ paging_init:
         push    __INIT_LENGTH               
         push    __INIT_PHY                  
         push    __INIT_LIN                  
-        push    SUP_RW_PRES_TableAttrib     
+        push    SUP_R__PRES_TableAttrib     
         push    SUP_R__PRES_PageAttrib      
         call    paging
         pop     eax
@@ -871,7 +871,7 @@ paging_init:
         push    __ROUTINES_LENGTH
         push    __ROUTINES_PHY
         push    __ROUTINES_LIN
-        push    SUP_RW_PRES_TableAttrib
+        push    SUP_R__PRES_TableAttrib
         push    SUP_R__PRES_PageAttrib
         call    paging
         pop     eax
@@ -1092,7 +1092,7 @@ paging_init:
         push    __INIT_LENGTH               
         push    __INIT_PHY                  
         push    __INIT_LIN                  
-        push    SUP_RW_PRES_TableAttrib     
+        push    SUP_R__PRES_TableAttrib     
         push    SUP_R__PRES_PageAttrib      
         call    paging
         pop     eax
@@ -1110,7 +1110,7 @@ paging_init:
         push    __ROUTINES_LENGTH
         push    __ROUTINES_PHY
         push    __ROUTINES_LIN
-        push    SUP_RW_PRES_TableAttrib
+        push    SUP_R__PRES_TableAttrib
         push    SUP_R__PRES_PageAttrib
         call    paging
         pop     eax
@@ -1331,7 +1331,7 @@ paging_init:
         push    __INIT_LENGTH               
         push    __INIT_PHY                  
         push    __INIT_LIN                  
-        push    SUP_RW_PRES_TableAttrib     
+        push    SUP_R__PRES_TableAttrib     
         push    SUP_R__PRES_PageAttrib      
         call    paging
         pop     eax
@@ -1349,7 +1349,7 @@ paging_init:
         push    __ROUTINES_LENGTH
         push    __ROUTINES_PHY
         push    __ROUTINES_LIN
-        push    SUP_RW_PRES_TableAttrib
+        push    SUP_R__PRES_TableAttrib
         push    SUP_R__PRES_PageAttrib
         call    paging
         pop     eax
