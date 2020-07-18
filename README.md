@@ -1,7 +1,7 @@
 #	Tecnicas Digitales III 2020
 ##	Tiago Monteiro (142035-5)
 
-#Archivos del proyecto
+###Archivos del proyecto
 
 * bios.asm: Es el que se ejecuta luego de as inicializaciones encontradas en init.asm. Se encarga de copiar el kernel a memoria y las rutinas de interrupciones a RAM en primera instancia. Esto se decidió de esta manera para que luego de paginar se pudieran poner esas paginas como solo lectura en todo momento. Luego, se encarga de paginar, llama a la función de paginación y setea los bits correspondientes de CR0 así como también carga el registro CR3. A continuación, se encarga de llenar la tabla que se usa para determinar las teclas presionadas, copiar el resto del código (de las tareas) a RAM, carga la GDT a RAM, inicializa la IDT, el pic y setea los bits necesarios para el uso de SIMD. Por último, llama a la función "scheduler_init" que se encuenta en scheduler.asm para inicializar el Scheduler.
 
@@ -24,19 +24,19 @@ La función "save_number_in_buffer" usa la tabla que se define al principio del 
 
 * scheduler.asm: En él se encuentran todas las funciones encargadas del manejo de tareas en el tiempo.
 Las funciones que contiene se explican a continuación:
--scheduler_init: Se encarga de inicializar las variables de tarea en curso y tarea futura así como tambien imprimir títulos en pantalla, cargar el registro "ltr" y encender las interrupciones. Termina en un loop de halt para esperar el tiempo dedicado a la presentación del programa.
--m_scheduler: Llama a las diferentes partes del scheduler y es la función llamada por el timer al momento de cumplirse el tiempo de timer tick.
--save_old_context: Guarda el contexto de la tarea saliente.
--load_new_context: Carga el contexto de la tarea entrante.
--scheduler_logic: Define la política de cambio de taréas del scheduler.
--contexts_init: Función que es llamada por "scheduler_init". Se encarga de cargar los contextos por primera vez, tanto de tareas como el de Kernel (en realidad carga la TSS que luego es cargada en ltr).
--reset_contexts: Una vez terminadas las tareas (o sea que llegaron a halt) tienen que ser reseteados sus contextos. De esto se encarga la función citada.
+** scheduler_init: Se encarga de inicializar las variables de tarea en curso y tarea futura así como tambien imprimir títulos en pantalla, cargar el registro "ltr" y encender las interrupciones. Termina en un loop de halt para esperar el tiempo dedicado a la presentación del programa.
+** m_scheduler: Llama a las diferentes partes del scheduler y es la función llamada por el timer al momento de cumplirse el tiempo de timer tick.
+** save_old_context: Guarda el contexto de la tarea saliente.
+** load_new_context: Carga el contexto de la tarea entrante.
+** scheduler_logic: Define la política de cambio de taréas del scheduler.
+** contexts_init: Función que es llamada por "scheduler_init". Se encarga de cargar los contextos por primera vez, tanto de tareas como el de Kernel (en realidad carga la TSS que luego es cargada en ltr).
+** reset_contexts: Una vez terminadas las tareas (o sea que llegaron a halt) tienen que ser reseteados sus contextos. De esto se encarga la función citada.
 
 * screen.asm: Este archivo contiene todo el código encargado de mostrar en pantalla las letras y números requeridos en el proyecto.
 
 * task1.asm, task2.asm, task3.asm: Son las tareas administradas por el scheduler. Task1 y task2 tienen sumas que se implementan mediante SIMD y tasy3 simplemente se pone en halt (tarea idle).
 
-*timer.asm: Aquí se encuentran los contadores del sistema. Ambos contadores de tiempo de las tareas y el de la pantalla de inicio son controlados por el código que él contiene.
+* timer.asm: Aquí se encuentran los contadores del sistema. Ambos contadores de tiempo de las tareas y el de la pantalla de inicio son controlados por el código que él contiene.
 
 
 
