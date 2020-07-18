@@ -56,16 +56,16 @@ Base de la Tabla de Paginas: mem.fis. 0x00114000
 |Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|TEXT Tarea 1        |IdxTab = 0x300 (0x00116C00)|0x00300000 + Atributos|
 |Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|BSS Tarea 1         |IdxTab = 0x301 (0x00116C04)|0x00301000 + Atributos|
 |Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|DATA R Tarea 1      |IdxTab = 0x302 (0x00116C08)|0x00302000 + Atributos|
+|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|DATA RW Tarea 1     |IdxTab = 0x303 (0x00116C0C)|0x00303000 + Atributos|
+|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|TEXT Tarea 2        |IdxTab = 0x310 (0x00116C40)|0x00310000 + Atributos|
+|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|BSS Tarea 2         |IdxTab = 0x311 (0x00116C44)|0x00311000 + Atributos|
+|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|DATA R Tarea 2      |IdxTab = 0x312 (0x00116C48)|0x00312000 + Atributos|
+|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|DATA RW Tarea 2     |IdxTab = 0x313 (0x00116C4C)|0x00313000 + Atributos|
 |Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|
 |Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|
 |Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|
 |Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|
-|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|
-|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|
-|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|
-|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|
-|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|
-|Tabla 3|IdxDir = 0x004 (0x00110010)|0x00116000 + Atributos|
+
 
 
 
@@ -73,105 +73,7 @@ Base de la Tabla de Paginas: mem.fis. 0x00114000
 
   
  
-  |_______________________________________________|________________________________________________|
-  |  Tabla 3 (está 4k mas arriba que la anterior) |    Inicio Paginas 1 (Para Nucleo)              |
-  |                                               |                                                |
-  | Ubicacion en Directorio:                      | Ubicacion en la Tabla:                         |
-  |        (IdxDir = 0x004)                       |        (IdxTab = 0x200)                        |
-  |        0x00110000 + IdxDir * 4 = 0x00110010   |        0x00116000 + IdxTab * 4 = 0x00116800    |
-  |                                               |                                                |
-  | Va a guardar la direccion:                    | Va a guardar la direccion:                     |
-  |        0x00116000  (Tabla 3)                  |        0x00200000  (Nucleo)                    |
-  |                                               |________________________________________________|
-  |                                               |    Inicio Paginas 2 (Para Tablas de Digitos)   |
-  |                                               |                                                |
-  |                                               | Ubicacion en la Tabla:                         |
-  |                                               |        (IdxTab = 0x210)                        |
-  |                                               |        0x00116000 + IdxTab * 4 = 0x00116840    |
-  |                                               |                                                |
-  |                                               | Va a guardar la direccion:                     |
-  |                                               |        0x00210000  (Tablas de Digitos)         |
-  |                                               |________________________________________________|
-  |                                               |    Inicio Paginas 3 (Para Datos)               |
-  |                                               |                                                |
-  |                                               | Ubicacion en la Tabla:                         |
-  |                                               |        (IdxTab = 0x202)                        |
-  |                                               |        0x00116000 + IdxTab * 4 = 0x00116808    |
-  |                                               |                                                |
-  |                                               | Va a guardar la direccion:                     |
-  |                                               |        0x00202000  (Datos)                     |
-  |                                               |________________________________________________|
-  |                                               |    Inicio Paginas 4 (Para TEXT Tarea 1)        |
-  |                                               |                                                |
-  |                                               | Ubicacion en la Tabla:                         |
-  |                                               |        (IdxTab = 0x300)                        |
-  |                                               |        0x00116000 + IdxTab * 4 = 0x00116C00    |
-  |                                               |                                                |
-  |                                               | Va a guardar la direccion:                     |
-  |                                               |        0x00300000  (TEXT Tarea 1)              |
-  |                                               |________________________________________________|
-  |                                               |    Inicio Paginas 5 (Para BSS Tarea 1)         |
-  |                                               |                                                |
-  |                                               | Ubicacion en la Tabla:                         |
-  |                                               |        (IdxTab = 0x301)                        |
-  |                                               |        0x00116000 + IdxTab * 4 = 0x00116C04    |
-  |                                               |                                                |
-  |                                               | Va a guardar la direccion:                     |
-  |                                               |        0x00301000  (BSS Tarea 1)               |
-  |                                               |________________________________________________|
-  |                                               |    Inicio Paginas 6 (Para DATA R Tarea 1)      |
-  |                                               |                                                |
-  |                                               | Ubicacion en la Tabla:                         |
-  |                                               |        (IdxTab = 0x302)                        |
-  |                                               |        0x00116000 + IdxTab * 4 = 0x00116C08    |
-  |                                               |                                                |
-  |                                               | Va a guardar la direccion:                     |
-  |                                               |        0x00302000  (DATA R Tarea 1)            |
-  |                                               |________________________________________________|
-  |                                               |    Inicio Paginas 7 (Para DATA RW Tarea 1)     |
-  |                                               |                                                |
-  |                                               | Ubicacion en la Tabla:                         |
-  |                                               |        (IdxTab = 0x303)                        |
-  |                                               |        0x00116000 + IdxTab * 4 = 0x00116C0C    |
-  |                                               |                                                |
-  |                                               | Va a guardar la direccion:                     |
-  |                                               |        0x00303000  (DATA RW Tarea 1)           |
-  |                                               |________________________________________________|
-  |                                               |    Inicio Paginas 8 (Para TEXT Tarea 2)        |
-  |                                               |                                                |
-  |                                               | Ubicacion en la Tabla:                         |
-  |                                               |        (IdxTab = 0x310)                        |
-  |                                               |        0x00116000 + IdxTab * 4 = 0x00116C40    |
-  |                                               |                                                |
-  |                                               | Va a guardar la direccion:                     |
-  |                                               |        0x00310000  (TEXT Tarea 2)              |
-  |                                               |________________________________________________|
-  |                                               |    Inicio Paginas 9 (Para BSS Tarea 2)         |
-  |                                               |                                                |
-  |                                               | Ubicacion en la Tabla:                         |
-  |                                               |        (IdxTab = 0x311)                        |
-  |                                               |        0x00116000 + IdxTab * 4 = 0x00116C44    |
-  |                                               |                                                |
-  |                                               | Va a guardar la direccion:                     |
-  |                                               |        0x00311000  (BSS Tarea 2)               |
-  |                                               |________________________________________________|
-  |                                               |    Inicio Paginas 10 (Para DATA R Tarea 2)     |
-  |                                               |                                                |
-  |                                               | Ubicacion en la Tabla:                         |
-  |                                               |        (IdxTab = 0x312)                        |
-  |                                               |        0x00116000 + IdxTab * 4 = 0x00116C48    |
-  |                                               |                                                |
-  |                                               | Va a guardar la direccion:                     |
-  |                                               |        0x00312000  (DATA R Tarea 2)            |
-  |                                               |________________________________________________|
-  |                                               |    Inicio Paginas 11 (Para DATA RW Tarea 2)    |
-  |                                               |                                                |
-  |                                               | Ubicacion en la Tabla:                         |
-  |                                               |        (IdxTab = 0x313)                        |
-  |                                               |        0x00116000 + IdxTab * 4 = 0x00116C4C    |
-  |                                               |                                                |
-  |                                               | Va a guardar la direccion:                     |
-  |                                               |        0x00313000  (DATA RW Tarea 2)           |
+ 
   |                                               |________________________________________________|
   |                                               |    Inicio Paginas 12 (Para TEXT Tarea 3)       |
   |                                               |                                                |
