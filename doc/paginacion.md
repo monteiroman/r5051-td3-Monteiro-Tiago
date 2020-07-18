@@ -39,13 +39,11 @@ El mapa de paginación propuesto para este proyecto se muestra a continuación. 
 Como se mencionó anteriormente, solo se explica la estructura de tablas para kernel ya que para las tareas es igual salvo porque no se incluyen en el directorio las secciones de memoria que no correspondan a la tarea en ejecución.
 
 
-   Base del Directorio:          mem.fis.  0x00110000
-   Base de la Tabla de Paginas:  mem.fis.  0x00114000
+Base del Directorio: mem.fis. 0x00110000
+   
+Base de la Tabla de Paginas: mem.fis. 0x00114000
 
-___________________________________________;
-                                           ;
-           Directorio de Kernel            ;
-___________________________________________;
+
   __________________________________________________________________________________________________
   |      Entrada en Directorio de Tabla 1         |    Inicio Paginas 1 (Para Inicializacion ROM)  |
   |                                               |                                                |
