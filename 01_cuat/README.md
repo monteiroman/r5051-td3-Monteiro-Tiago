@@ -1,4 +1,4 @@
-# Tecnicas Digitales III 2020
+# Tecnicas Digitales III Primer Cuatrimestre 2020
 	
 ## Tiago Monteiro - Legajo: 142035-5
 
