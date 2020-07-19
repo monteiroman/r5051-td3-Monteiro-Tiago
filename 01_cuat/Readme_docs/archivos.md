@@ -1,6 +1,6 @@
 ## Archivos del proyecto
 
-### Los archivos a los que se hace mención aquí se encuentran en la carpeta [/01_cuat/tp_01_15/src](/01_cuat/tp_01_15/src).
+### Los archivos a los que se hace mención aquí se encuentran en la carpeta [/tp_01_15/src](/01_cuat/tp_01_15/src).
 
 * ###### bios.asm: 
     Es el que se ejecuta luego de as inicializaciones encontradas en _init.asm_. Se encarga de copiar el kernel a memoria y las rutinas de interrupciones a RAM en primera instancia. Esto se decidió de esta manera para que luego de paginar se pudieran poner esas paginas como solo lectura en todo momento. Luego, se encarga de paginar, llama a la función de paginación y setea los bits correspondientes de CR0 así como también carga el registro CR3. A continuación, se encarga de llenar la tabla que se usa para determinar las teclas presionadas, copiar el resto del código (de las tareas) a RAM, carga la GDT a RAM, inicializa la IDT, el pic y setea los bits necesarios para el uso de SIMD. Por último, llama a la función "scheduler_init" que se encuenta en _scheduler.asm_ para inicializar el Scheduler.
@@ -60,7 +60,7 @@
 * ###### biosLS.lds:
     Script que describe las secciones de memoria y las etiquetas que hacen referencia a direcciones de memoria del proyecto.
 
-### Los archivos a los que se hace mención a continuación se encuentran en la carpeta [/01_cuat/tp_01_15](/01_cuat/tp_01_15).
+### Los archivos a los que se hace mención a continuación se encuentran en la carpeta [/tp_01_15](/01_cuat/tp_01_15).
 
 * ###### Makefile:
     Script que se encarga de la compilación del proyecto tal como se intica [aqui](/01_cuat/Readme_docs/makefile.md).
