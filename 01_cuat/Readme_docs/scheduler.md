@@ -4,7 +4,7 @@
 
 Es el encargado de manejar la multiplexación en tiempo de las tareas. Cada tarea está un tiempo limitado determinado por el timertick ejecutando código.
 
-![Alt text](/doc/img/scheduler.png )
+![Alt text](01_cuat/Readme_docs/img/scheduler.png )
 
 La imagen de arriba es del profesor Dario Alpern.
 
