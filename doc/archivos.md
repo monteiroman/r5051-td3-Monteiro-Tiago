@@ -52,7 +52,7 @@ Los archivos a los que se hace mención aquí se encuentran en la carpeta [/Ejer
     Este archivo contiene todo el código encargado de mostrar en pantalla las letras y números requeridos en el proyecto.
 
 * ###### task1.asm, task2.asm, task3.asm: 
-    Son las tareas administradas por el scheduler. Task1 y task2 tienen sumas que se implementan mediante SIMD y tasy3 simplemente se pone en halt (tarea idle).
+    Son las tareas administradas por el scheduler. Task1 y Task2 tienen sumas que se implementan mediante SIMD y Task3 simplemente se pone en halt (tarea idle).
 
 * ###### timer.asm: 
     Aquí se encuentran los contadores del sistema. Ambos contadores de tiempo de las tareas y el de la pantalla de inicio son controlados por el código que él contiene.
