@@ -3,19 +3,19 @@
 ## Tiago Monteiro - Legajo: 142035-5
 
 Las explicaciones que se encuentran en este readme hacen referencia al ejercicio 15 que es el integrador.
-Todos los archivos del mismo se encuentran en [Ejercicios/Ejercicio_15](/Ejercicios/Ejercicio_15).
+Todos los archivos del mismo se encuentran en [tp_01_15](/tp_01_15).
 
-### [Archivos del proyecto](/doc/archivos.md)
+### [Archivos del proyecto](/Readme_docs/archivos.md)
 
-### [Paginación](/doc/paginacion.md)
+### [Paginación](/Readme_docs/paginacion.md)
 
-### [Pantalla](/doc/pantalla.md)
+### [Pantalla](/Readme_docs/pantalla.md)
 
-### [Scheduler](/doc/scheduler.md)
+### [Scheduler](/Readme_docs/scheduler.md)
 
-### [Teclado](/doc/teclado.md)
+### [Teclado](/Readme_docs/teclado.md)
 
-### [Makefile](/doc/makefile.md)
+### [Makefile](/Readme_docs/makefile.md)
 
 
 
