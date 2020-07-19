@@ -5,17 +5,17 @@
 Las explicaciones que se encuentran en este readme hacen referencia al ejercicio 15 que es el integrador.
 Todos los archivos del mismo se encuentran en [tp_01_15](/01_cuat/tp_01_15).
 
-### [Archivos del proyecto](/Readme_docs/archivos.md)
+### [Archivos del proyecto](/01_cuat/Readme_docs/archivos.md)
 
-### [Paginación](/Readme_docs/paginacion.md)
+### [Paginación](/01_cuat/Readme_docs/paginacion.md)
 
-### [Pantalla](/Readme_docs/pantalla.md)
+### [Pantalla](/01_cuat/Readme_docs/pantalla.md)
 
-### [Scheduler](/Readme_docs/scheduler.md)
+### [Scheduler](/01_cuat/Readme_docs/scheduler.md)
 
-### [Teclado](/Readme_docs/teclado.md)
+### [Teclado](/01_cuat/Readme_docs/teclado.md)
 
-### [Makefile](/Readme_docs/makefile.md)
+### [Makefile](/01_cuat/Readme_docs/makefile.md)
 
 
 
