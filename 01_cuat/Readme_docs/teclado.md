@@ -2,7 +2,7 @@
 
 Cada vez que se presiona una tecla, esta se guarda en el buffer circular de 9 bytes. Cuando se presiona la tecla enter se copian los caracteres ingresados que estaban guardados en el buffer a memoria.
 
-Cada vez que se presiona una tecla esta se interpreta como un símbolo de 4 bits, es decir que en un byte entran 2. Por esta razón se eligió llenar el buffer en el orden que van llegando los caracteres y luego se los ordena para guardarlos en memoria.
+Cada tecla representa un símbolo de 4 bits, es decir que en un byte entran 2. Por esta razón se eligió llenar el buffer en el orden que van llegando los caracteres y luego se los ordena para guardarlos en memoria.
 
 Soy conciente que no debe ser lo óptimo pero a esa altura del año fué lo que mejor me salió.
 
@@ -22,7 +22,7 @@ En esta lista los números tienen que ser guardados en el orden correcto para qu
 
 En este caso puedo levantar byte a byte desde el buffer circular. RECORRO EN DIRECCION INVERSA AL LLENADO.
 
-Ejemplo: En este caso se ingresaron 20 números y se tienen que guardar los ultimos 16 en memoria, es por esto que los números del byte 1 no son de importancia. 
+Ejemplo: se ingresaron 20 números y se tienen que guardar los ultimos 16 en memoria, los números del byte 1 no son de importancia. 
 
 Buffer circular:
 
@@ -42,7 +42,7 @@ nX: nible a guardar cuyo número denota su orden de entrada al buffer circular.
 
 Cuando la cantidad de nibles es impar el problema que se presenta es que quedan dos nibles cruzados. Estos los tengo que tratar especialmente.
 
-Ejemplo: En este caso se ingresaron 21 números y se tienen que guardar los ultimos 16 en memoria, es por esto que los números del byte 1 no son de importancia. 
+Ejemplo: se ingresaron 21 números y se tienen que guardar los ultimos 16 en memoria, la parte baja del byte 1 y la parte alta del byte 2 no son de importancia. 
 
 Buffer circular:
 
