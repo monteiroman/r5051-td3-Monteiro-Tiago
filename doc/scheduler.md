@@ -17,8 +17,5 @@ El primer paso en el scheduler es setear los contextos con los valores de inicio
 La tss que se carga en el descriptor al que apunta "tr" tiene solo la dirección del selector de datos con privilegio 0 para "ss" y la dirección lineal de la pila con privilegio 0 para las tareas que, debido a que tienen las tres la misma dirección lineal, no es necesario cambiar una vez que se inicia el sistema.
 
 
-#### Cargado de contexto entrante a memoria
-
-#### Guardado de contexto saliente
 
 #### Politica del scheduler
