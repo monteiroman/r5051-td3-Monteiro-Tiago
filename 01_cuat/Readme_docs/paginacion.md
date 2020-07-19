@@ -1,6 +1,6 @@
 ## Paginación
 
-Existe una tabla de paginación propuesta por la cátedra que fue la que se siguió en este proyecto. Se utilizadon 4 directorios para el programa, cada uno correspondía a una tarea (3 en total) y un cuarto que correspondía a kernel. Este último es el que se explica con mayor detalle en la sección _Estructura de tablas para Kernel_. Los otros tres son similares pero sin las secciones correspondientes a las otras tareas.
+Existe una tabla de paginación propuesta por la cátedra que fue la que se siguió en este proyecto. Se utilizaron 4 directorios para el programa, cada uno correspondía a una tarea (3 en total) y un cuarto que correspondía a kernel. Este último es el que se explica con mayor detalle en la sección _Estructura de tablas para Kernel_. Los otros tres son similares pero sin las secciones correspondientes a las otras tareas.
 
 Cabe aclarar que una vez que el scheduler empieza a distribuir el uso del procesador entre las tareas, el directorio de kernel no se vuelve a utilizar.
 
@@ -39,8 +39,9 @@ El mapa de paginación propuesto para este proyecto se muestra a continuación. 
 Como se mencionó anteriormente, solo se explica la estructura de tablas para kernel ya que para las tareas es igual salvo porque no se incluyen en el directorio las secciones de memoria que no correspondan a la tarea en ejecución.
 
 
-Base del Directorio: mem.fis. 0x00110000
-Base de la Tabla de Paginas: mem.fis. 0x00114000
+Base del Directorio: 0x00110000 (mem.fis.)
+
+Base de la Tabla de Paginas: 0x00114000 (mem.fis.)
 
 |Entrada en Directorio|Ubicacion en Directorio (direccion física)|Va a guardar la direccion|Entrada de Tabla|Ubicacion en la Tabla (direccion física)|Va a guardar la direccion|
 |:---:|:---:|:---:|:---:|:---:|:---:|
@@ -68,14 +69,18 @@ Base de la Tabla de Paginas: mem.fis. 0x00114000
 |Tabla 4|IdxDir = 0x07F (0x001101FC)|0x00117000 + Atributos|Pila Nucleo         |IdxTab = 0x308 (0x00117C20)|0x1FF08000 + Atributos|
 
 
-A partir de la dirección física 0x08000000 se guardan las paginas no mapeadas al inicio del programa (esta funcionalidad era requerida para el ejercicio 12 luego de este se pedía que no se borre pero que se deshabilite).
+A partir de la dirección física 0x08000000 se guardan las paginas no mapeadas al inicio del programa (esta funcionalidad era requerida para el ejercicio 12 luego de éste se pedía que no se borre pero que se deshabilite).
 
-Para las paginas de las tareas se aplica la misma logica. En cada una de las tareas se paginó todo lo que sea de privilegio 0 mas lo que corresponde a cada una con sus respectivas pilas.
-   El directorio de la Tarea 1 comienza en 111000 y las tablas en 0x0017E000
-   El directorio de la Tarea 2 comienza en 112000 y las tablas en 0x00183000
-   El directorio de la Tarea 3 comienza en 113000 y las tablas en 0x00188000
+Para las paginas de las tareas se aplica la misma lógica. En cada una de las tareas se paginó todo lo que sea de privilegio 0 mas lo que corresponde a cada una con sus respectivas pilas.
+
+   El directorio de la Tarea 1 comienza en 111000 y las tablas en 0x0017E000.
+   
+   El directorio de la Tarea 2 comienza en 112000 y las tablas en 0x00183000.
+   
+   El directorio de la Tarea 3 comienza en 113000 y las tablas en 0x00188000.
    
 Se debe tener en cuenta que el atributo que se guarda en la tabla es el que primero se ingresa, es decir, con el que se genera por primera vez la tabla.
-  Por ejemplo: El atributo de la tabla 3 sera el que se pase a la funcion 
-               paging al paginar las direcciones de memoria de la sección 
-               llamada KERNEL que es la primera que se pagina.
+  
+  Por ejemplo: 
+  
+  El atributo de la tabla 3 será el que se pase a la función paging al paginar las direcciones de memoria de la sección llamada KERNEL que es la primera que se pagina.
