@@ -3,7 +3,7 @@
 ### Los archivos a los que se hace mención aquí se encuentran en la carpeta [/tp_01_15/src](/01_cuat/tp_01_15/src).
 
 * ###### bios.asm: 
-    Es el que se ejecuta luego de as inicializaciones encontradas en _init.asm_. Se encarga de copiar el kernel a memoria y las rutinas de interrupciones a RAM en primera instancia. Esto se decidió de esta manera para que luego de paginar se pudieran poner esas paginas como solo lectura en todo momento. Luego, se encarga de paginar, llama a la función de paginación y setea los bits correspondientes de CR0 así como también carga el registro CR3. A continuación, se encarga de llenar la tabla que se usa para determinar las teclas presionadas, copiar el resto del código (de las tareas) a RAM, carga la GDT a RAM, inicializa la IDT, el pic y setea los bits necesarios para el uso de SIMD. Por último, llama a la función "scheduler_init" que se encuenta en _scheduler.asm_ para inicializar el Scheduler.
+    Es el que se ejecuta luego de las inicializaciones encontradas en _init.asm_. Se encarga de copiar el kernel a memoria y las rutinas de interrupciones a RAM, en primera instancia. Esto se decidió de esta manera para que luego de paginar se pudieran poner esas paginas como solo lectura en todo momento. Luego, se encarga de paginar, llama a la función de paginación y setea los bits correspondientes de CR0 así como también carga el registro CR3. A continuación, se encarga de llenar la tabla que se usa para determinar las teclas presionadas, copiar el resto del código (de las tareas) a RAM, carga la GDT a RAM, inicializa la IDT, el pic y setea los bits necesarios para el uso de SIMD. Por último, llama a la función "scheduler_init" que se encuenta en _scheduler.asm_ para inicializar el Scheduler.
 
 * ###### copy.asm: 
     Este archivo contiene el código para copiar pedazos de memoria. Se utilizó para copiar de ROM a RAM.
@@ -18,14 +18,14 @@
     Archivo no escrito por el alumno que fue provisto por la cátedra y que es incluido en "init.asm". Se encarga de inicializar el video en Bochs.
 
 * ###### irq_handlers.asm: 
-    Contiene los manejadores de interrupciones, se encarga de manejar las interrupciones de timer, teclaro y system calls (halt, read y print).
+    Contiene los manejadores de interrupciones que se encargan de manejar las interrupciones de timer, teclaro y system calls (halt, read y print).
 
 * ###### keyboard.asm: 
     Este archivo es el que contiene el código de la atención de la interrupción de teclado "keyboard_routine", la función de escritura en el buffer "save_number_in_buffer" y la función de guardado en memoria del contenido del buffer "save_buffer".
     La función "save_number_in_buffer" usa la tabla que se define al principio del archivo (y que carga bios.asm) para encontrar cual fué la tecla presionada.
 
 * ###### paging.asm: 
-    Contiene las funciones encargadas de armar los árboles de paginación de cada tarea. Se pagina un directorio de Kernel y uno para cada tarea. El de Kernel es el usado durante toda la inicialización del programa que luego se deja de usar al comenzar a correr el Scheduler. En cada directorio de tarea se paginaron todas las tablas correspondientes al Kernel mas las correspondientes particularmente a la tarea en ejecición. Es decir, las tareas no pueden verse las páginas entre ellas.
+    Contiene las funciones encargadas de armar los árboles de paginación de cada tarea. Se pagina un directorio de Kernel y uno para cada tarea. El de Kernel es el usado durante toda la inicialización del programa que luego se deja de usar al comenzar a correr el Scheduler. En cada directorio de tarea se paginaron todas las tablas correspondientes al Kernel mas las correspondientes particularmente a la tarea en ejecución. Es decir, las tareas no pueden verse las páginas entre ellas.
 
 * ###### pic_init.asm: 
     Contiene todo el código dedicado a la inicialixación de los pics encargados del teclado y del timer del sistema.
@@ -46,7 +46,7 @@
     
     - contexts_init: Función que es llamada por "scheduler_init". Se encarga de cargar los contextos por primera vez, tanto de tareas como el de Kernel (en realidad carga la TSS que luego es cargada en ltr).
     
-    - reset_contexts: Una vez terminadas las tareas (o sea que llegaron a halt) tienen que ser reseteados sus contextos. De esto se encarga la función citada.
+    - reset_contexts: Una vez terminadas las tareas (o sea, que llegaron a halt) tienen que ser reseteados sus contextos. De esto se encarga ésta función.
 
 * ###### screen.asm: 
     Este archivo contiene todo el código encargado de mostrar en pantalla las letras y números requeridos en el proyecto.
