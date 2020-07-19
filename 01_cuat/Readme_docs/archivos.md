@@ -63,7 +63,7 @@
 ### Los archivos a los que se hace mención a continuación se encuentran en la carpeta [/tp_01_15](/01_cuat/tp_01_15).
 
 * ###### Makefile:
-    Script que se encarga de la compilación del proyecto tal como se intica [aqui](/01_cuat/Readme_docs/makefile.md).
+    Script que se encarga de la compilación del proyecto tal como se indica [aqui](/01_cuat/Readme_docs/makefile.md).
 
 * ###### bochs.cfg:
     Archivo de configuración del bochs.
