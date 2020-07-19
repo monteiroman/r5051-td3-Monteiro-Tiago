@@ -19,3 +19,5 @@ La tss que se carga en el descriptor al que apunta "tr" tiene solo la dirección
 
 
 #### Politica del scheduler
+
+En pos de que una tarea no bloquee a otra, en cada timertick el scheduler va a pasar de una tarea a la otra obligadamente, siempre y cuando las condiciones impuestas por el proyecto estén dadas. Es decir, si se está ejecutando la tarea 1 debido a que se cumplió su tiempo de ejecución (cada 100ms) y tambien se tiene que ejecutar la tarea 2 porque su flag está en uno (cada 200ms), supongamos que la tarea 1 no terminó de ejecutar su suma en los 10ms que le corresponde, el scheduler ejecutará la tarea 2 sin importar que la tarea 1 no haya terminado. Esto será así hasta que se termine el tiempo de la tarea 2 (10ms) volviendo a la tarea 1 si fuera necesario.
