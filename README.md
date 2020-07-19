@@ -17,7 +17,6 @@ Todos los archivos del mismo se encuentran en [Ejercicios/Ejercicio_15](/Ejercic
 
 ### [Makefile](/doc/makefile.md)
 
-### [Linkerscript](/doc/linker.md)
 
 
 
