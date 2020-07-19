@@ -26,11 +26,11 @@ Ejemplo: En este caso se ingresaron 20 números y se tienen que guardar los ulti
 
 Buffer circular:
 
-![Alt text](/doc/img/buf_circ_par.png)
+![Alt text](01_cuat/Readme_docs/img/buf_circ_par.png)
 
 Número guardado en memoria: (Para poder levantarlo en un registro)
 
-![Alt text](/doc/img/en_mem.png)
+![Alt text](01_cuat/Readme_docs/img/en_mem.png)
 
 Siendo:
 
@@ -46,11 +46,11 @@ Ejemplo: En este caso se ingresaron 21 números y se tienen que guardar los ulti
 
 Buffer circular:
 
-![Alt text](/doc/img/buf_circ_impar.png)
+![Alt text](01_cuat/Readme_docs/img/buf_circ_impar.png)
 
 Número guardado en memoria: (Para poder levantarlo en un registro)
 
-![Alt text](/doc/img/en_mem.png)
+![Alt text](01_cuat/Readme_docs/img/en_mem.png)
 
 Siendo:
 
