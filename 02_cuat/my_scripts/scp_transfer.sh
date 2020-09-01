@@ -3,10 +3,12 @@
 
 #! /usr/bin/bash
 file=
-defPath="server/"
+scpOptions=
+destPath="server/"
 ipAddr="192.168.7.2"
 usrName="ubuntu"
 pwd="temppwd"
+strMsg="Archivo"
 
 
 #____________________ Functions ____________________#
@@ -22,11 +24,11 @@ help(){
 }
 
 transferFile(){
-    sshpass -p $pwd scp $file $usrName@$ipAddr:$defPath
+    sshpass -p $pwd scp $scpOptions $file $usrName@$ipAddr:$destPath
 
     if [ $? -eq 0 ];
     then
-        printf "\n\t>>>> ¡Archivo copiado a la BBB en "\"$defPath\"" con éxito! <<<<\n\n"
+        printf "\n\t>>>> ¡"$strMsg" copiado a la BBB en "\"$destPath\"" con éxito! <<<<\n\n"
     else
         printf "\n\t>>>>¡¡Error al copiar el archivo!!.<<<<\n\n"
     fi
@@ -51,7 +53,10 @@ while [ "$1" != "" ]; do
                     pwd=$1
                     ;;
         -r )    shift
-                    defPath=$1
+                    destPath=$1
+                    ;;
+        -R )        scpOptions="-rp"
+                    strMsg="Directorio"
                     ;;
         -h )        help
                     exit
@@ -62,7 +67,7 @@ while [ "$1" != "" ]; do
     shift
 done
 
-if [ -z "$pwd" ] || [ -z "$ipAddr" ] || [ -z "$defPath" ] || [ -z "$usrName" ] || [ -z "$file" ]
+if [ -z "$pwd" ] || [ -z "$ipAddr" ] || [ -z "$destPath" ] || [ -z "$usrName" ] || [ -z "$file" ]
 then
     help
     exit
