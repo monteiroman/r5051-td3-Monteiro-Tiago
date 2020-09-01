@@ -14,12 +14,27 @@ connect(){
     sshpass -p $pwd ssh -t $usrName@$ipAddr "cd $initPath ; bash"
 }
 
+### Para poder usar esta funcion agregar:
+#       
+#       ubuntu ALL=NOPASSWD: /sbin/halt, /sbin/reboot, /sbin/poweroff
+#
+# Al archivo:
+#       
+#       /etc/sudoers
+#
+# Tener en cuenta que solo será valido para el usuario "ubuntu".
+#
+poweroff(){
+    sshpass -p $pwd ssh -t $usrName@$ipAddr "sudo poweroff; "
+}
+
 help(){
     printf "\nModo de uso:\n\t./ssh_connect.sh [OPCIONES]\n"
     printf "\nOpciones:\n\t-r: Path de inicio de la conección. Por defecto es ~/server/.\n"
     printf "\t-d: Dirección ip a conectarse. Por defecto es 192.168.7.2.\n"
     printf "\t-n: Nombre de usuario. Por defecto es \"ubuntu\".\n"
     printf "\t-p: Password. Por defecto es \"temppwd\".\n"
+    printf "\t-x: Apaga la BBB.\n"
     printf "\t-h: Ayuda. Muestra este menu.\n\n"
 }
 
@@ -39,6 +54,9 @@ while [ "$1" != "" ]; do
                     ;;
         -r )    shift
                     initPath=$1
+                    ;;
+        -x )        poweroff
+                    exit
                     ;;
         -h )        help
                     exit
