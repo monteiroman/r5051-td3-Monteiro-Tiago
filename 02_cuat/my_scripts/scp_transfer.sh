@@ -6,7 +6,7 @@ file=
 scpOptions=
 destPath="server/"
 ipAddr="192.168.7.2"
-usrName="ubuntu"
+usrName="debian"
 pwd="temppwd"
 strMsg="Archivo"
 

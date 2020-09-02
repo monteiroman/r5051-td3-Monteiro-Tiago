@@ -6,8 +6,9 @@
 #! /usr/bin/bash
 initPath="server/"
 ipAddr="192.168.7.2"
-usrName="ubuntu"
+usrName="debian"
 pwd="temppwd"
+poweroffFlag=false
 
 #____________________ Functions ____________________#
 connect(){
@@ -16,13 +17,14 @@ connect(){
 
 ### Para poder usar esta funcion agregar:
 #       
-#       ubuntu ALL=NOPASSWD: /sbin/halt, /sbin/reboot, /sbin/poweroff
+#       debian ALL=NOPASSWD: /sbin/halt, /sbin/reboot, /sbin/poweroff
 #
 # Al archivo:
 #       
 #       /etc/sudoers
 #
-# Tener en cuenta que solo será valido para el usuario "ubuntu".
+# Tener en cuenta que solo será valido para el usuario "debian".
+# en caso de usar otro usuario cambiar el nombre.
 #
 poweroff(){
     sshpass -p $pwd ssh -t $usrName@$ipAddr "sudo poweroff; "
@@ -55,8 +57,7 @@ while [ "$1" != "" ]; do
         -r )    shift
                     initPath=$1
                     ;;
-        -x )        poweroff
-                    exit
+        -x )        poweroffFlag=true
                     ;;
         -h )        help
                     exit
@@ -70,6 +71,12 @@ done
 if [ -z "$pwd" ] || [ -z "$ipAddr" ] || [ -z "$initPath" ] || [ -z "$usrName" ]
 then
     help
+    exit
+fi
+
+if [ $poweroffFlag = true ]
+then
+    poweroff
     exit
 fi
 
