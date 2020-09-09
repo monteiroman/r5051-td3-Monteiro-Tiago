@@ -4,7 +4,7 @@
 #! /usr/bin/bash
 file=
 scpOptions=
-destPath="server/"
+destPath="/home/debian"
 ipAddr="192.168.7.2"
 usrName="debian"
 pwd="temppwd"
@@ -16,7 +16,7 @@ strMsg="Archivo"
 help(){
     printf "\nModo de uso:\n\t./scp_transfer.sh [OPCIONES]\n"
     printf "\nOpciones:\n\t-f: Archivo a copiar DEBE DEFINIRSE OBLIGATORIAMENTE.\n"
-    printf "\t-r: Path al cual se copia el archivo. Por defecto es ~/server/.\n"
+    printf "\t-r: Path al cual se copia el archivo. Por defecto es ~.\n"
     printf "\t-d: Dirección ip a la cual se copia el archivo. Por defecto es 192.168.7.2.\n"
     printf "\t-n: Nombre de usuario. Por defecto es \"ubuntu\".\n"
     printf "\t-p: Password. Por defecto es \"temppwd\".\n"
