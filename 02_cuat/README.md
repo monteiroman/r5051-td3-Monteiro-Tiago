@@ -2,19 +2,25 @@
 	
 ## Tiago Monteiro - Legajo: 142035-5
 
-### -------------------------Scripts------------------------------------
+### Scripts
 Para el uso de los scripts de este proyecto se debe ejecutar
-sudo apt-get install sshpass
+sudo apt-get install sshpass.
+Estos scripts se utilizaron para hacer mas simple la conección a la BBB durante los días de trabajo.
 
-### -------------------------Configuración de la BBB para compilación------------
+* scp_transfer: Se encarga de pasar archivos desde y hacia la BBB con valores por defecto que permiten hacer el trabajo mas fácil.
+
+* ssh_connect: Se encarga de conectar la PC a la BBB con valores por defecto, también puede apagar la BBB.
+
+### Configuración de la BBB para compilación
 Para configurar la BBB en caso de tener que regenerar la imagen.
+
     apt update
     apt upgrade
     apt install build-essential linux-header-$(uname -r)
     ln -s /usr/src/linux-headers-$(uname -r)/ /lib/modules/$(uname -r)/build
 
 
-### -------------------------Device tree------------------------------------
+### Device tree
 El archivo .dtb es el binario que va en /boot/dtbs/4.19.94-ti-r42.
 El archivo .dts es el archivo de texto que tengo que editar.
 
