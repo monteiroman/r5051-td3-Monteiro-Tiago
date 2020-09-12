@@ -1,10 +1,15 @@
-
-#Script que me conecta a la BBB los valores por defecto son los de las
-# variables definidas abajo. Todas esas variables se pueden modificar
-# en el momento que se llama al script.
+##################################################################################
+#                                                                                #
+#              Tiago Monteiro. 1420355  2do cuatrimestre 2020                    #
+#                                                                                #
+##################################################################################
+#   Script que me conecta a la BBB los valores por defecto son los de las        #
+#   variables definidas abajo. Todas esas variables se pueden modificar          #
+#   en el momento que se llama al script.                                        #
+##################################################################################
 
 #! /usr/bin/bash
-initPath="server/"
+initPath="/home/debian"
 ipAddr="192.168.7.2"
 usrName="debian"
 pwd="temppwd"
@@ -32,7 +37,7 @@ poweroff(){
 
 help(){
     printf "\nModo de uso:\n\t./ssh_connect.sh [OPCIONES]\n"
-    printf "\nOpciones:\n\t-r: Path de inicio de la conección. Por defecto es ~/server/.\n"
+    printf "\nOpciones:\n\t-r: Path de inicio de la conección. Por defecto es ~.\n"
     printf "\t-d: Dirección ip a conectarse. Por defecto es 192.168.7.2.\n"
     printf "\t-n: Nombre de usuario. Por defecto es \"ubuntu\".\n"
     printf "\t-p: Password. Por defecto es \"temppwd\".\n"
