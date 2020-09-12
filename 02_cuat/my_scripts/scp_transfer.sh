@@ -36,8 +36,9 @@ help(){
 transferFile(){
     if [ "$inv" = false ];
     then
+    # Copia de la PC a la BBB.
         sshpass -p $pwd scp $scpOptions $file $usrName@$ipAddr:$destPath
-
+    # Chequeo de errores en la copia.
         if [ $? -eq 0 ];
         then
             printf "\n\t>>>> ¡"$strMsg" copiado a la BBB en "\"$destPath\"" con éxito! <<<<\n\n"
@@ -45,8 +46,9 @@ transferFile(){
             printf "\n\t>>>>¡¡Error al copiar el archivo!!.<<<<\n\n"
         fi
     else
+    # Copia de la BBB a la PC.
         sshpass -p $pwd scp $scpOptions $usrName@$ipAddr:$file $destPath 
-
+    # Chequeo de errores en la copia.
         if [ $? -eq 0 ];
         then
             printf "\n\t>>>> ¡"$strMsg" copiado a la PC en "\"$destPath\"" con éxito! <<<<\n\n"
