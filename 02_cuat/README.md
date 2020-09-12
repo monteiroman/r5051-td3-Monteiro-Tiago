@@ -32,4 +32,4 @@ El archivo **.dts** es el archivo de texto que tengo que editar. En él hay que 
     
         dtc -I dts -O dtb am335x-boneblack.dts -o am335x-boneblack.dtb
 
-Con *"ls /proc/device-tree/ocp/"* veo si mi device tree está bien hecho.
+Con **"ls /proc/device-tree/ocp/"** veo si mi device tree está bien hecho.
