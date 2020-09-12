@@ -26,10 +26,10 @@ El archivo **.dts** es el archivo de texto que tengo que editar. En él hay que 
 
 * Para decompilar el .dtb:
     
-    dtc -I dtb -O dts am335x-boneblack.dtb -o am335x-boneblack.dts
+        dtc -I dtb -O dts am335x-boneblack.dtb -o am335x-boneblack.dts
 
 * Para compilar el .dts:
     
-    dtc -I dts -O dtb am335x-boneblack.dts -o am335x-boneblack.dtb
+        dtc -I dts -O dtb am335x-boneblack.dts -o am335x-boneblack.dtb
 
 Con "ls /proc/device-tree/ocp/" veo si mi device tree está bien hecho.
