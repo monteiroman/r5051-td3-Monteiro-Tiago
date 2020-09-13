@@ -21,6 +21,9 @@ strMsg="Archivo"
 #____________________ Functions ____________________#
 
 help(){
+    printf "\n\t\t================================================"
+    printf "\n\t\t| COPIADOR DE ARCHIVOS PC => BBB // BBB => PC. |"
+    printf "\n\t\t================================================\n"
     printf "\nModo de uso:\n\t./scp_transfer.sh [OPCIONES]\n"
     printf "\nOpciones:\n\t-f: Path al archivo a copiar DEBE DEFINIRSE OBLIGATORIAMENTE.\n"
     printf "\t-r: Path al cual se copia el archivo. Por defecto es ~.\n"

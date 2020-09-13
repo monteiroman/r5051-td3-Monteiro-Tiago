@@ -33,3 +33,20 @@ El archivo **.dts** es el archivo de texto que tengo que editar. En él hay que 
         dtc -I dts -O dtb am335x-boneblack.dts -o am335x-boneblack.dtb
 
 Con **"ls /proc/device-tree/ocp/"** veo si mi device tree está bien hecho.
+
+
+#### Para hacer andar el device tree
+
+Editar **/boot/uEnv.txt**
+
+Se comenta la siguiente línea:
+
+    #enable_uboot_overlays=1
+
+Se eliminan los comentarios de las siguientes líneas:
+
+    disable_uboot_overlay_emmc=1
+    disable_uboot_overlay_video=1
+    disable_uboot_overlay_audio=1
+    disable_uboot_overlay_wireless=1
+    disable_uboot_overlay_adc=1
