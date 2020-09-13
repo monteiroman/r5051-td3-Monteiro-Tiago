@@ -2,7 +2,12 @@
 	
 ## Tiago Monteiro - Legajo: 142035-5
 
-### Scripts
+### Descripción de puntos importantes del proyecto
+
+### [Device Tree](/02_cuat/device_tree/README.md)
+
+
+### Scripts secundarios usados en el proyecto
 Para el uso de los scripts de este proyecto se debe ejecutar
 sudo apt-get install sshpass.
 Estos scripts se utilizaron para hacer mas simple la conección a la BBB durante los días de trabajo.
@@ -19,6 +24,5 @@ Para configurar la BBB para compilar en forma local en caso de tener que regener
     $ sudo apt install build-essential linux-header-$(uname -r)
     $ sudo ln -s /usr/src/linux-headers-$(uname -r)/ /lib/modules/$(uname -r)/build
 
-### [Device Tree](/02_cuat/device_tree/README.md)
 
 
