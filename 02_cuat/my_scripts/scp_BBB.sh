@@ -3,8 +3,7 @@
 #              Tiago Monteiro. 1420355  2do cuatrimestre 2020                    #
 #                                                                                #
 ##################################################################################
-#   Script que envia archivos a una ubicación determinada o en su defecto a la   # 
-#   cartpeta del proyecto.                                                       #
+#           Script que envia y recibe archivos entre la BBB y la PC              #
 ##################################################################################
 
 #! /usr/bin/bash
