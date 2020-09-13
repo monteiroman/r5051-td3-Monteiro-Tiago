@@ -25,10 +25,12 @@ help(){
     printf "\n\t\t| COPIADOR DE ARCHIVOS PC => BBB // BBB => PC. |"
     printf "\n\t\t================================================\n"
     printf "\nModo de uso:\n\t./scp_transfer.sh [OPCIONES]\n"
-    printf "\nOpciones:\n\t-f: Path al archivo a copiar DEBE DEFINIRSE OBLIGATORIAMENTE.\n"
-    printf "\t-r: Path al cual se copia el archivo. Por defecto es ~.\n"
-    printf "\t-R: Copiar directorio.\n"
-    printf "\t-d: Dirección ip a la cual se realiza la conexion. Por defecto es 192.168.7.2.\n"
+    printf "\nOpciones:\n\t-O: Path del archivo o directorio a copiar.\n"
+    printf "\t    DEBE DEFINIRSE OBLIGATORIAMENTE.\n"
+    printf "\t-D: Path destino al cual se copia el archivo. Por defecto es \"~\".\n"
+    printf "\t-R: Copiar un directorio.\n"
+    printf "\t-d: Dirección ip a la cual se realiza la conexion.\n"
+    printf "\t    Por defecto es 192.168.7.2.\n"
     printf "\t-n: Nombre de usuario. Por defecto es \"ubuntu\".\n"
     printf "\t-p: Password. Por defecto es \"temppwd\".\n"
     printf "\t-i: Sentido inverso, se copia de la BBB a la PC.\n"
@@ -67,7 +69,7 @@ transferFile(){
 ### Parameters Parser ###
 while [ "$1" != "" ]; do
     case $1 in
-        -f )    shift
+        -O )    shift
                     file=$1
                     ;;
         -d )    shift
@@ -79,7 +81,7 @@ while [ "$1" != "" ]; do
 	    -p )    shift
                     pwd=$1
                     ;;
-        -r )    shift
+        -D )    shift
                     destPath=$1
                     ;;
         -R )        scpOptions="-rp"
