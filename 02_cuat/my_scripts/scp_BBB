@@ -7,10 +7,10 @@
 ##################################################################################
 
 #! /usr/bin/bash
-file=
+origPath=
+destPath=
 scpOptions=
 inv=false
-destPath="/home/debian"
 ipAddr="192.168.7.2"
 usrName="debian"
 pwd="temppwd"
@@ -26,7 +26,8 @@ help(){
     printf "\nModo de uso:\n\t./scp_transfer.sh [OPCIONES]\n"
     printf "\nOpciones:\n\t-O: Path del archivo o directorio a copiar.\n"
     printf "\t    DEBE DEFINIRSE OBLIGATORIAMENTE.\n"
-    printf "\t-D: Path destino al cual se copia el archivo. Por defecto es \"~\".\n"
+    printf "\t-D: Path destino al cual se copia el archivo.\n"
+    printf "\t    DEBE DEFINIRSE OBLIGATORIAMENTE.\n"
     printf "\t-R: Copiar un directorio.\n"
     printf "\t-d: Dirección ip a la cual se realiza la conexion.\n"
     printf "\t    Por defecto es 192.168.7.2.\n"
@@ -41,7 +42,7 @@ transferFile(){
     if [ "$inv" = false ];
     then
     # Copia de la PC a la BBB.
-        sshpass -p $pwd scp $scpOptions $file $usrName@$ipAddr:$destPath
+        sshpass -p $pwd scp $scpOptions $origPath $usrName@$ipAddr:$destPath
     # Chequeo de errores en la copia.
         if [ $? -eq 0 ];
         then
@@ -51,7 +52,7 @@ transferFile(){
         fi
     else
     # Copia de la BBB a la PC.
-        sshpass -p $pwd scp $scpOptions $usrName@$ipAddr:$file $destPath 
+        sshpass -p $pwd scp $scpOptions $usrName@$ipAddr:$origPath $destPath 
     # Chequeo de errores en la copia.
         if [ $? -eq 0 ];
         then
@@ -69,7 +70,7 @@ transferFile(){
 while [ "$1" != "" ]; do
     case $1 in
         -O )    shift
-                    file=$1
+                    origPath=$1
                     ;;
         -d )    shift
                     ipAddr=$1
@@ -97,7 +98,7 @@ while [ "$1" != "" ]; do
     shift
 done
 
-if [ -z "$pwd" ] || [ -z "$ipAddr" ] || [ -z "$destPath" ] || [ -z "$usrName" ] || [ -z "$file" ]
+if [ -z "$pwd" ] || [ -z "$ipAddr" ] || [ -z "$destPath" ] || [ -z "$usrName" ] || [ -z "$origPath" ]
 then
     help
     exit
