@@ -36,7 +36,7 @@ poweroff(){
 }
 
 help(){
-    printf "\nModo de uso:\n\t./ssh_connect.sh [OPCIONES]\n"
+    printf "\nModo de uso:\n\t./ssh_BBB [OPCIONES]\n"
     printf "\nOpciones:\n\t-r: Path de inicio de la conección. Por defecto es ~.\n"
     printf "\t-d: Dirección ip a conectarse. Por defecto es 192.168.7.2.\n"
     printf "\t-n: Nombre de usuario. Por defecto es \"ubuntu\".\n"

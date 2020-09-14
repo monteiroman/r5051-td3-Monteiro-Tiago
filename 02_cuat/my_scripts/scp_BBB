@@ -23,7 +23,7 @@ help(){
     printf "\n\t\t================================================"
     printf "\n\t\t| COPIADOR DE ARCHIVOS PC => BBB // BBB => PC. |"
     printf "\n\t\t================================================\n"
-    printf "\nModo de uso:\n\t./scp_transfer.sh [OPCIONES]\n"
+    printf "\nModo de uso:\n\t./scp_BBB [OPCIONES]\n"
     printf "\nOpciones:\n\t-O: Path del archivo o directorio a copiar.\n"
     printf "\t    DEBE DEFINIRSE OBLIGATORIAMENTE.\n"
     printf "\t-D: Path destino al cual se copia el archivo.\n"
