@@ -59,3 +59,6 @@ Se eliminan los comentarios de las siguientes líneas:
     disable_uboot_overlay_audio=1
     disable_uboot_overlay_wireless=1
     disable_uboot_overlay_adc=1
+
+#### Dirección física del Driver I2C
+La dirección física del Driver I2C-2 (el que se usa en este proyecto) es 0x4819C000 

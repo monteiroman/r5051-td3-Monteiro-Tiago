@@ -25,4 +25,10 @@ Para configurar la BBB para compilar en forma local en caso de tener que regener
     $ sudo ln -s /usr/src/linux-headers-$(uname -r)/ /lib/modules/$(uname -r)/build
 
 
+### Como ver mi sensor
+En este proyecto se utilizó el LSM303 que tiene las direcciones 0x19 y 0x1E del I2C-2
+Esto se puede ver con:
 
+    sudo i2cdetect -y -r 2
+
+Cuando se encuentra presente el driver del Linux, es decir, con el device tree original.
