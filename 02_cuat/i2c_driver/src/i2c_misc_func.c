@@ -1,5 +1,7 @@
-#include "../inc/i2c_driver.h"
 
+/*____________________________________________________________________________*/
+
+/*____________________________________________________________________________*/
 
 // Error message with status.
 void print_error_msg_w_status(char* e_action, char* e_file, char* e_func,
@@ -7,7 +9,7 @@ void print_error_msg_w_status(char* e_action, char* e_file, char* e_func,
 
     printk(KERN_ERR "[E]: %s | File: %s | Msg:", e_action, e_file);
     printk(KERN_ERR " ERROR in function: %s, line: %d status: %d)\n", 
-            e_func, e_line, status);
+            e_func, e_line, e_status);
 }
 
 // Error message without status.

@@ -6,9 +6,6 @@
             m_i2c_read
             m_i2c_write
 ______________________________________________________________________________*/
-#include "../inc/i2c_driver.h"
-
-
 
 static int m_i2c_open(struct inode *inode, struct file *file) {
     return 0;

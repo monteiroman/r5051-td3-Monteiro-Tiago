@@ -1,5 +1,4 @@
 
-
 KERNEL_SOURCE := /lib/modules/$(shell uname -r)/build
 PWD := $(shell pwd)
 INCLUDES := $(PWD)/inc

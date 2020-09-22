@@ -18,8 +18,10 @@
 #define CLASS_NAME      "i2c_class"
 #define BASE_MINOR      0
 #define MINOR_COUNT     1
-#define DEVICE_NAME     "td3_i2c"
-#define NAME_SHORT      "td3_i2c"
+#define DEVICE_NAME     "i2c_TM"
+#define NAME_SHORT      "i2c_TM"
+#define DEVICE_PARENT   NULL
+#define DEVICE_DATA     NULL
 
 
 // Function definitions from i2c_driver.c ______________________________________
@@ -33,12 +35,12 @@ void print_error_msg_w_status(char* e_action, char* e_file, char* e_func,
     int e_line, int e_status);
 
 void print_error_msg_wo_status(char* e_action, char* e_file, char* e_func,
-    int e_line, int e_status);
+    int e_line);
 
 void print_info_msg(char* i_action, char* i_file, char* i_msg);
 
 
-struct state {
+static struct {
   struct class *m_i2c_class;
   struct device *m_i2c_device;
   struct cdev m_i2c_cdev;
@@ -47,4 +49,10 @@ struct state {
   unsigned int freq;
   void __iomem *base;
   int irq;
-};
+} state;
+
+struct file_operations mFileOps;
+
+irqreturn_t driver_isr(int irq, void *devid);
+static int m_i2c_probe(struct platform_device *pdev);
+static int m_i2c_remove(struct platform_device *pdev);
