@@ -7,18 +7,18 @@ Estos scripts se utilizaron para hacer mas simple la conección a la BBB durante
 
 * **ssh_BBB**: Se encarga de conectar la PC a la BBB con valores por defecto, también puede apagar la BBB y setear la hora de la placa para poder compilar en ella. Este script necesita un poco mas de configuración, para poder apagar la BBB y setear su hora hay que editar el archivo:
 
-    /etc/sudoers
+        /etc/sudoers
 
-poniendo la siguiente linea al final:
+    poniendo la siguiente linea al final:
 
-    debian ALL=NOPASSWD: /sbin/halt, /sbin/reboot, /sbin/poweroff, /bin/date
+        debian ALL=NOPASSWD: /sbin/halt, /sbin/reboot, /sbin/poweroff, /bin/date
 
-Esto permite ejecutar los comandos **sudo poweroff** y **date -s** sin tener que poner la clave de root.
-Para el caso de la fecha hay que agregar una configuración mas. Se debe setear la zona horaria en GMT-3 con el comando:
+    Esto permite ejecutar los comandos **sudo poweroff** y **date -s** sin tener que poner la clave de root.
+    Para el caso de la fecha hay que agregar una configuración mas. Se debe setear la zona horaria en GMT-3 con el comando:
 
-    sudo timedatectl set-timezone Etc/GMT+3
+        sudo timedatectl set-timezone Etc/GMT+3
 
-Es raro el **+** en vez de **-** pero están invertidos a la hora de setear.
+    Es raro el **+** en vez de **-** pero están invertidos a la hora de setear.
 
 Para poder acceder desde cualquier lugar a estos scripts agregar el path de los mismos a .bashrc, de la siguiente manera: 
 Abrir el archivo __.bashrc__ con: 
