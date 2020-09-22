@@ -4,9 +4,9 @@
 
 ### Descripción de puntos importantes del proyecto
 
-### [Device Tree](/02_cuat/device_tree/README.md)
+### [Device Tree](/02_cuat/Readme_docs/device_tree.md)
 
-### [Scripts secundarios](/02_cuat/my_scripts/README.md)
+### [Scripts secundarios](/02_cuat/Readme_docs/my_scripts.md)
 
 ### NOTAS
 #### Configuración de la BBB para compilación local
@@ -16,7 +16,6 @@ Para configurar la BBB para compilar en forma local en caso de tener que regener
     $ sudo apt upgrade
     $ sudo apt install build-essential linux-header-$(uname -r)
     $ sudo ln -s /usr/src/linux-headers-$(uname -r)/ /lib/modules/$(uname -r)/build
-
 
 #### Como ver mi sensor
 En este proyecto se utilizó el LSM303 que tiene las direcciones 0x19 y 0x1E del I2C-2

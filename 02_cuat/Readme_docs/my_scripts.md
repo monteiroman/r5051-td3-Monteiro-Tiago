@@ -20,6 +20,7 @@ Estos scripts se utilizaron para hacer mas simple la conección a la BBB durante
 
     Es raro el **+** en vez de **-** pero están invertidos a la hora de setear.
 
+#### Acceso
 Para poder acceder desde cualquier lugar a estos scripts agregar el path de los mismos a .bashrc, de la siguiente manera: 
 Abrir el archivo __.bashrc__ con: 
     
@@ -31,4 +32,5 @@ Agregar al final:
 
 Reiniciar la terminal.
 
+#### Notas
 Cada script viene con su texto de ayuda en la opción __-h__.
