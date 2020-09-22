@@ -10,8 +10,6 @@ ______________________________________________________________________________*/
 
 
 
-
-
 static int m_i2c_open(struct inode *inode, struct file *file) {
     return 0;
 }

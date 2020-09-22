@@ -22,6 +22,28 @@ connect(){
 
 ### Para poder usar esta funcion agregar:
 #       
+#       debian ALL=NOPASSWD: /bin/date
+#
+# Al archivo:
+#       
+#       /etc/sudoers
+#
+# Tener en cuenta que solo será valido para el usuario "debian".
+# en caso de usar otro usuario cambiar el nombre.
+#
+# IMPORTANTE: Setear la zona horaria con:
+#
+#       sudo timedatectl set-timezone Etc/GMT+3
+#
+# ¿Suena raro el GMT+3? Si, pero asi se setea en -3
+#
+set_date(){
+    sshpass -p $pwd ssh -t $usrName@$ipAddr \
+    "sudo date +%F -s $(date +%F); sudo date +%T -s $(date +%T)"
+}
+
+### Para poder usar esta funcion agregar:
+#       
 #       debian ALL=NOPASSWD: /sbin/halt, /sbin/reboot, /sbin/poweroff
 #
 # Al archivo:
@@ -37,9 +59,11 @@ poweroff(){
 
 help(){
     printf "\nModo de uso:\n\t./ssh_BBB [OPCIONES]\n"
-    printf "\nOpciones:\n\t-r: Path de inicio de la conección. Por defecto es ~.\n"
+    printf "\nOpciones:\n"
+    prontf "\t-s: Seteo la hora de la BBB en base a la hora de la PC."
+    printf "\t-r: Path de inicio de la conección. Por defecto es ~.\n"
     printf "\t-d: Dirección ip a conectarse. Por defecto es 192.168.7.2.\n"
-    printf "\t-n: Nombre de usuario. Por defecto es \"ubuntu\".\n"
+    printf "\t-n: Nombre de usuario. Por defecto es \"debian\".\n"
     printf "\t-p: Password. Por defecto es \"temppwd\".\n"
     printf "\t-x: Apaga la BBB.\n"
     printf "\t-h: Ayuda. Muestra este menu.\n\n"
@@ -61,6 +85,9 @@ while [ "$1" != "" ]; do
                     ;;
         -r )    shift
                     initPath=$1
+                    ;;
+        -s )    shift
+                    set_date
                     ;;
         -x )        poweroffFlag=true
                     ;;

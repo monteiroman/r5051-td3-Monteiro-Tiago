@@ -15,11 +15,11 @@
 #include <linux/uaccess.h>
 #include <linux/pinctrl/consumer.h>
 
-#define CLASS        "i2c_class"
-#define MINORBASE    0
-#define MINORCOUNT   1
-#define NAME         "td3_i2c"
-#define NAME_SHORT   "td3_i2c"
+#define CLASS_NAME      "i2c_class"
+#define BASE_MINOR      0
+#define MINOR_COUNT     1
+#define DEVICE_NAME     "td3_i2c"
+#define NAME_SHORT      "td3_i2c"
 
 
 // Function definitions from i2c_driver.c ______________________________________
@@ -36,7 +36,6 @@ void print_error_msg_wo_status(char* e_action, char* e_file, char* e_func,
     int e_line, int e_status);
 
 void print_info_msg(char* i_action, char* i_file, char* i_msg);
-
 
 
 struct state {
