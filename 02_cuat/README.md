@@ -4,6 +4,8 @@
 
 ### Descripción de puntos importantes del proyecto
 
+### [Driver I2C y Módulo](/02_cuat/Readme_docs/driver.md)
+
 ### [Device Tree](/02_cuat/Readme_docs/device_tree.md)
 
 ### [Scripts secundarios](/02_cuat/Readme_docs/my_scripts.md)
@@ -17,7 +19,7 @@ Para configurar la BBB para compilar en forma local en caso de tener que regener
     $ sudo apt install build-essential linux-header-$(uname -r)
     $ sudo ln -s /usr/src/linux-headers-$(uname -r)/ /lib/modules/$(uname -r)/build
 
-#### Como ver mi sensor
+#### Como ver mi sensor con el Device Tree original
 En este proyecto se utilizó el LSM303 que tiene las direcciones 0x19 y 0x1E del I2C-2
 Esto se puede ver con:
 

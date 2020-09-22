@@ -17,7 +17,11 @@ poweroffFlag=false
 
 #____________________ Functions ____________________#
 connect(){
-    sshpass -p $pwd ssh -t $usrName@$ipAddr "cd $initPath ; bash"
+    sshpass -p $pwd ssh -t $usrName@$ipAddr "cd $initPath; bash"
+}
+
+conn_and_htop(){
+    sshpass -p $pwd ssh -t $usrName@$ipAddr "htop; exit;"
 }
 
 ### Para poder usar esta funcion agregar:
@@ -39,7 +43,7 @@ connect(){
 #
 set_date(){
     sshpass -p $pwd ssh -t $usrName@$ipAddr \
-    "sudo date +%F -s $(date +%F); sudo date +%T -s $(date +%T)"
+    "sudo date +%F -s $(date +%F); sudo date +%T -s $(date +%T); exit;"
 }
 
 ### Para poder usar esta funcion agregar:
@@ -61,6 +65,7 @@ help(){
     printf "\nModo de uso:\n\t./ssh_BBB [OPCIONES]\n"
     printf "\nOpciones:\n"
     prontf "\t-s: Seteo la hora de la BBB en base a la hora de la PC."
+    prontf "\t-T: Abre HTOP en la BBB desde consola."
     printf "\t-r: Path de inicio de la conección. Por defecto es ~.\n"
     printf "\t-d: Dirección ip a conectarse. Por defecto es 192.168.7.2.\n"
     printf "\t-n: Nombre de usuario. Por defecto es \"debian\".\n"
@@ -88,6 +93,11 @@ while [ "$1" != "" ]; do
                     ;;
         -s )    shift
                     set_date
+                    exit
+                    ;;
+        -T )    shift
+                    conn_and_htop
+                    exit
                     ;;
         -x )        poweroffFlag=true
                     ;;
