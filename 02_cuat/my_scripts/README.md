@@ -9,9 +9,11 @@ Estos scripts se utilizaron para hacer mas simple la conección a la BBB durante
 
 Para poder acceder desde cualquier lugar a estos scripts agregar el path de los mismos a .bashrc, de la siguiente manera: 
 Abrir el archivo __.bashrc__ con: 
+    
     nano ~/.bashrc
 
 Agregar al final:
+    
     export PATH=$PATH:/ruta_a_los_scripts
 
 Reiniciar la terminal.
