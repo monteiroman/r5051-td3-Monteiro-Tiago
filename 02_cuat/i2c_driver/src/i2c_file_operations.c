@@ -1,11 +1,11 @@
-/*______________________________________________________________________________
-    File operations for the i2c driver.
-        Functions: 
-            m_i2c_open
-            m_i2c_close
-            m_i2c_read
-            m_i2c_write
-______________________________________________________________________________*/
+/*____________________________________________________________________________*/
+/*    File operations for the i2c driver.                                     */
+/*        Functions:                                                          */
+/*              m_i2c_open                                                    */
+/*              m_i2c_close                                                   */
+/*              m_i2c_read                                                    */
+/*              m_i2c_write                                                   */
+/*____________________________________________________________________________*/
 
 static int m_i2c_open(struct inode *inode, struct file *file) {
     return 0;

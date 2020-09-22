@@ -115,7 +115,7 @@ static int __init i2c_init(void){
 
     print_info_msg("INIT", __FILE__, "Module successfully registered!!");
     printk(KERN_INFO 
-        "[I]: INIT | File: %s | Msg: major number: %d, minor number %d\n", 
+        "[I]: INIT | File: %s | Msg: Major number: %d, Minor number %d.\n", 
         __FILE__, MAJOR(state.m_i2c_device_type),
         MINOR(state.m_i2c_device_type));
 
@@ -132,7 +132,7 @@ static void __exit i2c_exit(void){
     unregister_chrdev_region(state.m_i2c_device_type, MINOR_COUNT);
     platform_driver_unregister(&m_i2c_pdriver);
 
-    print_info_msg("EXIT", __FILE__, "Module successfully closed");
+    print_info_msg("EXIT", __FILE__, "Module successfully closed.");
     
 }
 

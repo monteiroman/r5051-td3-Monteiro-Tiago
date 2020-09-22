@@ -1,0 +1,8 @@
+### Scripts secundarios usados en el proyecto
+Para el uso de los scripts de este proyecto se debe ejecutar
+sudo apt-get install sshpass.
+Estos scripts se utilizaron para hacer mas simple la conección a la BBB durante los días de trabajo.
+
+* **scp_BBB**: Se encarga de pasar archivos desde y hacia la BBB con valores por defecto que permiten hacer el trabajo mas fácil.
+
+* **ssh_BBB**: Se encarga de conectar la PC a la BBB con valores por defecto, también puede apagar la BBB y setear la hora de la placa para poder compilar en ella.
