@@ -5,7 +5,7 @@ INCLUDES := $(PWD)/inc
 
 MOD_NAME = src/i2c_driver
 
-
+# Converts a module object in LKM
 obj-m += $(MOD_NAME).o
 
 

@@ -1,8 +1,8 @@
 #include "../inc/i2c_driver.h"
 
-#include "i2c_driver_func.c"
-#include "i2c_file_operations.c"
 #include "i2c_misc_func.c"
+#include "i2c_file_operations.c"
+#include "i2c_driver_func.c"
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Monteiro Tiago (Leg.1420355)");
