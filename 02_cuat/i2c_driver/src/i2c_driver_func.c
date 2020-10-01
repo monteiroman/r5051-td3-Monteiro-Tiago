@@ -8,6 +8,8 @@
 
 static int m_i2c_probe(struct platform_device *pdev) {
     uint32_t auxValue;
+    uint8_t ira_reg_m_value, irb_reg_m_value, irc_reg_m_value;
+    uint8_t value[1];
 
     dev_info(&pdev->dev, "Initializing driver controller.\n");
     // Configuration steps at:                                           //
@@ -84,12 +86,12 @@ static int m_i2c_probe(struct platform_device *pdev) {
     // SCL Pin (Page 1515)
     //  0x3B = 111011b 
     //  => Fast | Reciever Enable | Pullup | Pullup/pulldown disabled | I2C2_SCL
-    iowrite32(0x3B, controlModule_base + CONF_UART1_RTSN_OFFSET);   // se puede probar con 0x33
+    iowrite32(0x3B, controlModule_base + CONF_UART1_RTSN_OFFSET);
       
     // SDA Pin
     //  0x3B = 111011b 
     //  => Fast | Reciever Enable | Pullup | Pullup/pulldown disabled | I2C2_SCL
-    iowrite32(0x3B, controlModule_base + CONF_UART1_CTSN_OFFSET);   // se puede probar con 0x33
+    iowrite32(0x3B, controlModule_base + CONF_UART1_CTSN_OFFSET);
 
 
     // >------------------- Configuring Virtual IRQ -------------------< //
@@ -138,15 +140,48 @@ static int m_i2c_probe(struct platform_device *pdev) {
     // I2C_SYSC has 0h value on reset, don't need to be configured.
 
     // Slave Address
-    iowrite32(0x1e, i2c2_base + I2C_SA);
-
-
-    iowrite32( I2C_IRQSTATUS_XRDY, i2c2_base + I2C_IRQENABLE_SET); 
-    iowrite32( I2C_IRQSTATUS_XRDY , i2c2_base + I2C_IRQSTATUS_RAW); 
-
+    iowrite32(LSM303_MAGNETIC_ADDR, i2c2_base + I2C_SA);     //magnetrometro
+    
     // configure register -> ENABLE & MASTER & RX & STOP
     // iowrite32(0x8400, i2c2_base + I2C_CON);
-    iowrite32(0x8601, i2c2_base + I2C_CON);
+    iowrite32(0x8600, i2c2_base + I2C_CON);
+
+
+    // >----------------- Checking compatible device ------------------< //
+    // The LSM303HCL does not have WOAMI register so I need to check the //
+    // default values of three registers. IRA_REG_M, IRB_REG_M and       //
+    // IRc_REG_M.                                                        //
+
+    // IRA register
+    value[0] = LSM303_REGISTER_MAG_IRA_REG_M;
+    m_i2c_writeBuffer(value, sizeof(value));
+    ira_reg_m_value = m_i2c_readByte();
+
+    // IRB register
+    value[0] = LSM303_REGISTER_MAG_IRB_REG_M;
+    m_i2c_writeBuffer(value, sizeof(value));
+    irb_reg_m_value = m_i2c_readByte();
+
+    // IRC register
+    value[0] = LSM303_REGISTER_MAG_IRC_REG_M;
+    m_i2c_writeBuffer(value, sizeof(value));
+    irc_reg_m_value = m_i2c_readByte();
+
+    if(ira_reg_m_value != 0x48 || irb_reg_m_value != 0x34 || 
+        irc_reg_m_value != 0x33){
+
+        //Requested resources rollback. 
+        free_irq(virt_irq, NULL);
+        iounmap(i2c2_base);
+        iounmap(cmPer_base);
+        iounmap(controlModule_base);
+
+        print_error_msg_wo_status("PROBE", __FILE__, (char*)__FUNCTION__,
+            __LINE__);
+        print_info_msg(" I2C_PROBE ", __FILE__, "No LSM303DHLC connected.");
+
+        return 1;            
+    }
 
     dev_info(&pdev->dev, "Driver controller successfully initialized.\n");
 

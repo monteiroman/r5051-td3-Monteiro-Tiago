@@ -42,7 +42,7 @@ static int __init i2c_init(void){
     int status = 0;
 
     // Print info message.
-    print_info_msg("INIT", __FILE__, "Initializing module...");
+    print_info_msg("   INIT    ", __FILE__, "Initializing module...");
     
     // Allocates a range of char device numbers. The major number will be chosen
     //  dynamically, and returned (along with the first minor number) in 
@@ -51,7 +51,7 @@ static int __init i2c_init(void){
     if((status = alloc_chrdev_region(&state.m_i2c_device_type, BASE_MINOR,
         MINOR_COUNT, DEVICE_NAME)) < 0){
         
-        print_error_msg_w_status("INIT", __FILE__, (char*)__FUNCTION__, 
+        print_error_msg_w_status("   INIT    ", __FILE__, (char*)__FUNCTION__, 
             __LINE__, status);
 
         return status;
@@ -64,7 +64,7 @@ static int __init i2c_init(void){
    // https://manned.org/class_create
    if((state.m_i2c_class = class_create(THIS_MODULE, CLASS_NAME)) == NULL){
 
-        print_error_msg_wo_status("INIT", __FILE__, (char*)__FUNCTION__,
+        print_error_msg_wo_status("   INIT    ", __FILE__, (char*)__FUNCTION__,
             __LINE__);
     
         //Requested resources rollback. 
@@ -80,7 +80,7 @@ static int __init i2c_init(void){
     if((device_create(state.m_i2c_class, DEVICE_PARENT, state.m_i2c_device_type,
         DEVICE_DATA, NAME_SHORT)) == NULL){
 
-        print_error_msg_wo_status("INIT", __FILE__, (char*)__FUNCTION__,
+        print_error_msg_wo_status("   INIT    ", __FILE__, (char*)__FUNCTION__,
             __LINE__);
 
         //Requested resources rollback. 
@@ -101,7 +101,7 @@ static int __init i2c_init(void){
     if((status  = cdev_add(&state.m_i2c_cdev, state.m_i2c_device_type,
         MINOR_COUNT)) < 0){
 
-        print_error_msg_w_status("INIT", __FILE__, (char*)__FUNCTION__,
+        print_error_msg_w_status("   INIT    ", __FILE__, (char*)__FUNCTION__,
             __LINE__, status);
 
         //Requested resources rollback.
@@ -116,7 +116,7 @@ static int __init i2c_init(void){
     // https://manned.org/platform_driver_register.9
     if((status = platform_driver_register(&m_i2c_pdriver)) < 0){
 
-        print_error_msg_w_status("INIT", __FILE__, (char*)__FUNCTION__, 
+        print_error_msg_w_status("   INIT    ", __FILE__, (char*)__FUNCTION__, 
             __LINE__, status);
 
         //Requested resources rollback. 
@@ -129,9 +129,9 @@ static int __init i2c_init(void){
     }
 
     // Print info message.
-    print_info_msg("INIT", __FILE__, "Module successfully registered!!");
+    print_info_msg("   INIT    ", __FILE__, "Module successfully registered!!");
     printk(KERN_INFO 
-        "[I]: INIT | File: %s | Msg: Major number: %d, Minor number %d.\n", 
+      "[I]:    INIT     | File: %s | Msg: Major number: %d, Minor number %d.\n", 
         __FILE__, MAJOR(state.m_i2c_device_type),
         MINOR(state.m_i2c_device_type));
 
@@ -141,7 +141,7 @@ static int __init i2c_init(void){
 static void __exit i2c_exit(void){
 
     // Print info message.
-    print_info_msg("EXIT", __FILE__, "Closing module...");
+    print_info_msg("   EXIT    ", __FILE__, "Closing module...");
 
     //Requested resources rollback. 
     cdev_del(&state.m_i2c_cdev);
@@ -150,12 +150,14 @@ static void __exit i2c_exit(void){
     unregister_chrdev_region(state.m_i2c_device_type, MINOR_COUNT);
     platform_driver_unregister(&m_i2c_pdriver);
 
-    print_info_msg("EXIT", __FILE__, "Module successfully closed.");
+    print_info_msg("   EXIT    ", __FILE__, "Module successfully closed.");
 }
 
 
 /*____________________________________________________________________________*/
-
+/*                                                                            */
+/*                              Caller methods                                */
+/*                                                                            */
 /*____________________________________________________________________________*/
 
 module_init(i2c_init);
