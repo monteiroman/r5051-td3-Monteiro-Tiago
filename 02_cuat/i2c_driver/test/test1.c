@@ -6,10 +6,10 @@
 void printValues (int *values){
     printf("Data: ----------------------\n");
     printf("Accel:\n");
-    printf("X: %+d\tY: %+d\tZ: %+d\n", (int16_t)values[0], (int16_t)values[1], 
+    printf("X: %+.5d\tY: %+.5d\tZ: %+.5d\n", (int16_t)values[0], (int16_t)values[1], 
         (int16_t)values[2]);
     printf("Mag:\n");
-    printf("X: %+d\tY: %+d\tZ: %+d\n", (int16_t)values[3], (int16_t)values[4], 
+    printf("X: %+.3d\t\tY: %+.3d\t\tZ: %+.3d\n", (int16_t)values[3], (int16_t)values[4], 
         (int16_t)values[5]);
 }
 
@@ -31,8 +31,6 @@ int main (){
     while(1){
         printf("\n");
 
-        usleep(500000);
-
         if(readSize != 24){
             printf("\tReaded %d bytes. Error. Exit.\n", readSize);
             
@@ -40,6 +38,8 @@ int main (){
         }
         printValues(datafromdriver);
         readSize = read(fd, &datafromdriver, sizeof(datafromdriver));
+        
+        usleep(200000);
     }
 
     return 0;

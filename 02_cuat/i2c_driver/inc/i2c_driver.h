@@ -121,6 +121,7 @@
 
 int virt_irq;
 int i2c_txData_size = 0;
+int i2c_txData_byteCount = 0;
 static void __iomem *i2c2_base, *cmPer_base, *controlModule_base;
 uint8_t *i2c_txData;// = 0;
 uint8_t i2c_rxData = 0;

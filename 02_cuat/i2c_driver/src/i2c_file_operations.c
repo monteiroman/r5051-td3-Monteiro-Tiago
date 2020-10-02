@@ -71,7 +71,8 @@ void m_i2c_writeBuffer (uint8_t *writeData, int writeData_size){
 
     msleep(1);
 
-    print_info_msg("WRITE_BUFF ", __FILE__, "Write byte in i2c bus returns OK!");
+    print_info_msg("WRITE_BUFF ", __FILE__, 
+        "Write byte in i2c bus returns OK!");
 }
 
 uint8_t m_i2c_readByte(void){
@@ -137,7 +138,8 @@ uint8_t m_i2c_readByte(void){
     // Retrieve data.
     readData = i2c_rxData;
 
-    print_info_msg(" READ_BYTE ", __FILE__, "Read byte from i2c bus returns OK!");
+    print_info_msg(" READ_BYTE ", __FILE__, 
+        "Read byte from i2c bus returns OK!");
 
     return readData;
 }
@@ -187,11 +189,13 @@ irqreturn_t driver_isr(int irq, void *devid, struct pt_regs *regs) {
             "-----> TX Interruption <-----");
 
         // Write data
-        iowrite8(i2c_txData[i2c_txData_size-1], i2c2_base + I2C_DATA);
+        iowrite8(i2c_txData[i2c_txData_byteCount], i2c2_base + I2C_DATA);
 
-        i2c_txData_size --;
+        i2c_txData_byteCount ++;
 
-        if(i2c_txData_size == 0){
+        if(i2c_txData_byteCount == i2c_txData_size){
+            i2c_txData_byteCount = 0;
+
             // Clear flags.
             // 0000 0000 0011 0110 b = 0x36
             aux_regValue = ioread32(i2c2_base + I2C_IRQSTATUS);
@@ -240,24 +244,24 @@ static int m_i2c_open(struct inode *inode, struct file *file) {
     // Set the accel sensor address to be read/written   
     iowrite32(LSM303_ACCELEROMETER_ADDR, i2c2_base + I2C_SA);
 
-    writeBuffer[1] = LSM303_REGISTER_ACCEL_CTRL_REG1_A;
-    writeBuffer[0] = 0x37;    
+    writeBuffer[0] = LSM303_REGISTER_ACCEL_CTRL_REG1_A;
+    writeBuffer[1] = 0x37;    
     m_i2c_writeBuffer(writeBuffer, sizeof(writeBuffer));
     
     // >--------- Set magnetic sensor configuration registers ---------< //
     // Set the accel sensor address to be read/written   
     iowrite32(LSM303_MAGNETIC_ADDR, i2c2_base + I2C_SA);   
 
-    writeBuffer[1] = LSM303_REGISTER_MAG_CRA_REG_M;
-    writeBuffer[0] = 0x10;    
+    writeBuffer[0] = LSM303_REGISTER_MAG_CRA_REG_M;
+    writeBuffer[1] = 0x10;    
     m_i2c_writeBuffer(writeBuffer, sizeof(writeBuffer));
 
-    writeBuffer[1] = LSM303_REGISTER_MAG_CRB_REG_M;
-    writeBuffer[0] = 0x80;    
+    writeBuffer[0] = LSM303_REGISTER_MAG_CRB_REG_M;
+    writeBuffer[1] = 0x80;    
     m_i2c_writeBuffer(writeBuffer, sizeof(writeBuffer));
 
-    writeBuffer[1] = LSM303_REGISTER_MAG_MR_REG_M;
-    writeBuffer[0] = 0x00;    
+    writeBuffer[0] = LSM303_REGISTER_MAG_MR_REG_M;
+    writeBuffer[1] = 0x00;    
     m_i2c_writeBuffer(writeBuffer, sizeof(writeBuffer));
 
     msleep(100);
