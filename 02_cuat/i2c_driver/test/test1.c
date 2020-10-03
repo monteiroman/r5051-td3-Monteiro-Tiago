@@ -15,7 +15,7 @@ void printValues (int *values){
 
 int main (){
     int fd = 0;
-    char datatodriver = 0;
+    char datatodriver = 0, key = 0;
     int datafromdriver[6]={0};
     int readSize = 2;
 
@@ -29,6 +29,7 @@ int main (){
     readSize = read(fd, &datafromdriver, sizeof(datafromdriver));
 
     while(1){
+        
         printf("\n");
 
         if(readSize != 24){
