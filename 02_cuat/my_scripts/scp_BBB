@@ -48,7 +48,7 @@ transferFile(){
         then
             printf "\n\t>>>> ¡"$strMsg" copiado a la BBB en "\"$destPath\"" con éxito! <<<<\n\n"
         else
-            printf "\n\t>>>>¡¡Error al copiar el archivo!!.<<<<\n\n"
+            printf "\n\t>>>>¡¡Error al copiar el "$strMsg"!!.<<<<\n\n"
         fi
     else
     # Copia de la BBB a la PC.
@@ -58,7 +58,7 @@ transferFile(){
         then
             printf "\n\t>>>> ¡"$strMsg" copiado a la PC en "\"$destPath\"" con éxito! <<<<\n\n"
         else
-            printf "\n\t>>>>¡¡Error al copiar el archivo!!.<<<<\n\n"
+            printf "\n\t>>>>¡¡Error al copiar el "$strMsg"!!.<<<<\n\n"
         fi
     fi
 }

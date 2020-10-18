@@ -49,7 +49,6 @@ void m_i2c_writeBuffer (uint8_t *writeData, int writeData_size){
     aux_regValue |= I2C_CON_START;
     iowrite32(aux_regValue, i2c2_base + I2C_CON);
 
-
     // Wait transmission end.
     if((status = wait_event_interruptible(
         m_i2c_wk, m_i2c_wk_condition > 0)) < 0){
