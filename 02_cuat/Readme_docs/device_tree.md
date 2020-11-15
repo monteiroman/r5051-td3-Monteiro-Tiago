@@ -1,6 +1,6 @@
 ### Device tree
 El archivo **.dtb** es el binario que va en **/boot/dtbs/4.19.94-ti-r42**.
-El archivo **.dts** es el archivo de texto que tengo que editar. En él hay que cambiar el 
+El archivo **.dts** es el archivo de texto que tengo que editar. En él hay que cambiar los valores que se muestran en **Backup de Device Tree**
 
 * Para decompilar el .dtb:
     

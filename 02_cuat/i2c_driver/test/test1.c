@@ -6,31 +6,31 @@
 
 #define PI 3.141592654
 
-void printValues (int *values){
-    printf("Data: ----------------------\n");
-    printf("Accel:\n");
-    printf("X: %+.5d\tY: %+.5d\tZ: %+.5d\n", (int16_t)values[0], 
-        (int16_t)values[1], (int16_t)values[2]);
-    printf("Mag:\n");
-    printf("X: %+.3d\t\tY: %+.3d\t\tZ: %+.3d\n", (int16_t)values[3], 
-        (int16_t)values[4], (int16_t)values[5]);
+void printValues (int16_t *values){
+    printf("\tData: ----------------------\n");
+    printf("\tAccel:\n");
+    printf("\tX: %+.5d\tY: %+.5d\tZ: %+.5d\n", values[0], 
+        values[1], values[2]);
+    printf("\tMag:\n");
+    printf("\tX: %+.4d\tY: %+.4d\tZ: %+.4d\n", values[3], 
+        values[4], values[5]);
 
     // Calculate the angle of the vector y,x
-    float heading = (atan2((int16_t)values[4],(int16_t)values[3]) * 180) / PI;
+    float heading = (float)((float)(atan2((double)values[4],(double)values[3]) * 180) / PI);
 
     // Normalize to 0-360
     if (heading < 0){
         heading = 360 + heading;
     }
 
-    printf("\nSensor heading: %.2f°\n", heading);
+    printf("\n\tSensor heading: %.2f°\n", heading);
     
 }
 
 int main (){
     int fd = 0;
     char datatodriver = 0, key = 0;
-    int datafromdriver[6]={0};
+    int16_t datafromdriver[6]={0};
     int readSize = 2;
 
     printf("Test script.\nOpening driver.\n");
@@ -46,8 +46,9 @@ int main (){
         
         printf("\n");
 
-        if(readSize != 24){
-            printf("\tReaded %d bytes. Error. Exit.\n", readSize);
+        if(readSize != sizeof(datafromdriver)){
+            printf("\tReaded %d bytes. Error. Exit.\n\tExpected %d\n\n",
+                readSize, sizeof(datafromdriver));
             
             return 1;
         }

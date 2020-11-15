@@ -240,30 +240,44 @@ static int m_i2c_open(struct inode *inode, struct file *file) {
     uint8_t writeBuffer[2];
 
     // >---------- Set accelerometer configuration registers ----------< //
-    // Set the accel sensor address to be read/written   
+    // Set the accel sensor address to be readed/written   
     iowrite32(LSM303_ACCELEROMETER_ADDR, i2c2_base + I2C_SA);
 
+    // Set: 
+    //      X, Y and Z enable, 
+    //      Normal mode and 
+    //      Normal / low-power mode (25 Hz).
     writeBuffer[0] = LSM303_REGISTER_ACCEL_CTRL_REG1_A;
     writeBuffer[1] = 0x37;    
     m_i2c_writeBuffer(writeBuffer, sizeof(writeBuffer));
     
     // >--------- Set magnetic sensor configuration registers ---------< //
-    // Set the accel sensor address to be read/written   
+    // Set the magnetic sensor address to be readed/written   
     iowrite32(LSM303_MAGNETIC_ADDR, i2c2_base + I2C_SA);   
 
+    // Set: 
+    //      temperature sensor disable, 
+    //      minimum data output rate 15Hz. 
+    //      [Bits 6, 5, 1 and 0 must be set to zero].
     writeBuffer[0] = LSM303_REGISTER_MAG_CRA_REG_M;
     writeBuffer[1] = 0x10;    
     m_i2c_writeBuffer(writeBuffer, sizeof(writeBuffer));
 
+    // Set:
+    //      range to +-1.3 Gauss.
+    //      [Bits 4 to 0 must be set to zero].
     writeBuffer[0] = LSM303_REGISTER_MAG_CRB_REG_M;
-    writeBuffer[1] = 0x80;    
+    writeBuffer[1] = 0x20;    
     m_i2c_writeBuffer(writeBuffer, sizeof(writeBuffer));
 
+    // Set:
+    //      continuous-conversion mode.
+    //      [Bits 2 to 7 must be set to zero].
     writeBuffer[0] = LSM303_REGISTER_MAG_MR_REG_M;
     writeBuffer[1] = 0x00;    
     m_i2c_writeBuffer(writeBuffer, sizeof(writeBuffer));
 
-    msleep(100);
+    msleep(50);
 
     return 0;
 }
@@ -287,7 +301,7 @@ static ssize_t m_i2c_read(struct file *m_file, char __user *buffer, size_t size,
     uint8_t Y_MAG_L = 0;
     uint8_t Z_MAG_H = 0;
     uint8_t Z_MAG_L = 0;    
-    int rcv[6] = {0};
+    int16_t rcv[6] = {0};
     uint32_t status = 0;
     uint8_t writeBuffer[1];
 
@@ -350,12 +364,12 @@ static ssize_t m_i2c_read(struct file *m_file, char __user *buffer, size_t size,
     Z_MAG_L = m_i2c_readByte();
 
     // >----------------- Reassemble Data -----------------< //
-    rcv[0] = (int)(X_ACCEL_H << 8 | X_ACCEL_L);
-    rcv[1] = (int)(Y_ACCEL_H << 8 | Y_ACCEL_L);
-    rcv[2] = (int)(Z_ACCEL_H << 8 | Z_ACCEL_L);
-    rcv[3] = (int)(X_MAG_H << 8 | X_MAG_L);
-    rcv[4] = (int)(Y_MAG_H << 8 | Y_MAG_L);
-    rcv[5] = (int)(Z_MAG_H << 8 | Z_MAG_L);
+    rcv[0] = (int16_t)((int16_t)X_ACCEL_H << 8 | (int16_t)X_ACCEL_L);
+    rcv[1] = (int16_t)((int16_t)Y_ACCEL_H << 8 | (int16_t)Y_ACCEL_L);
+    rcv[2] = (int16_t)((int16_t)Z_ACCEL_H << 8 | (int16_t)Z_ACCEL_L);
+    rcv[3] = (int16_t)((int16_t)X_MAG_H << 8 | (int16_t)X_MAG_L);
+    rcv[4] = (int16_t)((int16_t)Y_MAG_H << 8 | (int16_t)Y_MAG_L);
+    rcv[5] = (int16_t)((int16_t)Z_MAG_H << 8 | (int16_t)Z_MAG_L);
 
     status = copy_to_user(buffer, (const void *) &rcv, sizeof(rcv));
 

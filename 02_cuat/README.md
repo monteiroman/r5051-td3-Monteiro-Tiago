@@ -16,7 +16,7 @@ Para configurar la BBB para compilar en forma local en caso de tener que regener
 
     $ sudo apt update
     $ sudo apt upgrade
-    $ sudo apt install build-essential linux-header-$(uname -r)
+    $ sudo apt install build-essential linux-headers-$(uname -r)
     $ sudo ln -s /usr/src/linux-headers-$(uname -r)/ /lib/modules/$(uname -r)/build
 
 #### Como ver mi sensor con el Device Tree original
