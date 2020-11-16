@@ -10,6 +10,8 @@
 
 ### [Scripts secundarios](/02_cuat/Readme_docs/my_scripts.md)
 
+### [Sensor](/02_cuat/Readme_docs/sensor.md)
+
 ### NOTAS
 #### Configuración de la BBB para compilación local
 Para configurar la BBB para compilar en forma local en caso de tener que regenerar la imagen.
