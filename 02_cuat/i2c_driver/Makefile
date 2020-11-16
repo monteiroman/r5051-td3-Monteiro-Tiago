@@ -20,10 +20,12 @@ CC = gcc
 LFLAGS = -lm
 
 # Source Path
-SRC = test/test1.c
+TEST_SRC = test/test1.c
+CAL_SRC = test/mag_calibration.c
 
 # Output
-OUT = test/test1
+TEST_OUT = test/test1
+CAL_OUT = test/calibration
 
 #______________________________________________________________________________#
 #                                 Rules                                        #
@@ -49,7 +51,14 @@ rm_mod:
 test_app:
 	@echo " "
 	@echo "====> Compiling test app at \"test/\" <===="
-	@${CC} ${SRC} -o ${OUT} ${LFLAGS}
+	@${CC} ${TEST_SRC} -o ${TEST_OUT} ${LFLAGS}
+	@echo "====> Done! <===="
+	@echo " "
+
+calibration_app:
+	@echo " "
+	@echo "====> Compiling calibration app at \"test/\" <===="
+	@${CC} ${CAL_SRC} -o ${CAL_OUT} ${LFLAGS}
 	@echo "====> Done! <===="
 	@echo " "
 

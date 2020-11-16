@@ -65,6 +65,7 @@
 #define LSM303_ACCELEROMETER_ADDR               0x19
 #define LSM303_MAGNETIC_ADDR                    0x1E
 
+/* Accelerometer defines */
 #define LSM303_REGISTER_ACCEL_CTRL_REG1_A       0x20
 #define LSM303_REGISTER_ACCEL_CTRL_REG3_A       0x22
 #define LSM303_REGISTER_ACCEL_CTRL_REG4_A       0x23
@@ -95,7 +96,12 @@
 #define LSM303_REGISTER_ACCEL_TIME_LIMIT_A      0x3B
 #define LSM303_REGISTER_ACCEL_TIME_LATENCY_A    0x3C
 #define LSM303_REGISTER_ACCEL_TIME_WINDOW_A     0x3D
+// The accelerometer is a left justified 12-bit value (last 4 bits are always 
+// 0) so, if the sensor is in normal mode, I have to divide the answer by 
+// 64 to get the correct value.
+#define LSM303ACC_SHIFT                         0x06
 
+/* Magnetometer defines */
 #define LSM303_REGISTER_MAG_CRA_REG_M           0x00
 #define LSM303_REGISTER_MAG_CRB_REG_M           0x01
 #define LSM303_REGISTER_MAG_MR_REG_M            0x02

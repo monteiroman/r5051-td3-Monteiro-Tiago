@@ -250,6 +250,17 @@ static int m_i2c_open(struct inode *inode, struct file *file) {
     writeBuffer[0] = LSM303_REGISTER_ACCEL_CTRL_REG1_A;
     writeBuffer[1] = 0x37;    
     m_i2c_writeBuffer(writeBuffer, sizeof(writeBuffer));
+
+    // Set:
+    //      Block data update: continuos update.
+    //      Big/little endian data selection: data LSB @ lower address.
+    //      Full-scale selection: +/- 2G.
+    //      High resolution output mode: high resolution disable.
+    //      Serial interface mode selection: 4-wire interface.
+    writeBuffer[0] = LSM303_REGISTER_ACCEL_CTRL_REG4_A;
+    writeBuffer[1] = 0x00;    
+    m_i2c_writeBuffer(writeBuffer, sizeof(writeBuffer));
+    
     
     // >--------- Set magnetic sensor configuration registers ---------< //
     // Set the magnetic sensor address to be readed/written   
@@ -289,12 +300,12 @@ static int m_i2c_release(struct inode *inode, struct file *file) {
 static ssize_t m_i2c_read(struct file *m_file, char __user *buffer, size_t size,
      loff_t *offset) {
     
-    uint8_t X_ACCEL_H = 0;
-    uint8_t X_ACCEL_L = 0;
-    uint8_t Y_ACCEL_H = 0;
-    uint8_t Y_ACCEL_L = 0;
-    uint8_t Z_ACCEL_H = 0;
-    uint8_t Z_ACCEL_L = 0;
+    uint8_t X_ACC_H = 0;
+    uint8_t X_ACC_L = 0;
+    uint8_t Y_ACC_H = 0;
+    uint8_t Y_ACC_L = 0;
+    uint8_t Z_ACC_H = 0;
+    uint8_t Z_ACC_L = 0;
     uint8_t X_MAG_H = 0;
     uint8_t X_MAG_L = 0;
     uint8_t Y_MAG_H = 0;
@@ -312,27 +323,27 @@ static ssize_t m_i2c_read(struct file *m_file, char __user *buffer, size_t size,
     // Read all axis
     writeBuffer[0] = LSM303_REGISTER_ACCEL_OUT_X_H_A;
     m_i2c_writeBuffer(writeBuffer, sizeof(writeBuffer));  
-    X_ACCEL_H = m_i2c_readByte();
+    X_ACC_H = m_i2c_readByte();
 
     writeBuffer[0] = LSM303_REGISTER_ACCEL_OUT_X_L_A;
     m_i2c_writeBuffer(writeBuffer, sizeof(writeBuffer));
-    X_ACCEL_L = m_i2c_readByte();
+    X_ACC_L = m_i2c_readByte();
 
     writeBuffer[0] = LSM303_REGISTER_ACCEL_OUT_Y_H_A;
     m_i2c_writeBuffer(writeBuffer, sizeof(writeBuffer));  
-    Y_ACCEL_H = m_i2c_readByte();
+    Y_ACC_H = m_i2c_readByte();
 
     writeBuffer[0] = LSM303_REGISTER_ACCEL_OUT_Y_L_A;
     m_i2c_writeBuffer(writeBuffer, sizeof(writeBuffer));
-    Y_ACCEL_L = m_i2c_readByte();
+    Y_ACC_L = m_i2c_readByte();
 
     writeBuffer[0] = LSM303_REGISTER_ACCEL_OUT_Z_H_A;
     m_i2c_writeBuffer(writeBuffer, sizeof(writeBuffer));  
-    Z_ACCEL_H = m_i2c_readByte();
+    Z_ACC_H = m_i2c_readByte();
 
     writeBuffer[0] = LSM303_REGISTER_ACCEL_OUT_Z_L_A;
     m_i2c_writeBuffer(writeBuffer, sizeof(writeBuffer));
-    Z_ACCEL_L = m_i2c_readByte();
+    Z_ACC_L = m_i2c_readByte();
 
     // >------------- Read accelerometer Axis -------------< //
     // Set the mag sensor address to be read/written   
@@ -364,12 +375,12 @@ static ssize_t m_i2c_read(struct file *m_file, char __user *buffer, size_t size,
     Z_MAG_L = m_i2c_readByte();
 
     // >----------------- Reassemble Data -----------------< //
-    rcv[0] = (int16_t)((int16_t)X_ACCEL_H << 8 | (int16_t)X_ACCEL_L);
-    rcv[1] = (int16_t)((int16_t)Y_ACCEL_H << 8 | (int16_t)Y_ACCEL_L);
-    rcv[2] = (int16_t)((int16_t)Z_ACCEL_H << 8 | (int16_t)Z_ACCEL_L);
-    rcv[3] = (int16_t)((int16_t)X_MAG_H << 8 | (int16_t)X_MAG_L);
-    rcv[4] = (int16_t)((int16_t)Y_MAG_H << 8 | (int16_t)Y_MAG_L);
-    rcv[5] = (int16_t)((int16_t)Z_MAG_H << 8 | (int16_t)Z_MAG_L);
+    rcv[0] = (int16_t)((X_ACC_H << 8) | X_ACC_L) >> LSM303ACC_SHIFT;
+    rcv[1] = (int16_t)((Y_ACC_H << 8) | Y_ACC_L) >> LSM303ACC_SHIFT;
+    rcv[2] = (int16_t)((Z_ACC_H << 8) | Z_ACC_L) >> LSM303ACC_SHIFT;
+    rcv[3] = (int16_t)((X_MAG_H << 8) | X_MAG_L);
+    rcv[4] = (int16_t)((Y_MAG_H << 8) | Y_MAG_L);
+    rcv[5] = (int16_t)((Z_MAG_H << 8) | Z_MAG_L);
 
     status = copy_to_user(buffer, (const void *) &rcv, sizeof(rcv));
 
