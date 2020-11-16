@@ -53,9 +53,9 @@ int main (){
         if(datafromdriver[5] > Z_max)
             Z_max = datafromdriver[5];
 
-        float midX = (float)(X_max + X_min / 2);
-        float midY = (float)(Y_max + Y_min / 2);
-        float midZ = (float)(Z_max + Z_min / 2);
+        float midX = ((float)(X_max + X_min) / 2);
+        float midY = ((float)(Y_max + Y_min) / 2);
+        float midZ = ((float)(Z_max + Z_min) / 2);
 
         printf("\tHard Offset:\n");
         printf("\tX: %+.4f\tY: %+.4f\tZ: %+.4f\n", midX, midY, midZ);

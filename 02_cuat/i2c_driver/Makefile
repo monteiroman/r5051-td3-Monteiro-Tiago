@@ -74,3 +74,5 @@ Compile_module:
 	@sudo insmod ${MOD_PATH}.ko
 	@sudo chmod 777 ${DEV_PATH}
 	@echo "====> Device successfully installed as \"${DEV_NAME}\"! <===="
+	@echo " "
+
