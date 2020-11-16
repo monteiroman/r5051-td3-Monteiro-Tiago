@@ -31,12 +31,14 @@ CAL_OUT = test/calibration
 #                                 Rules                                        #
 #______________________________________________________________________________#
 
-all: Compile_module test_app
+all: Compile_module test_app calibration_app
 	
 clean:
 	@echo " "
 	@echo "====> Cleaning Project <===="
 	@echo " "
+	@rm test/calibration
+	@rm test/test1
 	${MAKE} -C ${KERNEL_SOURCE} SUBDIRS=${PWD} -I${INCLUDES} clean
 	@echo " "
 	@echo "====> Cleaned! <===="
