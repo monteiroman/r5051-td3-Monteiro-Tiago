@@ -317,7 +317,7 @@ static ssize_t m_i2c_read(struct file *m_file, char __user *buffer, size_t size,
     uint8_t writeBuffer[1];
 
     // >------------- Read accelerometer Axis -------------< //
-    // Set the accel sensor address to be read/written   
+    // Set the accel sensor address to be readed/written   
     iowrite32(LSM303_ACCELEROMETER_ADDR, i2c2_base + I2C_SA);   
     
     // Read all axis
@@ -346,7 +346,7 @@ static ssize_t m_i2c_read(struct file *m_file, char __user *buffer, size_t size,
     Z_ACC_L = m_i2c_readByte();
 
     // >------------- Read accelerometer Axis -------------< //
-    // Set the mag sensor address to be read/written   
+    // Set the mag sensor address to be readed/written   
     iowrite32(LSM303_MAGNETIC_ADDR, i2c2_base + I2C_SA);   
     
     // Read all axis

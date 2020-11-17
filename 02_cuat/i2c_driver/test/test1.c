@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include <math.h>
 
-// #define PI 3.141592654F
 #define LSM303MAG_GAUSS_LSB_XY  1100
 #define GAUSS_TO_MICROTESLA     100
 
@@ -12,8 +11,8 @@
 #define LSM303ACC_SHIFT         6
 #define LSM303ACC_GRAVITY       9.80665F
 
-#define X_MAG_HARDOFFSET        116
-#define Y_MAG_HARDOFFSET        -222 
+#define X_MAG_HARDOFFSET        -116
+#define Y_MAG_HARDOFFSET        222 
 
 
 void printValues (int16_t *values){
@@ -26,11 +25,10 @@ void printValues (int16_t *values){
         values[4], values[5]);
 
     // Calculate the angle of the vector y,x
-    float PI=3.141592654;
-    double X_uTesla = (double)(values[3] + X_MAG_HARDOFFSET);// / LSM303MAG_GAUSS_LSB_XY * GAUSS_TO_MICROTESLA;
-    double Y_uTesla = (double)(values[4] + Y_MAG_HARDOFFSET);// / LSM303MAG_GAUSS_LSB_XY * GAUSS_TO_MICROTESLA;
+    float X_uTesla = (float)(values[3] + X_MAG_HARDOFFSET);// / LSM303MAG_GAUSS_LSB_XY * GAUSS_TO_MICROTESLA;
+    float Y_uTesla = (float)(values[4] + Y_MAG_HARDOFFSET);// / LSM303MAG_GAUSS_LSB_XY * GAUSS_TO_MICROTESLA;
 
-    float heading = ((float)(atan2(Y_uTesla, X_uTesla) * 180) / PI);
+    float heading = ((float)(atan2(Y_uTesla, X_uTesla) * 180) / M_PI);
 
     // Normalize to 0-360
     if (heading < 0){
