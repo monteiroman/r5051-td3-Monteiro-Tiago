@@ -8,7 +8,6 @@
 #define GAUSS_TO_MICROTESLA     100
 
 #define LSM303ACC_G_LSB         0.0039F
-#define LSM303ACC_SHIFT         6
 #define LSM303ACC_GRAVITY       9.80665F
 
 #define X_MAG_HARDOFFSET        -116

@@ -25,9 +25,10 @@ TEST2_SRC = test/test2.c
 CAL_SRC = test/mag_calibration.c
 
 # Output
-TEST1_OUT = test/test1
-TEST2_OUT = test/test2
-CAL_OUT = test/calibration
+TEST_BUILD_PATH = test/build
+TEST1_OUT = ${TEST_BUILD_PATH}/test1
+TEST2_OUT = ${TEST_BUILD_PATH}/test2
+CAL_OUT = ${TEST_BUILD_PATH}/calibration
 
 #______________________________________________________________________________#
 #                                 Rules                                        #
@@ -35,13 +36,11 @@ CAL_OUT = test/calibration
 
 all: Compile_module test1_app test2_app calibration_app
 	
-clean:
+clean: rm_mod
 	@echo " "
 	@echo "====> Cleaning Project <===="
 	@echo " "
-	@rm -f ${CAL_OUT}
-	@rm -f ${TEST1_OUT}
-	@rm -f ${TEST2_OUT}
+	@rm -fr ${TEST_BUILD_PATH}
 	${MAKE} -C ${KERNEL_SOURCE} SUBDIRS=${PWD} -I${INCLUDES} clean
 	@echo " "
 	@echo "====> Cleaned! <===="
@@ -54,6 +53,7 @@ rm_mod:
 	@echo " "
 
 test1_app:
+	@mkdir -p ${TEST_BUILD_PATH}
 	@echo " "
 	@echo "====> Compiling test1 app at \"test/\" <===="
 	@${CC} ${TEST1_SRC} -o ${TEST1_OUT} ${LFLAGS}
@@ -61,6 +61,7 @@ test1_app:
 	@echo " "
 
 test2_app:
+	@mkdir -p ${TEST_BUILD_PATH}
 	@echo " "
 	@echo "====> Compiling test2 app at \"test/\" <===="
 	@${CC} ${TEST2_SRC} -o ${TEST2_OUT} ${LFLAGS}
@@ -68,6 +69,7 @@ test2_app:
 	@echo " "
 
 calibration_app:
+	@mkdir -p ${TEST_BUILD_PATH}
 	@echo " "
 	@echo "====> Compiling calibration app at \"test/\" <===="
 	@${CC} ${CAL_SRC} -o ${CAL_OUT} ${LFLAGS}
