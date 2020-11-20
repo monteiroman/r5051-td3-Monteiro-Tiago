@@ -1,28 +1,11 @@
-#include <stdio.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <stdint.h>
-#include <math.h>
-#include <signal.h>
-#include <stdlib.h>
+#include "../inc/sensor_query.h"
 
-#define LSM303MAG_GAUSS_LSB_XY  1100
-#define GAUSS_TO_MICROTESLA     100
-
-#define LSM303ACC_G_LSB         0.0039F
-#define LSM303ACC_GRAVITY       9.80665F
-
-#define X_MAG_HARDOFFSET        -116
-#define Y_MAG_HARDOFFSET        222 
-
-int fd = 0;
-int read_sensor = 1;
 
 void printValues (int16_t *values){
     printf("\n\tHeading & Accel Data: -------------------------------\n");
     // Calculate the angle of the vector y,x
-    float X_uTesla = (float)(values[3] + X_MAG_HARDOFFSET);// / LSM303MAG_GAUSS_LSB_XY * GAUSS_TO_MICROTESLA;
-    float Y_uTesla = (float)(values[4] + Y_MAG_HARDOFFSET);// / LSM303MAG_GAUSS_LSB_XY * GAUSS_TO_MICROTESLA;
+    float X_uTesla = (float)(values[3] + X_MAG_HARDOFFSET);
+    float Y_uTesla = (float)(values[4] + Y_MAG_HARDOFFSET);
 
     float heading = ((float)(atan2(Y_uTesla, X_uTesla) * 180) / M_PI);
 
@@ -49,7 +32,8 @@ void SIGINT_handler (int signbr) {
     exit(0);
 }
 
-int main (){
+
+int sensor_query (){
     char datatodriver = 0, key = 0;
     int16_t datafromdriver[6]={0};
     int readSize = 2;

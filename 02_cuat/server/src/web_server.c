@@ -17,16 +17,8 @@
 /* con temperatura en Celsius indicado por el usuario y   */
 /* en Fahrenheit.                                         */
 /**********************************************************/
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <errno.h>
-#define MAX_CONN 10 //Nro maximo de conexiones en espera
+#include "../inc/web_server.h"
+
 
 void ProcesarCliente(int s_aux, struct sockaddr_in *pDireccionCliente,
                      int puerto);
@@ -37,7 +29,7 @@ void ProcesarCliente(int s_aux, struct sockaddr_in *pDireccionCliente,
 /**********************************************************/
 int main(int argc, char *argv[])
 {
-  int s;
+  int sock;
   struct sockaddr_in datosServidor;
   socklen_t longDirec;
 
@@ -47,8 +39,8 @@ int main(int argc, char *argv[])
     exit(1);
   }
   // Creamos el socket
-  s = socket(AF_INET, SOCK_STREAM,0);
-  if (s == -1)
+  sock = socket(AF_INET, SOCK_STREAM,0);
+  if (sock == -1)
   {
     printf("ERROR: El socket no se ha creado correctamente!\n");
     exit(1);
@@ -59,7 +51,7 @@ int main(int argc, char *argv[])
   datosServidor.sin_addr.s_addr = htonl(INADDR_ANY);
 
   // Obtiene el puerto para este proceso.
-  if( bind(s, (struct sockaddr*)&datosServidor,
+  if( bind(sock, (struct sockaddr*)&datosServidor,
            sizeof(datosServidor)) == -1)
   {
     printf("ERROR: este proceso no puede tomar el puerto %s\n",
@@ -70,10 +62,10 @@ int main(int argc, char *argv[])
          argv[1]);
   // Indicar que el socket encole hasta MAX_CONN pedidos
   // de conexion simultaneas.
-  if (listen(s, MAX_CONN) < 0)
+  if (listen(sock, MAX_CONN) < 0)
   {
     perror("Error en listen");
-    close(s);
+    close(sock);
     exit(1);
   }
   // Permite atender a multiples usuarios
@@ -85,18 +77,18 @@ int main(int argc, char *argv[])
     // informacion del cliente y pone en longDirec la longitud
     // de la estructura.
     longDirec = sizeof(datosCliente);
-    s_aux = accept(s, (struct sockaddr*) &datosCliente, &longDirec);
+    s_aux = accept(sock, (struct sockaddr*) &datosCliente, &longDirec);
     if (s_aux < 0)
     {
       perror("Error en accept");
-      close(s);
+      close(sock);
       exit(1);
     }
     pid = fork();
     if (pid < 0)
     {
       perror("No se puede crear un nuevo proceso mediante fork");
-      close(s);
+      close(sock);
       exit(1);
     }
     if (pid == 0)
@@ -129,7 +121,7 @@ void ProcesarCliente(int s_aux, struct sockaddr_in *pDireccionCliente,
     perror("Error en recv");
     exit(1);
   }
-  printf("* Recibido del navegador Web %s:%d:\n%s\n",
+  printf("\n>=======================<\n* Recibido del navegador Web %s:%d:\n%s\n",
          ipAddr, Port, bufferComunic);
   
   // Obtener la temperatura desde la ruta.
@@ -147,6 +139,7 @@ void ProcesarCliente(int s_aux, struct sockaddr_in *pDireccionCliente,
   sprintf(encabezadoHTML, "<html><head><title>Temperatura</title>"
             "<meta name=\"viewport\" "
             "content=\"width=device-width, initial-scale=1.0\">"
+            "<meta http-equiv=\"refresh\" content=\"1\">"
             "</head>"
             "<h1>Temperatura</h1>");
   if (tempValida)
@@ -169,7 +162,7 @@ void ProcesarCliente(int s_aux, struct sockaddr_in *pDireccionCliente,
           "Connection: Closed\n\n%s",
           strlen(HTML), HTML);
 
-  printf("* Enviado al navegador Web %s:%d:\n%s\n",
+  printf("\n>=======================<\n* Enviado al navegador Web %s:%d:\n%s\n",
          ipAddr, Port, bufferComunic);
   
   // Envia el mensaje al cliente
