@@ -5,6 +5,3 @@
 
 #define X_MAG_HARDOFFSET        -116
 #define Y_MAG_HARDOFFSET        222 
-
-int fd = 0;
-int read_sensor = 1;

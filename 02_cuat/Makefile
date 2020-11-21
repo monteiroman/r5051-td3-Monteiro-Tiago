@@ -19,3 +19,9 @@ clean_server:
 
 clean_driver:
 	@cd ${DRIVER_PATH} && ${MAKE} clean
+
+run_server:
+	./server/build/web_server 11111
+
+run_test2:
+	./i2c_driver/test/build/test2
