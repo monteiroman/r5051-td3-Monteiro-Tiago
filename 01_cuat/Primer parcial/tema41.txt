@@ -4,7 +4,6 @@
 Tiene que ver con como estan conectados los bancos de memoria y como maneja el 80386 los mismos. (ver diagrama adjunto bajo el nombre dibujo_1)
 La memoria debe poder ser direccionada por byte, cada banco tiene un byte que se lee de 0 a 7 pero el micro levanta los datos primero de los bytes mas altos a los mas bajos.
 
-
 2.
 Explique cómo es posible con un procesador IA-32 con segmentación activa en modo 32 bits direccionar 32 Tbytes de memoria. Justificar su respuesta
 
@@ -64,6 +63,9 @@ Suponga que una tarea con CPL=10b quiere ejecutar código de nivel de privilegio
 
 La tarea de PL=2 debe hacer una llamada a sistema mediante una compuerta de llamada de donde el procesador sacará un ss1 y esp1 para el codigo de PL=1. Luego los parametros serán pusheados a esta pila donde el codigo de PL=1 deberá leerlos. 
 
+***************************************************
+* No hay cambio de pila para segmento conforming. *
+***************************************************
 
 7.
 ¿Cómo es la secuencia de instrucciones en Assembler para llamar a una función en C cuyo prototipo es: int func(int prim, short seg, char ter); si lo tengo que llamar con los parámetros 2248, 79 y 15 respectivamente?
@@ -84,4 +86,6 @@ Se debe: Poner en 0 del registro CR0.2
 
 Y en cada cambio de tarea se debe chequear el valor de CR3.3 (Task Switched) que me indicará si se cambió de tarea y se usaron registros SIMD.
 
-
+**************************
+* Task switched es CR0.3 *
+**************************
