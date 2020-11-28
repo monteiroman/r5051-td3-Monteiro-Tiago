@@ -1,0 +1,8 @@
+Un sistema tiene un caché L1 de código y datos con las siguientes características: Memoria cache de asociativo a línea (no sets) de 4 vías y 32 Kbytes de tamaño. Line Size = 8 bytes, Address Bus Size: 32 Bits. 
+Determinar los siguientes parámetros del Directorio Cache (Cada respuesta es una cantidad. Se pide justificar cada respuesta):
+a.) Tag Size
+b.) # Sets
+c.) Formato de una entrada del Directorio Cache.
+d.) # Total de Entradas del directorio cache
+e.) # Líneas por tag
+

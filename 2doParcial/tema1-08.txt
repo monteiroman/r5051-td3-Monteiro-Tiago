@@ -1,0 +1,3 @@
+a) Describir claramente justificando lo más completamente posible que diferencia hay entre los estados TASK_INTERRUPTIBLE y TASK_UNINTERRUPTIBLE.
+b) Cite una situación en la que convenga que un kernel asigne ese estado a un proceso.
+

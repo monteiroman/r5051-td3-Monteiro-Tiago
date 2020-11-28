@@ -1,0 +1,2 @@
+En TCP ¿Cuál es el modo de asegurar que un paquete transmitido llegó a destino? ¿Cómo se maneja el timeout?
+
