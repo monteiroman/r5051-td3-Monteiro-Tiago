@@ -1,2 +1,5 @@
 En TCP ¿Cuál es el modo de asegurar que un paquete transmitido llegó a destino? ¿Cómo se maneja el timeout?
 
+La forma de asegurarce que el paquete llegó a destino es mediante otro paquete que se envia en forma de respuesta desde el destino al origen llamado ACK. El ACK esta debidamente identificado a su frame correspondiente.
+El timeout es un reloj de retransmisión que el emisor maneja de forma arbitraria en base al bus y su latencia. Al no recibirse ACK dentro del timeout el paquete se retransmite.
+

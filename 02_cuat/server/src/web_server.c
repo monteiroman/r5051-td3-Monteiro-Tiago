@@ -127,8 +127,8 @@ void ProcesarCliente(int s_aux, struct sockaddr_in *pDireccionCliente,
         perror("Error en recv");
         exit(1);
     }
-    printf("\n>=======================<\n* Recibido");
-    printf(" del navegador Web %s:%d:\n%s\n", ipAddr, Port, bufferComunic);
+    // printf("\n>=======================<\n* Recibido");
+    // printf(" del navegador Web %s:%d:\n%s\n", ipAddr, Port, bufferComunic);
   
     // Obtener la temperatura desde la ruta.
     if (memcmp(bufferComunic, "GET /", 5) == 0)
@@ -151,9 +151,9 @@ void ProcesarCliente(int s_aux, struct sockaddr_in *pDireccionCliente,
             "<h1>Temperatura</h1>");
     if (tempValida)
     {
-        sprintf(HTML, "%s<p> El sensor esta apuntando a: %f°</p>"
-                        "<p>Aceleracion:</p><p> X: %fm/s^2 "
-                        "Y: %fm/s^2 Z: %fm/s^2</p>", encabezadoHTML, 
+        sprintf(HTML, "%s<p> El sensor esta apuntando a: %.2f°</p>"
+                        "<p>Aceleracion:</p><p> X: %.2fm/s^2 "
+                        "Y: %.2fm/s^2 Z: %.2fm/s^2</p>", encabezadoHTML, 
                         LSM303_data[0], LSM303_data[1], LSM303_data[2],
                         LSM303_data[3]);
     }
@@ -171,8 +171,8 @@ void ProcesarCliente(int s_aux, struct sockaddr_in *pDireccionCliente,
           "Connection: Closed\n\n%s",
           strlen(HTML), HTML);
 
-    printf("\n>=======================<\n* Enviado al navegador Web %s:%d:\n%s\n",
-                            ipAddr, Port, bufferComunic);
+    // printf("\n>=======================<\n* Enviado al navegador Web %s:%d:\n%s\n",
+                            // ipAddr, Port, bufferComunic);
     
     // Envia el mensaje al cliente
     if (send(s_aux, bufferComunic, strlen(bufferComunic), 0) == -1)

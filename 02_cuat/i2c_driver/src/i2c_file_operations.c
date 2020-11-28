@@ -318,6 +318,9 @@ static ssize_t m_i2c_read(struct file *m_file, char __user *buffer, size_t size,
     uint32_t status = 0;
     uint8_t writeBuffer[1];
 
+    if(sizeof(rcv) > size)
+        return -1;
+
     // >------------- Read accelerometer Axis -------------< //
     // Set the accel sensor address to be readed/written   
     iowrite32(LSM303_ACCELEROMETER_ADDR, i2c2_base + I2C_SA);   

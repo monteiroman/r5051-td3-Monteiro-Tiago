@@ -1,2 +1,14 @@
 Escriba las mínimas funciones necesarias que se requieren en un controlador, para establecer un proceso en TASK_UNINTERRUPTIBLE
 
+Para poner a dormir un proceso en TASK_INTERRUPTIBLE nos dieron estas funciones:
+
+	wait_event_interruptible(queue, condition)
+	void wake_up_interruptible(wait_queue_head_t *queue);
+
+Al despertar el proceso se debe asegurar que la condición sea verdadera. La primer función duerme el proceso y la segunda lo despierta.
+Se debe tener una una estructura de tipo wait_queue_head_t la cual se puede declarar en tiempo de compilación de la siguiente manera:
+
+	static DECLARE_WAIT_QUEUE_HEAD (mi_queue);
+
+Existe otra versión de wait event que pone al proceso en estado UNINTERRUPTIBLE. Pero se nos recomendó que la misma no sea utilizada.
+

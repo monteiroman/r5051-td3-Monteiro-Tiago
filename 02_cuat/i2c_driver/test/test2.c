@@ -76,7 +76,7 @@ int main (){
         
         readSize = read(fd, &datafromdriver, sizeof(datafromdriver));
         
-        usleep(100000);
+        usleep(1000);
     }
 
     return 0;

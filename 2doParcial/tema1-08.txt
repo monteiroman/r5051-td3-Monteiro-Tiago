@@ -1,3 +1,13 @@
 a) Describir claramente justificando lo más completamente posible que diferencia hay entre los estados TASK_INTERRUPTIBLE y TASK_UNINTERRUPTIBLE.
 b) Cite una situación en la que convenga que un kernel asigne ese estado a un proceso.
 
+a)
+TASK_INTERRUPTIBLE (S): Significa que el proceso está dormido. Queda a la espera de una señal, interrupción o recurso. Se espera que se pueda volver a levantar luego de que se cumple una condicion (que se recibe el recurso necesario por ejemplo).
+
+TASK_UNINTERRUPTIBLE (D): En este caso el proceso está dormido a la espera de una interrupción unicamente. No puede matarselo con una señal.
+
+b)
+El TASK_INTERRUPTIBLE se puede usar en un driver cuando se esta a la espera de una interrupción y puede ser receptor de una señal.
+
+TASK_UNINTERRUPTIBLE en casos especiales donde no se tenga que detener el proceso por una señal como por ejemplo procesos de una base de datos.
+

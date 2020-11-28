@@ -6,3 +6,15 @@ c.) Formato de una entrada del Directorio Cache.
 d.) # Total de Entradas del directorio cache
 e.) # Líneas por tag
 
+a) 	4 vias 
+	32 Kbytes tamaño 	8 Kbytes por via 
+	
+	Addres Bus Size 32bits -> 4Gb 
+	
+	4194304 KB / 8 KB = 524288 paginas 
+	
+	log2 (524288) = 19 bits
+	
+b) Numero de sets = 2 ^12 / 4 = 1024 sets
+
+e) Numero de lineas = 32KB/8B = 4096 lineas

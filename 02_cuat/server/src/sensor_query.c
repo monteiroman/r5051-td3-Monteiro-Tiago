@@ -27,7 +27,6 @@ int sensor_query (){
 
     usleep(100000);
 
-
     // Calculate the angle of the vector y,x
     float X_uTesla = (float)(datafromdriver[3] + X_MAG_HARDOFFSET);
     float Y_uTesla = (float)(datafromdriver[4] + Y_MAG_HARDOFFSET);
@@ -38,8 +37,6 @@ int sensor_query (){
     if (LSM303_data[0] < 0){
         LSM303_data[0] = 360 + LSM303_data[0];
     }
-
-    printf("\n\tSensor heading: %.2f°\n", LSM303_data[0]);
 
     LSM303_data[1] = (float)datafromdriver[0] * LSM303ACC_G_LSB * 
                                                             LSM303ACC_GRAVITY;
