@@ -1,12 +1,11 @@
 #include "../inc/sensor_query.h"
 
-extern float LSM303_data[];
+int16_t datafromdriver[6]={0};
+
 extern int fd;
 
 int sensor_query (){
-    char datatodriver = 0, key = 0;
-    int16_t datafromdriver[6]={0};
-    int readSize = 2;
+    int readSize = 0;
 
     if((fd = open("/dev/i2c_TM", O_RDWR)) < 0){
         printf("\tCannot open driver. Exit.\n");
@@ -27,23 +26,7 @@ int sensor_query (){
 
     usleep(100000);
 
-    // Calculate the angle of the vector y,x
-    float X_uTesla = (float)(datafromdriver[3] + X_MAG_HARDOFFSET);
-    float Y_uTesla = (float)(datafromdriver[4] + Y_MAG_HARDOFFSET);
-
-    LSM303_data[0] = ((float)(atan2(Y_uTesla, X_uTesla) * 180) / M_PI);
-
-    // Normalize to 0-360
-    if (LSM303_data[0] < 0){
-        LSM303_data[0] = 360 + LSM303_data[0];
-    }
-
-    LSM303_data[1] = (float)datafromdriver[0] * LSM303ACC_G_LSB * 
-                                                            LSM303ACC_GRAVITY;
-    LSM303_data[2] = (float)datafromdriver[1] * LSM303ACC_G_LSB * 
-                                                            LSM303ACC_GRAVITY;
-    LSM303_data[3] = (float)datafromdriver[2] * LSM303ACC_G_LSB * 
-                                                            LSM303ACC_GRAVITY;
+    
     
     return 0;
 }

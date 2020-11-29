@@ -13,18 +13,31 @@
 /* Después de los encabezados va una lìnea en blanco y    */
 /* luego el código HTML.                                  */
 /*                                                        */
-/* http://dominio/tempCelsius (número): genera respuesta  */
+/* http://dominio/sensorOption (número): genera respuesta  */
 /* con temperatura en Celsius indicado por el usuario y   */
 /* en Fahrenheit.                                         */
 /**********************************************************/
 #include "../inc/web_server.h"
 
-float LSM303_data[4] = {0};
+extern int16_t datafromdriver[];
 int fd = 0;
+bool fromCompassFlag = true;
+
+struct calibValues {
+    int16_t X_min; 
+    int16_t Y_min; 
+    int16_t Z_min; 
+    int16_t X_max; 
+    int16_t Y_max; 
+    int16_t Z_max; 
+} calVal;
+
 
 int sensor_query ();
-
-void ProcesarCliente(int s_aux, struct sockaddr_in *pDireccionCliente,
+void compassAnswer (char* commBuffer);
+void calibAnswer(char* commBuffer, struct calibValues calVal);
+void setCalToZero();
+void processClient(int s_aux, struct sockaddr_in *pDireccionCliente,
                      int puerto);
 void SIGINT_handler (int signbr);
 
@@ -99,7 +112,7 @@ int main(int argc, char *argv[])
         }
         if (pid == 0)
         {       // Proceso hijo.
-            ProcesarCliente(s_aux, &datosCliente, atoi(argv[1]));
+            processClient(s_aux, &datosCliente, atoi(argv[1]));
             exit(0);
         }
         close(s_aux);  // El proceso padre debe cerrar el socket
@@ -107,39 +120,91 @@ int main(int argc, char *argv[])
     }
 }
 
-void ProcesarCliente(int s_aux, struct sockaddr_in *pDireccionCliente,
+void processClient(int s_aux, struct sockaddr_in *pDireccionCliente,
                      int puerto)
 {
-    char bufferComunic[4096];
+    char commBuffer[4096];
     char ipAddr[20];
     int Port;
     int indiceEntrada;
-    float tempCelsius;
+    char sensorOption[6];
     int tempValida = 0;
-    char HTML[4096];
-    char encabezadoHTML[4096];
   
     strcpy(ipAddr, inet_ntoa(pDireccionCliente->sin_addr));
     Port = ntohs(pDireccionCliente->sin_port);
     // Recibe el mensaje del cliente
-    if (recv(s_aux, bufferComunic, sizeof(bufferComunic), 0) == -1)
+    if (recv(s_aux, commBuffer, sizeof(commBuffer), 0) == -1)
     {
         perror("Error en recv");
         exit(1);
     }
     // printf("\n>=======================<\n* Recibido");
-    // printf(" del navegador Web %s:%d:\n%s\n", ipAddr, Port, bufferComunic);
+    // printf(" del navegador Web %s:%d:\n%s\n", ipAddr, Port, commBuffer);
   
     // Obtener la temperatura desde la ruta.
-    if (memcmp(bufferComunic, "GET /", 5) == 0)
+    if (memcmp(commBuffer, "GET /", 5) == 0)
     {
-        if (sscanf(&bufferComunic[5], "%f", &tempCelsius) == 1)
+        if (sscanf(&commBuffer[5], "%s", &sensorOption) == 1)
         {      // Conversion done successfully.
             tempValida = 1;
         }
     }
   
-    sensor_query ();
+    sensor_query();
+
+    printf("GET: %s\n", sensorOption);
+
+    if(memcmp(sensorOption, "compass", 7) == 0){
+        compassAnswer(commBuffer);
+        fromCompassFlag = true;
+    }
+
+    if(memcmp(sensorOption, "calib", 5) == 0){
+        if(fromCompassFlag){
+            setCalToZero();
+            fromCompassFlag = false;
+        }
+        calibAnswer(commBuffer, calVal);
+    }
+
+    // printf("\n>=======================<\n* Enviado al navegador Web %s:%d:\n%s\n",
+                            // ipAddr, Port, commBuffer);
+    
+    // Envia el mensaje al cliente
+    if (send(s_aux, commBuffer, strlen(commBuffer), 0) == -1)
+    {
+        perror("Error en send");
+        exit(1);
+    }
+    
+    // Cierra la conexion con el cliente actual
+    close(s_aux);
+}
+
+void compassAnswer(char* commBuffer)
+{
+    float LSM303_compass_data[4] = {0};
+    char encabezadoHTML[4096];
+    char HTML[4096];
+
+    // Calculate the angle of the vector y,x
+    float X_uTesla = (float)(datafromdriver[3] + X_MAG_HARDOFFSET);
+    float Y_uTesla = (float)(datafromdriver[4] + Y_MAG_HARDOFFSET);
+
+    LSM303_compass_data[0] = ((float)(atan2(Y_uTesla, X_uTesla) * 180) / M_PI);
+
+    // Normalize to 0-360
+    if (LSM303_compass_data[0] < 0){
+        LSM303_compass_data[0] = 360 + LSM303_compass_data[0];
+    }
+
+    LSM303_compass_data[1] = (float)datafromdriver[0] * LSM303ACC_G_LSB * 
+                                                            LSM303ACC_GRAVITY;
+    LSM303_compass_data[2] = (float)datafromdriver[1] * LSM303ACC_G_LSB * 
+                                                            LSM303ACC_GRAVITY;
+    LSM303_compass_data[3] = (float)datafromdriver[2] * LSM303ACC_G_LSB * 
+                                                            LSM303ACC_GRAVITY;
+
     // Generar HTML.
     // El viewport es obligatorio para que se vea bien en
     // dispositivos móviles.
@@ -149,40 +214,76 @@ void ProcesarCliente(int s_aux, struct sockaddr_in *pDireccionCliente,
             "<meta http-equiv=\"refresh\" content=\"1\">"
             "</head>"
             "<h1>Temperatura</h1>");
-    if (tempValida)
-    {
-        sprintf(HTML, "%s<p> El sensor esta apuntando a: %.2f°</p>"
-                        "<p>Aceleracion:</p><p> X: %.2fm/s^2 "
-                        "Y: %.2fm/s^2 Z: %.2fm/s^2</p>", encabezadoHTML, 
-                        LSM303_data[0], LSM303_data[1], LSM303_data[2],
-                        LSM303_data[3]);
-    }
-    else
-    {
-        sprintf(HTML, 
-            "%s<p>El URL debe ser http://dominio:%d/gradosCelsius.</p>",
-            encabezadoHTML, puerto);
-    }
-
-    sprintf(bufferComunic,
+    
+    sprintf(HTML, "%s<p> El sensor esta apuntando a: %.2f°</p>"
+            "<p>Aceleracion:</p><p> X: %.2fm/s^2 "
+            "Y: %.2fm/s^2 Z: %.2fm/s^2</p>", encabezadoHTML, 
+            LSM303_compass_data[0], LSM303_compass_data[1], LSM303_compass_data[2],
+            LSM303_compass_data[3]);
+            
+    sprintf(commBuffer,
           "HTTP/1.1 200 OK\n"
           "Content-Length: %d\n"
           "Content-Type: text/html; charset=utf-8\n"
           "Connection: Closed\n\n%s",
           strlen(HTML), HTML);
+}
 
-    // printf("\n>=======================<\n* Enviado al navegador Web %s:%d:\n%s\n",
-                            // ipAddr, Port, bufferComunic);
+void calibAnswer(char* commBuffer, struct calibValues calVal)
+{
+    float LSM303_compass_data[4] = {0};
+    char encabezadoHTML[4096];
+    char HTML[4096];
+
+    if(datafromdriver[3] < calVal.X_min)
+        calVal.X_min = datafromdriver[3];
+    if(datafromdriver[3] > calVal.X_max)
+        calVal.X_max = datafromdriver[3];
     
-    // Envia el mensaje al cliente
-    if (send(s_aux, bufferComunic, strlen(bufferComunic), 0) == -1)
-    {
-        perror("Error en send");
-        exit(1);
-    }
+    if(datafromdriver[4] < calVal.Y_min)
+        calVal.Y_min = datafromdriver[4];
+    if(datafromdriver[4] > calVal.Y_max)
+        calVal.Y_max = datafromdriver[4];
     
-    // Cierra la conexion con el cliente actual
-    close(s_aux);
+    if(datafromdriver[5] < calVal.Z_min)
+        calVal.Z_min = datafromdriver[5];
+    if(datafromdriver[5] > calVal.Z_max)
+        calVal.Z_max = datafromdriver[5];
+
+    float midX = ((float)(calVal.X_max + calVal.X_min) / 2);
+    float midY = ((float)(calVal.Y_max + calVal.Y_min) / 2);
+    float midZ = ((float)(calVal.Z_max + calVal.Z_min) / 2);
+
+    // Generar HTML.
+    // El viewport es obligatorio para que se vea bien en
+    // dispositivos móviles.
+    sprintf(encabezadoHTML, "<html><head><title>Temperatura</title>"
+            "<meta name=\"viewport\" "
+            "content=\"width=device-width, initial-scale=1.0\">"
+            "<meta http-equiv=\"refresh\" content=\"1\">"
+            "</head>"
+            "<h1>Temperatura</h1>");
+    
+    sprintf(HTML, "%s<p> Calibracion:</p>"
+            "<p> Xmed: %.2f"
+            "Ymed: %.2f Z: %.2f</p>", encabezadoHTML, 
+            midX, midY, midZ);
+            
+    sprintf(commBuffer,
+          "HTTP/1.1 200 OK\n"
+          "Content-Length: %d\n"
+          "Content-Type: text/html; charset=utf-8\n"
+          "Connection: Closed\n\n%s",
+          strlen(HTML), HTML);
+}
+
+void setCalToZero(){
+    calVal.X_min = 0; 
+    calVal.Y_min = 0; 
+    calVal.Z_min = 0; 
+    calVal.X_max = 0; 
+    calVal.Y_max = 0; 
+    calVal.Z_max = 0;
 }
 
 void SIGINT_handler (int signbr) {
