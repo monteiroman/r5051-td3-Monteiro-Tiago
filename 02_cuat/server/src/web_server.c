@@ -19,19 +19,7 @@
 /**********************************************************/
 #include "../inc/web_server.h"
 
-extern int16_t datafromdriver[];
 int fd = 0;
-bool fromCompassFlag = true;
-
-struct calibValues {
-    int16_t X_min; 
-    int16_t Y_min; 
-    int16_t Z_min; 
-    int16_t X_max; 
-    int16_t Y_max; 
-    int16_t Z_max; 
-} calVal;
-
 
 int sensor_query ();
 void compassAnswer (char* commBuffer);
@@ -154,16 +142,11 @@ void processClient(int s_aux, struct sockaddr_in *pDireccionCliente,
 
     printf("GET: %s\n", sensorOption);
 
-    if(memcmp(sensorOption, "compass", 7) == 0){
+    if(memcmp(sensorOption, "compass", 7) == 0)
         compassAnswer(commBuffer);
-        fromCompassFlag = true;
-    }
 
     if(memcmp(sensorOption, "calib", 5) == 0){
-        if(fromCompassFlag){
-            setCalToZero();
-            fromCompassFlag = false;
-        }
+        setCalToZero();
         calibAnswer(commBuffer, calVal);
     }
 
@@ -183,26 +166,29 @@ void processClient(int s_aux, struct sockaddr_in *pDireccionCliente,
 
 void compassAnswer(char* commBuffer)
 {
-    float LSM303_compass_data[4] = {0};
+    float heading = 0;
+    float LSM303_compass_x = 0;
+    float LSM303_compass_y = 0;
+    float LSM303_compass_z = 0;
     char encabezadoHTML[4096];
     char HTML[4096];
 
     // Calculate the angle of the vector y,x
-    float X_uTesla = (float)(datafromdriver[3] + X_MAG_HARDOFFSET);
-    float Y_uTesla = (float)(datafromdriver[4] + Y_MAG_HARDOFFSET);
+    float X_uTesla = (float)(LSM303_values.X_mag + X_MAG_HARDOFFSET);
+    float Y_uTesla = (float)(LSM303_values.Y_mag + Y_MAG_HARDOFFSET);
 
-    LSM303_compass_data[0] = ((float)(atan2(Y_uTesla, X_uTesla) * 180) / M_PI);
+    heading = ((float)(atan2(Y_uTesla, X_uTesla) * 180) / M_PI);
 
     // Normalize to 0-360
-    if (LSM303_compass_data[0] < 0){
-        LSM303_compass_data[0] = 360 + LSM303_compass_data[0];
+    if (heading < 0){
+        heading = 360 + heading;
     }
 
-    LSM303_compass_data[1] = (float)datafromdriver[0] * LSM303ACC_G_LSB * 
+    LSM303_compass_x = (float)LSM303_values.X_acc * LSM303ACC_G_LSB * 
                                                             LSM303ACC_GRAVITY;
-    LSM303_compass_data[2] = (float)datafromdriver[1] * LSM303ACC_G_LSB * 
+    LSM303_compass_y = (float)LSM303_values.Y_acc * LSM303ACC_G_LSB * 
                                                             LSM303ACC_GRAVITY;
-    LSM303_compass_data[3] = (float)datafromdriver[2] * LSM303ACC_G_LSB * 
+    LSM303_compass_z = (float)LSM303_values.Z_acc * LSM303ACC_G_LSB * 
                                                             LSM303ACC_GRAVITY;
 
     // Generar HTML.
@@ -218,37 +204,36 @@ void compassAnswer(char* commBuffer)
     sprintf(HTML, "%s<p> El sensor esta apuntando a: %.2f°</p>"
             "<p>Aceleracion:</p><p> X: %.2fm/s^2 "
             "Y: %.2fm/s^2 Z: %.2fm/s^2</p>", encabezadoHTML, 
-            LSM303_compass_data[0], LSM303_compass_data[1], LSM303_compass_data[2],
-            LSM303_compass_data[3]);
+            heading, LSM303_compass_x, LSM303_compass_y,
+            LSM303_compass_z);
             
     sprintf(commBuffer,
-          "HTTP/1.1 200 OK\n"
-          "Content-Length: %d\n"
-          "Content-Type: text/html; charset=utf-8\n"
-          "Connection: Closed\n\n%s",
-          strlen(HTML), HTML);
+            "HTTP/1.1 200 OK\n"
+            "Content-Length: %d\n"
+            "Content-Type: text/html; charset=utf-8\n"
+            "Connection: Closed\n\n%s",
+            strlen(HTML), HTML);
 }
 
 void calibAnswer(char* commBuffer, struct calibValues calVal)
 {
-    float LSM303_compass_data[4] = {0};
     char encabezadoHTML[4096];
     char HTML[4096];
 
-    if(datafromdriver[3] < calVal.X_min)
-        calVal.X_min = datafromdriver[3];
-    if(datafromdriver[3] > calVal.X_max)
-        calVal.X_max = datafromdriver[3];
+    if(LSM303_values.X_mag < calVal.X_min)
+        calVal.X_min = LSM303_values.X_mag;
+    if(LSM303_values.X_mag > calVal.X_max)
+        calVal.X_max = LSM303_values.X_mag;
     
-    if(datafromdriver[4] < calVal.Y_min)
-        calVal.Y_min = datafromdriver[4];
-    if(datafromdriver[4] > calVal.Y_max)
-        calVal.Y_max = datafromdriver[4];
+    if(LSM303_values.Y_mag < calVal.Y_min)
+        calVal.Y_min = LSM303_values.Y_mag;
+    if(LSM303_values.Y_mag > calVal.Y_max)
+        calVal.Y_max = LSM303_values.Y_mag;
     
-    if(datafromdriver[5] < calVal.Z_min)
-        calVal.Z_min = datafromdriver[5];
-    if(datafromdriver[5] > calVal.Z_max)
-        calVal.Z_max = datafromdriver[5];
+    if(LSM303_values.Z_mag < calVal.Z_min)
+        calVal.Z_min = LSM303_values.Z_mag;
+    if(LSM303_values.Z_mag > calVal.Z_max)
+        calVal.Z_max = LSM303_values.Z_mag;
 
     float midX = ((float)(calVal.X_max + calVal.X_min) / 2);
     float midY = ((float)(calVal.Y_max + calVal.Y_min) / 2);
@@ -270,11 +255,11 @@ void calibAnswer(char* commBuffer, struct calibValues calVal)
             midX, midY, midZ);
             
     sprintf(commBuffer,
-          "HTTP/1.1 200 OK\n"
-          "Content-Length: %d\n"
-          "Content-Type: text/html; charset=utf-8\n"
-          "Connection: Closed\n\n%s",
-          strlen(HTML), HTML);
+            "HTTP/1.1 200 OK\n"
+            "Content-Length: %d\n"
+            "Content-Type: text/html; charset=utf-8\n"
+            "Connection: Closed\n\n%s",
+            strlen(HTML), HTML);
 }
 
 void setCalToZero(){
