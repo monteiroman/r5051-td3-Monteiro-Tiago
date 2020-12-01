@@ -20,14 +20,11 @@
 #include "../inc/web_server.h"
 
 int fd = 0;
+int sock_http;
+void *sharedMemPtr = (void *) 0;
+sem_t *data_semaphore;
+struct sensorValues *sensorValues_data, LSM303_values;
 
-int sensor_query ();
-void compassAnswer (char* commBuffer);
-void calibAnswer(char* commBuffer, struct calibValues calVal);
-void setCalToZero();
-void processClient(int s_aux, struct sockaddr_in *pDireccionCliente,
-                     int puerto);
-void SIGINT_handler (int signbr);
 
 /**********************************************************/
 /* funcion MAIN                                           */
@@ -35,22 +32,52 @@ void SIGINT_handler (int signbr);
 /**********************************************************/
 int main(int argc, char *argv[])
 {
-    int sock;
     struct sockaddr_in datosServidor;
     socklen_t longDirec;
+    pid_t server_pid, httpClient_pid, sensor_query_pid;
+    int sharedMemId;
 
-    signal(SIGINT, SIGINT_handler);
-
+// -------> Help <-------
     if (argc != 2)
     {
         printf("\n\nLinea de comandos: webserver Puerto\n\n");
+        
         exit(1);
     }
-    // Creamos el socket
-    sock = socket(AF_INET, SOCK_STREAM,0);
-    if (sock == -1)
+
+    server_pid = getpid();
+    printf("[LOG] Web Server: Server pid: %d\n", server_pid);
+
+// -------> Signal handlers <-------
+    signal(SIGINT, SIGINT_handler);
+    signal(SIGCHLD, SIGCHLD_handler);
+
+// -------> Shared memory <-------
+    // Get shmem
+    sharedMemId = shmget( (key_t)1234, SHARED_SIZE, 0666 | IPC_CREAT);
+    if (sharedMemId == -1) {
+        print_error(__FILE__, "shmget failed");
+        
+        return -1;
+    }
+    // Attach shmem
+    sharedMemPtr = shmat(sharedMemId, (void *)0, 0);
+    if (sharedMemPtr == (void *)-1) {
+        print_error(__FILE__, "shmat failed");
+        
+        return -1;
+    }
+    printf("[LOG] TCP SOCKET: Shared memory attached at %p\n", sharedMemPtr);
+    // Point shared memory to the corresponding struct.
+    sensorValues_data = (struct sensorValues *)sharedMemPtr;
+    
+// -------> Socket creation <-------
+    sock_http = socket(AF_INET, SOCK_STREAM,0);
+    if (sock_http == -1)
     {
-        printf("ERROR: El socket no se ha creado correctamente!\n");
+        shmdt(sharedMemPtr);
+        print_error(__FILE__, "Socket not created");
+        
         exit(1);
     }
     // Asigna el puerto indicado y una IP de la maquina
@@ -59,48 +86,94 @@ int main(int argc, char *argv[])
     datosServidor.sin_addr.s_addr = htonl(INADDR_ANY);
 
     // Obtiene el puerto para este proceso.
-    if( bind(sock, (struct sockaddr*)&datosServidor,
+    if( bind(sock_http, (struct sockaddr*)&datosServidor,
                                                 sizeof(datosServidor)) == -1)
     {
-        printf("ERROR: este proceso no puede tomar el puerto %s\n", argv[1]);
+        shmdt(sharedMemPtr);
+        close(sock_http);
+        print_error(__FILE__, "Can't bind to the requested port");
+        
         exit(1);
     }
-    printf("\nIngrese en el navegador");
-    printf(" http://dir ip servidor:%s/gradosCelsius\n", argv[1]);
+        
     // Indicar que el socket encole hasta MAX_CONN pedidos
     // de conexion simultaneas.
-    if (listen(sock, MAX_CONN) < 0)
+    if (listen(sock_http, MAX_CONN) < 0)
     {
-        perror("Error en listen");
-        close(sock);
+        shmdt(sharedMemPtr);
+        close(sock_http);
+        print_error(__FILE__, "Error in listen");
+        
         exit(1);
     }
+
+// -------> Semaphores <-------
+    sem_unlink ("data_semaphore");
+    data_semaphore = sem_open ("data_semaphore", O_CREAT | O_EXCL, 0644, 1);
+    if (data_semaphore < 0)
+    {
+        shmdt(sharedMemPtr);
+        close(sock_http);
+        sem_unlink ("data_semaphore");
+        sem_close(data_semaphore);
+        print_error(__FILE__, "Can't create semaphore");
+
+        return -1;
+    }
+
+// -------> Sensor process <-------
+    // Start sensor values query process.
+    sensor_query_pid = fork();
+
+    if (sensor_query_pid < 0)
+    {
+        shmdt(sharedMemPtr);
+        close(sock_http);
+        sem_unlink ("data_semaphore");
+        sem_close(data_semaphore);
+        print_error(__FILE__, "Can not open sensor process");
+        
+        exit(1);
+    }
+    if (sensor_query_pid == 0) // Child process.
+    {       
+        sensor_query();
+        
+        exit(0);
+    }
+
+// -------> User info. <-------
+    printf("\nGo to this path in your browser:");
+    printf("\n\thttp://server_ip_addr:%s/callib", argv[1]);
+    printf("\n\to http://server_ip_addr:%s/compass\n", argv[1]);
+
+// -------> Client process <-------
     // Permite atender a multiples usuarios
     while (1)
     {
-        int pid, s_aux;
-        struct sockaddr_in datosCliente;
+        int s_aux;
+        struct sockaddr_in clientData;
         // La funcion accept rellena la estructura address con
         // informacion del cliente y pone en longDirec la longitud
         // de la estructura.
-        longDirec = sizeof(datosCliente);
-        s_aux = accept(sock, (struct sockaddr*) &datosCliente, &longDirec);
+        longDirec = sizeof(clientData);
+        s_aux = accept(sock_http, (struct sockaddr*) &clientData, &longDirec);
         if (s_aux < 0)
         {
             perror("Error en accept");
-            close(sock);
+            close(sock_http);
             exit(1);
         }
-        pid = fork();
-        if (pid < 0)
+        httpClient_pid = fork();
+        if (httpClient_pid < 0)
         {
             perror("No se puede crear un nuevo proceso mediante fork");
-            close(sock);
+            close(sock_http);
             exit(1);
         }
-        if (pid == 0)
+        if (httpClient_pid == 0)
         {       // Proceso hijo.
-            processClient(s_aux, &datosCliente, atoi(argv[1]));
+            processClient(s_aux, &clientData, atoi(argv[1]));
             exit(0);
         }
         close(s_aux);  // El proceso padre debe cerrar el socket
@@ -108,8 +181,7 @@ int main(int argc, char *argv[])
     }
 }
 
-void processClient(int s_aux, struct sockaddr_in *pDireccionCliente,
-                     int puerto)
+void processClient(int s_aux, struct sockaddr_in *pDireccionCliente, int puerto)
 {
     char commBuffer[4096];
     char ipAddr[20];
@@ -138,9 +210,7 @@ void processClient(int s_aux, struct sockaddr_in *pDireccionCliente,
         }
     }
   
-    sensor_query();
-
-    printf("GET: %s\n", sensorOption);
+    // printf("GET: %s\n", sensorOption);
 
     if(memcmp(sensorOption, "compass", 7) == 0)
         compassAnswer(commBuffer);
@@ -172,6 +242,17 @@ void compassAnswer(char* commBuffer)
     float LSM303_compass_z = 0;
     char encabezadoHTML[4096];
     char HTML[4096];
+    bool not_valid_heading;
+
+    // Wait semaphore and get sensor data. 
+    sem_wait(data_semaphore);
+    LSM303_values.X_acc = sensorValues_data->X_acc;
+    LSM303_values.Y_acc = sensorValues_data->Y_acc;
+    LSM303_values.Z_acc = sensorValues_data->Z_acc;
+    LSM303_values.X_mag = sensorValues_data->X_mag;
+    LSM303_values.Y_mag = sensorValues_data->Y_mag;
+    LSM303_values.Z_mag = sensorValues_data->Z_mag;
+    sem_post(data_semaphore);
 
     // Calculate the angle of the vector y,x
     float X_uTesla = (float)(LSM303_values.X_mag + X_MAG_HARDOFFSET);
@@ -190,6 +271,8 @@ void compassAnswer(char* commBuffer)
                                                             LSM303ACC_GRAVITY;
     LSM303_compass_z = (float)LSM303_values.Z_acc * LSM303ACC_G_LSB * 
                                                             LSM303ACC_GRAVITY;
+    
+    not_valid_heading = (LSM303_compass_z < STRAIGHT_SENSOR_G) ? true : false;
 
     // Generar HTML.
     // El viewport es obligatorio para que se vea bien en
@@ -206,6 +289,12 @@ void compassAnswer(char* commBuffer)
             "Y: %.2fm/s^2 Z: %.2fm/s^2</p>", encabezadoHTML, 
             heading, LSM303_compass_x, LSM303_compass_y,
             LSM303_compass_z);
+
+    if(not_valid_heading)
+    {
+        sprintf(HTML, 
+            "%s<p>La informacion no es valida. Enderese el sensor</p>",HTML);
+    }
             
     sprintf(commBuffer,
             "HTTP/1.1 200 OK\n"
@@ -272,9 +361,20 @@ void setCalToZero(){
 }
 
 void SIGINT_handler (int signbr) {
-    if (fd > 0) {
-        close(fd);
-    }
-    printf("\nLSM303 closed\n\n");
+    shmdt(sharedMemPtr);
+    close(sock_http);
+    sem_unlink ("data_semaphore");
+    sem_close(data_semaphore);
+    
+    printf("\nParent\n\n");
     exit(0);
+}
+
+void SIGCHLD_handler (int signbr) {
+  pid_t child_pid;
+  int status_child;
+  while((child_pid = waitpid(-1, &status_child, WNOHANG)) > 0) {
+    // printf("[LOG] TCP SOCKET: Dead child PID: %d\n", child_pid);
+  }
+  return;
 }

@@ -11,7 +11,7 @@ OUT_NAME = web_server
 OUT_PATH = ${SERV_BUILD_PATH}/${OUT_NAME}
 
 # Linker flags
-LFLAGS = -lm
+LFLAGS = -lm -lpthread
 
 all: build_server
 	

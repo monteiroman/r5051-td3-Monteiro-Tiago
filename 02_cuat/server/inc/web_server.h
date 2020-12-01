@@ -12,6 +12,10 @@
 #include <math.h>
 #include <signal.h>
 #include <stdbool.h>
+#include <sys/wait.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <semaphore.h>
 
 #define MAX_CONN 10 //Nro maximo de conexiones en espera
 
@@ -21,7 +25,11 @@
 #define X_MAG_HARDOFFSET        -116
 #define Y_MAG_HARDOFFSET        222
 
+#define SHARED_SIZE             4096
+#define STRAIGHT_SENSOR_G       9
+
 struct calibValues {
+    bool firstCalibFlag;
     int16_t X_min; 
     int16_t Y_min; 
     int16_t Z_min; 
@@ -37,4 +45,16 @@ struct sensorValues {
     int16_t X_mag;
     int16_t Y_mag;
     int16_t Z_mag;
-} LSM303_values;
+};
+
+int sensor_query ();
+void compassAnswer (char* commBuffer);
+void calibAnswer(char* commBuffer, struct calibValues calVal);
+void setCalToZero();
+void processClient(int s_aux, struct sockaddr_in *pDireccionCliente,
+                                                                int puerto);
+void SIGINT_handler (int signbr);
+void SIGCHLD_handler (int signbr);
+
+// Miscelaneous functions
+void print_error (char* e_file, char* e_msg);
