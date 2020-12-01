@@ -43,7 +43,7 @@ static int __init i2c_init(void){
 
     // Register platform driver to link the device tree with the driver module.
     // https://manned.org/platform_driver_register.9
-    if((status = platform_driver_register(&m_i2c_pdriver)) >= 0){
+    if((status = platform_driver_register(&m_i2c_pdriver)) < 0){
 
         print_error_msg_w_status("   INIT    ", __FILE__, (char*)__FUNCTION__, 
             __LINE__, status);

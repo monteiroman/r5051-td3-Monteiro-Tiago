@@ -12,7 +12,6 @@ static int m_i2c_probe(struct platform_device *pdev) {
     uint8_t value[1];
     int status = 0;
 
-
     // >-------------------- Initializing Chdev -----------------------< //
     //                   CLASS_NAME   "i2c_class"                        //
     //                   DEVICE_NAME  "i2c_TM"                           //
@@ -267,8 +266,7 @@ static int m_i2c_probe(struct platform_device *pdev) {
     irc_reg_m_value = m_i2c_readByte();
 
     if(ira_reg_m_value != 0x48 || irb_reg_m_value != 0x34 || 
-        irc_reg_m_value != 0x33){
-
+                                            irc_reg_m_value != 0x33){
         //Requested resources rollback. 
         free_irq(virt_irq, NULL);
         iounmap(i2c2_base);
@@ -300,10 +298,6 @@ static int m_i2c_remove(struct platform_device *pdev){
     iounmap(i2c2_base);
     iounmap(cmPer_base);
     iounmap(controlModule_base);
-    cdev_del(&state.m_i2c_cdev);
-    device_destroy(state.m_i2c_class, state.m_i2c_device_type);
-    class_destroy(state.m_i2c_class);
-    unregister_chrdev_region(state.m_i2c_device_type, MINOR_COUNT);
     
     dev_info(&pdev->dev, "Driver controller successfully removed.\n");
     
