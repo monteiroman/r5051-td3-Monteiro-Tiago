@@ -10,7 +10,7 @@ void processClient(int s_aux, struct sockaddr_in *pDireccionCliente, int puerto)
     char ipAddr[20];
     int Port;
     int indiceEntrada;
-    char sensorOption[6];
+    char *sensorOption,*method;
     int tempValida = 0;
   
     strcpy(ipAddr, inet_ntoa(pDireccionCliente->sin_addr));
@@ -23,23 +23,20 @@ void processClient(int s_aux, struct sockaddr_in *pDireccionCliente, int puerto)
         exit(1);
     }
   
-    // Check if it is a GET message.
-    if (memcmp(commBuffer, "GET /", 5) == 0)
-    {
-        if (sscanf(&commBuffer[5], "%s", &sensorOption) == 1)
-        {     
-            // printf("GET: %s\n", sensorOption);
-
-            if(memcmp(sensorOption, "compass", 7) == 0)
-                compassAnswer(commBuffer);
-
-            if(memcmp(sensorOption, "calib", 5) == 0)
-                calibAnswer(commBuffer, calVal);
-        }
-    }
-  
-   
+    // Obtain requested method and file.
+    method = strtok(commBuffer, " \t\r\n");    // GET or POST
+    sensorOption   = strtok(NULL, " \t");      // File name (/compass or /calib)
     
+    // Check if it is a GET method.
+    if (memcmp(method, "GET", 5) == 0)
+    {
+        if(memcmp(sensorOption, "/compass", 7) == 0)
+            compassAnswer(commBuffer);
+
+        if(memcmp(sensorOption, "/calib", 5) == 0)
+            calibAnswer(commBuffer, calVal);
+    }
+   
     // Reply to client.
     if (send(s_aux, commBuffer, strlen(commBuffer), 0) == -1)
     {

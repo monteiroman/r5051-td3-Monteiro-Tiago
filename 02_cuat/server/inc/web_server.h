@@ -57,3 +57,5 @@ void SIGCHLD_handler (int signbr);
 
 // Miscelaneous functions
 void print_error (char* e_file, char* e_msg);
+void print_msg (char* m_file, char* m_msg);
+void print_msg_wValue (char* m_file, char* m_msg, long val);

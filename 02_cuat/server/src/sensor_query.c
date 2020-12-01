@@ -47,6 +47,6 @@ void SIGINT_sensor_handler (int signbr) {
     if (fd > 0) {
         close(fd);
     }
-    printf("\nLSM303 closed\n\n");
+    // printf("\nLSM303 closed\n\n");
     exit(0);
 }

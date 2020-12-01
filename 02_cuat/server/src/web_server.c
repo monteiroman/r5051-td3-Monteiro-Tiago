@@ -1,22 +1,3 @@
-/**********************************************************/
-/* Mini web server por Dario Alpern (17/8/2020)           */
-/*                                                        */
-/* Headers HTTP relevantes del cliente:                   */
-/* GET {path} HTTP/1.x                                    */
-/*                                                        */
-/* Encabezados HTTP del servidor enviados como respuesta: */
-/* HTTP/1.1 200 OK                                        */
-/* Content-Length: nn (longitud del HTML)                 */
-/* Content-Type: text/html; charset=utf-8                 */
-/* Connection: Closed                                     */
-/*                                                        */
-/* Después de los encabezados va una lìnea en blanco y    */
-/* luego el código HTML.                                  */
-/*                                                        */
-/* http://dominio/sensorOption (número): genera respuesta  */
-/* con Brujula en Celsius indicado por el usuario y   */
-/* en Fahrenheit.                                         */
-/**********************************************************/
 #include "../inc/web_server.h"
 
 int sock_http;
@@ -42,7 +23,7 @@ int main(int argc, char *argv[])
     }
 
     server_pid = getpid();
-    printf("[LOG] Web Server: Server pid: %d\n", server_pid);
+    print_msg_wValue(__FILE__, "Server pid: %d", (long)server_pid);
 
 // -------> Signal handlers <-------
     signal(SIGINT, SIGINT_handler);
@@ -63,7 +44,8 @@ int main(int argc, char *argv[])
         
         return -1;
     }
-    printf("[LOG] TCP SOCKET: Shared memory attached at %p\n", sharedMemPtr);
+    print_msg_wValue(__FILE__, "Shared memory attached at: %p", 
+                                                        (long)sharedMemPtr);
     
     // Point the struct to the corresponding shared memory.
     sensorValues_data = (struct sensorValues *)sharedMemPtr;
@@ -90,7 +72,7 @@ int main(int argc, char *argv[])
     {
         shmdt(sharedMemPtr);
         close(sock_http);
-        print_error(__FILE__, "Can't bind to the requested port");
+        print_error(__FILE__, "Can't bind to requested port");
         
         exit(1);
     }
@@ -170,10 +152,12 @@ int main(int argc, char *argv[])
     }
 
 // -------> User info. <-------
-    printf("\nGo to this path in your browser:");
-    printf("\n\thttp://server_ip_addr:%s/callib", argv[1]);
-    printf("\n\tor http://server_ip_addr:%s/compass\n", argv[1]);
-
+    print_msg(__FILE__, "Go to this path in your browser:");
+    print_msg_wValue(__FILE__, "\thttp://server_ip_addr:%s/callib", 
+                                                                (long)argv[1]);
+    print_msg_wValue(__FILE__, "\tor http://server_ip_addr:%s/compass\n", 
+                                                                (long)argv[1]);
+    
 // -------> Client process <-------
     // Permite atender a multiples usuarios
     while (1)
@@ -226,8 +210,10 @@ void SIGINT_handler (int signbr) {
     sem_close(data_semaphore);
     sem_unlink ("calib_semaphore");
     sem_close(calib_semaphore);
-    
-    printf("\nParent\n\n");
+
+    printf("\n");
+    print_msg(__FILE__, "Exiting server.");
+
     exit(0);
 }
 
@@ -235,7 +221,7 @@ void SIGCHLD_handler (int signbr) {
   pid_t child_pid;
   int status_child;
   while((child_pid = waitpid(-1, &status_child, WNOHANG)) > 0) {
-    // printf("[LOG] TCP SOCKET: Dead child PID: %d\n", child_pid);
+    //   print_msg_wValue(__FILE__, "Dead child PID: %d", (long)child_pid);
   }
   return;
 }
