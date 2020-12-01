@@ -9,7 +9,9 @@ void processClient(int s_aux, struct sockaddr_in *pDireccionCliente, int puerto)
     char commBuffer[4096];
     char ipAddr[20];
     int Port;
+    int indiceEntrada;
     char sensorOption[6];
+    int tempValida = 0;
   
     strcpy(ipAddr, inet_ntoa(pDireccionCliente->sin_addr));
     Port = ntohs(pDireccionCliente->sin_port);
@@ -17,26 +19,35 @@ void processClient(int s_aux, struct sockaddr_in *pDireccionCliente, int puerto)
     // Client message.
     if (recv(s_aux, commBuffer, sizeof(commBuffer), 0) == -1)
     {
-        print_error(__FILE__, "Error en recv");
-
+        perror("Error en recv");
         exit(1);
     }
   
-    if(memcmp(sensorOption, "compass", 7) == 0)
-        compassAnswer(commBuffer);
+    // Check if it is a GET message.
+    if (memcmp(commBuffer, "GET /", 5) == 0)
+    {
+        if (sscanf(&commBuffer[5], "%s", &sensorOption) == 1)
+        {     
+            // printf("GET: %s\n", sensorOption);
 
-    if(memcmp(sensorOption, "calib", 5) == 0){
-        calibAnswer(commBuffer, calVal);
+            if(memcmp(sensorOption, "compass", 7) == 0)
+                compassAnswer(commBuffer);
+
+            if(memcmp(sensorOption, "calib", 5) == 0)
+                calibAnswer(commBuffer, calVal);
+        }
     }
+  
+   
     
-    // Send reply.
+    // Reply to client.
     if (send(s_aux, commBuffer, strlen(commBuffer), 0) == -1)
     {
         perror("Error en send");
         exit(1);
     }
     
-    // Cierra la conexion con el cliente actual
+    // Close actual client connection.
     close(s_aux);
 }
 
@@ -50,7 +61,7 @@ void compassAnswer(char* commBuffer)
     char HTML[4096];
     bool not_valid_heading;
 
-// -------> Sensor logic. <-------
+// -------> Compass logic. <-------
     // Set callibration first time to true.
     sem_wait(calib_semaphore);
     calibration_data->firstCalibFlag = true;

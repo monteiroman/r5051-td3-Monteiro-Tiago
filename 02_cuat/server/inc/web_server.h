@@ -26,7 +26,7 @@
 #define Y_MAG_HARDOFFSET        222
 
 #define SHARED_SIZE             4096
-#define DATA_MARGIN             1024
+#define DATA_MARGIN             128
 
 struct calibValues {
     bool firstCalibFlag;
