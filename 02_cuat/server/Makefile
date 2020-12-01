@@ -2,7 +2,6 @@
 CC = gcc
 
 # Source
-SRC_NAME = web_server.c
 SRC_PATH = src#/${SRC_NAME}
 
 # Output

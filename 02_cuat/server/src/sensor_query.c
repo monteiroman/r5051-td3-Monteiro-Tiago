@@ -1,11 +1,11 @@
 #include "../inc/sensor_query.h"
 
-extern int fd;
+int fd;
 extern int sock_http;
 extern sem_t *data_semaphore;
 extern struct sensorValues *sensorValues_data;
 
-int sensor_query (){
+void sensor_query (){
     int readSize = 0;
     int16_t datafromdriver[6]={0};
 
@@ -16,7 +16,7 @@ int sensor_query (){
         if((fd = open("/dev/i2c_TM", O_RDWR)) < 0){
             print_error(__FILE__, "Cannot open driver. Exit.");
 
-            return -1;
+            exit(1);
         }   
 
         readSize = read(fd, &datafromdriver, sizeof(datafromdriver));
@@ -25,7 +25,7 @@ int sensor_query (){
             printf("\tReaded %d bytes. Error. Exit.\n\tExpected %d\n\n",
                 readSize, sizeof(datafromdriver));
 
-            return -1;
+            exit(1);
         }
 
         close(fd);
@@ -41,12 +41,9 @@ int sensor_query (){
     
         usleep(100000);
     }
-    return 0;
 }
 
 void SIGINT_sensor_handler (int signbr) {
-    close(sock_http);
-    
     if (fd > 0) {
         close(fd);
     }

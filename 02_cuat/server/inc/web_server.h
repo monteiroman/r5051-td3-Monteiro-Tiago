@@ -26,7 +26,7 @@
 #define Y_MAG_HARDOFFSET        222
 
 #define SHARED_SIZE             4096
-#define STRAIGHT_SENSOR_G       9
+#define DATA_MARGIN             1024
 
 struct calibValues {
     bool firstCalibFlag;
@@ -36,7 +36,7 @@ struct calibValues {
     int16_t X_max; 
     int16_t Y_max; 
     int16_t Z_max; 
-} calVal;
+};
 
 struct sensorValues {
     int16_t X_acc;
@@ -47,10 +47,9 @@ struct sensorValues {
     int16_t Z_mag;
 };
 
-int sensor_query ();
+void sensor_query ();
 void compassAnswer (char* commBuffer);
 void calibAnswer(char* commBuffer, struct calibValues calVal);
-void setCalToZero();
 void processClient(int s_aux, struct sockaddr_in *pDireccionCliente,
                                                                 int puerto);
 void SIGINT_handler (int signbr);
