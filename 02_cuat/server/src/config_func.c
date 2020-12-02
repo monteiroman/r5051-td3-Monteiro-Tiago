@@ -77,6 +77,7 @@ int readAndUpdateCfg(){
                 break;
         }
     }
+
     // Copy configuration values to shared mem.
     sem_wait(cfg_semaphore);
     memcpy(configValues_data, &cfgVal, sizeof(struct configValues));

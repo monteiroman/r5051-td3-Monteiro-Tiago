@@ -98,6 +98,7 @@ int main(int argc, char *argv[])
 
         return -1;
     }
+
 // -------> Set calibration data to zero <-------
     sem_wait(calib_semaphore);
     calibration_data->X_min = 0;
@@ -113,7 +114,7 @@ int main(int argc, char *argv[])
     // Read config file for the first time, if there is no file set the 
     //  configuration with default data.
     if(readAndUpdateCfg() < 0){
-        sem_wait(calib_semaphore);
+        sem_wait(cfg_semaphore);
         configValues_data->backlog = 2;
         configValues_data->current_connections = 0;
         configValues_data->max_connections = 1000;
@@ -121,7 +122,7 @@ int main(int argc, char *argv[])
         configValues_data->sensor_period = 1;
         configValues_data->X_HardOffset = -116;
         configValues_data->Y_HardOffset = 222;
-        sem_post(calib_semaphore);
+        sem_post(cfg_semaphore);
     }
 
 // -------> Socket creation <-------
@@ -133,6 +134,7 @@ int main(int argc, char *argv[])
         
         exit(1);
     }
+
     // Asigna el puerto indicado y una IP de la maquina
     datosServidor.sin_family = AF_INET;
     datosServidor.sin_port = htons(atoi(argv[1]));

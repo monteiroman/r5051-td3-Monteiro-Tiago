@@ -55,9 +55,9 @@ void compassAnswer(char* commBuffer)
 {
     int xMagHardoffset = 0, yMagHardoffset = 0; 
     float heading = 0;
-    float LSM303_compass_x = 0;
-    float LSM303_compass_y = 0;
-    float LSM303_compass_z = 0;
+    float LSM303_accel_x = 0;
+    float LSM303_accel_y = 0;
+    float LSM303_accel_z = 0;
     char encabezadoHTML[4096];
     char HTML[4096];
     bool not_valid_heading;
@@ -96,15 +96,15 @@ void compassAnswer(char* commBuffer)
         heading = 360 + heading;
     }
 
-    LSM303_compass_x = (float)LSM303_values.X_acc * LSM303ACC_G_LSB * 
+    LSM303_accel_x = (float)LSM303_values.X_acc * LSM303ACC_G_LSB * 
                                                             LSM303ACC_GRAVITY;
-    LSM303_compass_y = (float)LSM303_values.Y_acc * LSM303ACC_G_LSB * 
+    LSM303_accel_y = (float)LSM303_values.Y_acc * LSM303ACC_G_LSB * 
                                                             LSM303ACC_GRAVITY;
-    LSM303_compass_z = (float)LSM303_values.Z_acc * LSM303ACC_G_LSB * 
+    LSM303_accel_z = (float)LSM303_values.Z_acc * LSM303ACC_G_LSB * 
                                                             LSM303ACC_GRAVITY;
     
     // If sensor is not straight the heading measure is wrong.
-    not_valid_heading = (LSM303_compass_z < STRAIGHT_SENSOR_G) ? true : false;
+    not_valid_heading = (LSM303_accel_z < STRAIGHT_SENSOR_G) ? true : false;
 
 // -------> HTML reply. <-------
     sprintf(encabezadoHTML, "<html><head><title>Brujula</title>"
@@ -117,8 +117,8 @@ void compassAnswer(char* commBuffer)
     sprintf(HTML, "%s<p> El sensor esta apuntando a: %.2f°</p>"
             "<p>Aceleracion:</p><p> X: %.2fm/s^2 "
             "Y: %.2fm/s^2 Z: %.2fm/s^2</p>", encabezadoHTML, 
-            heading, LSM303_compass_x, LSM303_compass_y,
-            LSM303_compass_z);
+            heading, LSM303_accel_x, LSM303_accel_y,
+            LSM303_accel_z);
 
     if(not_valid_heading)
     {
