@@ -30,3 +30,14 @@ void print_msg_wValue (char* m_file, char* m_msg, long val)
 
     printf("%s\n", msg);
 }
+
+void print_msg_wFloatValue (char* m_file, char* m_msg, float val)
+{
+    char msg[255] = "[LOG]   ", buf[255];
+    strcat(msg, m_file);
+    strcat(msg, " | ");
+    snprintf(buf, 255, m_msg, val);
+    strcat(msg, buf);
+
+    printf("%s\n", msg);
+}

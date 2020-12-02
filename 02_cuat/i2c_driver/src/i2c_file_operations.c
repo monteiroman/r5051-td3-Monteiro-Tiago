@@ -9,13 +9,11 @@ void m_i2c_writeBuffer (uint8_t *writeData, int writeData_size){
     uint32_t aux_regValue = 0;
     uint32_t status = 0;
 
-    // print_info_msg("WRITE_BYTE ", __FILE__, "Writing byte in i2c bus...");
-
     // Check irq status (occupied or free)
     aux_regValue = ioread32(i2c2_base + I2C_IRQSTATUS_RAW);
 
     while((aux_regValue >> 12) & 1){
-       msleep(100);
+       msleep(100);     // Wait if irq status releases.
        print_error_msg_wo_status("WRITE_BYTE ", __FILE__, (char*)__FUNCTION__,
             __LINE__);
        i++;
@@ -69,9 +67,6 @@ void m_i2c_writeBuffer (uint8_t *writeData, int writeData_size){
     iowrite32(aux_regValue, i2c2_base + I2C_CON);
 
     msleep(1);
-
-    // print_info_msg("WRITE_BUFF ", __FILE__, 
-        // "Write byte in i2c bus returns OK!");
 }
 
 uint8_t m_i2c_readByte(void){
@@ -80,13 +75,11 @@ uint8_t m_i2c_readByte(void){
     uint32_t status = 0;
     uint8_t readData;
 
-    // print_info_msg(" READ_BYTE ", __FILE__, "Reading byte from i2c bus...");
-
     // Check irq status (occupied or free).
     aux_regValue = ioread32(i2c2_base + I2C_IRQSTATUS_RAW);
     
     while((aux_regValue >> 12) & 1){
-        msleep(100);
+        msleep(100);     // Wait if irq status releases.
         print_error_msg_wo_status(" READ_BYTE ", __FILE__, (char*)__FUNCTION__,
             __LINE__);
         i++;
@@ -139,9 +132,6 @@ uint8_t m_i2c_readByte(void){
 
     msleep(1);
 
-    // print_info_msg(" READ_BYTE ", __FILE__, 
-        // "Read byte from i2c bus returns OK!");
-
     return readData;
 }
 
@@ -156,15 +146,10 @@ irqreturn_t driver_isr(int irq, void *devid, struct pt_regs *regs) {
     uint32_t irq_status;
     uint32_t aux_regValue;
 
-    // print_info_msg("    IRQ    ", __FILE__, "New interruption.");
-
     irq_status = ioread32(i2c2_base + I2C_IRQSTATUS);
 
     // If it is a reception irq...
     if(irq_status & I2C_IRQSTATUS_RRDY){
-        // print_info_msg("    IRQ    ", __FILE__, 
-            // "-----> RX Interruption <-----");
-
         // Retrieve data.
         i2c_rxData = ioread8(i2c2_base + I2C_DATA);
        
@@ -186,9 +171,6 @@ irqreturn_t driver_isr(int irq, void *devid, struct pt_regs *regs) {
    
     // If it is a transmission irq...
     if(irq_status & I2C_IRQSTATUS_XRDY){
-        // print_info_msg("    IRQ    ", __FILE__, 
-            // "-----> TX Interruption <-----");
-
         // Write data
         iowrite8(i2c_txData[i2c_txData_byteCount], i2c2_base + I2C_DATA);
 
@@ -219,8 +201,6 @@ irqreturn_t driver_isr(int irq, void *devid, struct pt_regs *regs) {
             iowrite32(irq_status, i2c2_base + I2C_IRQSTATUS);    
         }
     }
-
-    // print_info_msg("    IRQ    ", __FILE__, "IRQ handled OK!");
 
     return (irqreturn_t)IRQ_HANDLED;
 }
@@ -290,6 +270,7 @@ static int m_i2c_open(struct inode *inode, struct file *file) {
     writeBuffer[1] = 0x00;    
     m_i2c_writeBuffer(writeBuffer, sizeof(writeBuffer));
 
+    // Wait for the sensor to start 
     msleep(50);
 
     return 0;
@@ -387,7 +368,9 @@ static ssize_t m_i2c_read(struct file *m_file, char __user *buffer, size_t size,
     rcv[4] = (int16_t)((Y_MAG_H << 8) | Y_MAG_L);
     rcv[5] = (int16_t)((Z_MAG_H << 8) | Z_MAG_L);
 
+// Tengo que poner un semaforo aca?
     status = copy_to_user(buffer, (const void *) &rcv, sizeof(rcv));
+
 
     if(status != 0){
         print_error_msg_w_status(" I2C_READ  ", __FILE__, (char*)__FUNCTION__,

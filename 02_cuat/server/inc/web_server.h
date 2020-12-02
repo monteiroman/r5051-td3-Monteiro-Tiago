@@ -16,6 +16,7 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <semaphore.h>
+#include <sys/stat.h>
 
 #define MAX_CONN 10 //Nro maximo de conexiones en espera
 
@@ -47,15 +48,32 @@ struct sensorValues {
     int16_t Z_mag;
 };
 
+struct configValues {
+    int backlog;                // b
+    int current_connections;    // c
+    int max_connections;        // m
+    int mean_samples;           // s
+    int X_HardOffset;           // x
+    int Y_HardOffset;           // y
+    double sensor_freq;          // f
+};
+
 void sensor_query ();
 void compassAnswer (char* commBuffer);
 void calibAnswer(char* commBuffer, struct calibValues calVal);
 void processClient(int s_aux, struct sockaddr_in *pDireccionCliente,
                                                                 int puerto);
 void SIGINT_handler (int signbr);
+void SIGKILL_handler (int signbr);
 void SIGCHLD_handler (int signbr);
 
 // Miscelaneous functions
 void print_error (char* e_file, char* e_msg);
 void print_msg (char* m_file, char* m_msg);
 void print_msg_wValue (char* m_file, char* m_msg, long val);
+void print_msg_wFloatValue (char* m_file, char* m_msg, float val);
+
+// File dunctions
+off_t fsize(const char * path);
+unsigned char* readFile(const char* path, size_t* size);
+void cfgRead();

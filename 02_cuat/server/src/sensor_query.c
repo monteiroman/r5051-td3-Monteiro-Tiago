@@ -21,14 +21,14 @@ void sensor_query (){
 
         readSize = read(fd, &datafromdriver, sizeof(datafromdriver));
 
+        close(fd);
+
         if(readSize != sizeof(datafromdriver)){
             printf("\tReaded %d bytes. Error. Exit.\n\tExpected %d\n\n",
                 readSize, sizeof(datafromdriver));
 
             exit(1);
         }
-
-        close(fd);
 
         sem_wait(data_semaphore);
         sensorValues_data->X_acc = datafromdriver[0];
@@ -44,9 +44,10 @@ void sensor_query (){
 }
 
 void SIGINT_sensor_handler (int signbr) {
+    close(sock_http);
+    
     if (fd > 0) {
         close(fd);
     }
-    // printf("\nLSM303 closed\n\n");
     exit(0);
 }

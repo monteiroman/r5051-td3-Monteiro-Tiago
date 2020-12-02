@@ -303,5 +303,3 @@ static int m_i2c_remove(struct platform_device *pdev){
     
     return 0;
 }
-
-

@@ -2,10 +2,10 @@
 
 int sock_http;
 void *sharedMemPtr = (void *) 0;
-sem_t *data_semaphore, *calib_semaphore;
+sem_t *data_semaphore, *calib_semaphore, *cfg_semaphore;
 struct sensorValues *sensorValues_data, LSM303_values;
 struct calibValues *calibration_data, calVal;
-
+struct configValues *configValues_data, cfgVal;
 
 int main(int argc, char *argv[])
 {
@@ -50,8 +50,72 @@ int main(int argc, char *argv[])
     // Point the struct to the corresponding shared memory.
     sensorValues_data = (struct sensorValues *)sharedMemPtr;
     calibration_data = (struct calibValues *)
-                    (sharedMemPtr + sizeof(struct sensorValues) + DATA_MARGIN);
- 
+                (sharedMemPtr + sizeof(struct sensorValues) + DATA_MARGIN);
+    configValues_data = (struct configValues *) 
+                (calibration_data + sizeof(struct calibValues) + DATA_MARGIN);
+
+// -------> Semaphores <-------
+    sem_unlink ("data_semaphore");
+    data_semaphore = sem_open ("data_semaphore", O_CREAT | O_EXCL, 0644, 1);
+    if (data_semaphore < 0)
+    {
+        shmdt(sharedMemPtr);
+        sem_unlink ("data_semaphore");
+        sem_close(data_semaphore);
+        print_error(__FILE__, "Can't create data semaphore");
+
+        return -1;
+    }
+
+    sem_unlink ("calib_semaphore");
+    calib_semaphore = sem_open ("calib_semaphore", O_CREAT | O_EXCL, 0644, 1);
+    if (calib_semaphore < 0)
+    {
+        shmdt(sharedMemPtr);
+        sem_unlink ("data_semaphore");
+        sem_close(data_semaphore);
+        sem_unlink ("calib_semaphore");
+        sem_close(calib_semaphore);
+        print_error(__FILE__, "Can't create calibration semaphore");
+
+        return -1;
+    }
+
+    sem_unlink ("cfg_semaphore");
+    cfg_semaphore = sem_open ("cfg_semaphore", O_CREAT | O_EXCL, 0644, 1);
+    if (cfg_semaphore < 0)
+    {
+        shmdt(sharedMemPtr);
+        sem_unlink ("data_semaphore");
+        sem_close(data_semaphore);
+        sem_unlink ("calib_semaphore");
+        sem_close(calib_semaphore);
+        sem_unlink ("cfg_semaphore");
+        sem_close(cfg_semaphore);
+        print_error(__FILE__, "Can't create calibration semaphore");
+
+        return -1;
+    }
+// -------> Set calibration data to zero <-------
+    sem_wait(calib_semaphore);
+    calibration_data->X_min = 0;
+    calibration_data->Y_min = 0;
+    calibration_data->Z_min = 0;
+    calibration_data->X_max = 0;
+    calibration_data->Y_max = 0;
+    calibration_data->Z_max = 0;
+    calibration_data->firstCalibFlag = true;
+    sem_post(calib_semaphore);
+
+// -------> Config file <-------
+    cfgRead();
+
+    sem_wait(cfg_semaphore);
+    printf("%f\n", configValues_data->sensor_freq);
+    sem_post(cfg_semaphore);
+
+
+
 // -------> Socket creation <-------
     sock_http = socket(AF_INET, SOCK_STREAM,0);
     if (sock_http == -1)
@@ -65,6 +129,21 @@ int main(int argc, char *argv[])
     datosServidor.sin_family = AF_INET;
     datosServidor.sin_port = htons(atoi(argv[1]));
     datosServidor.sin_addr.s_addr = htonl(INADDR_ANY);
+
+    // For reuse TCP port. When a process is closed linux takes time to free the
+    // port.
+    int reuse = 1;
+    if (setsockopt(sock_http, SOL_SOCKET, SO_REUSEADDR, (const char*)&reuse, 
+                                                            sizeof(reuse)) < 0){
+        print_error(__FILE__, "setsockopt(SO_REUSEADDR) failed");
+    }
+
+#ifdef SO_REUSEPORT
+    if (setsockopt(sock_http, SOL_SOCKET, SO_REUSEPORT, (const char*)&reuse, 
+                                                            sizeof(reuse)) < 0){
+        print_error(__FILE__, "setsockopt(SO_REUSEPORT) failed");
+    }
+#endif
 
     // Obtiene el puerto para este proceso.
     if( bind(sock_http, (struct sockaddr*)&datosServidor,
@@ -87,46 +166,6 @@ int main(int argc, char *argv[])
         
         exit(1);
     }
-
-// -------> Semaphores <-------
-    sem_unlink ("data_semaphore");
-    data_semaphore = sem_open ("data_semaphore", O_CREAT | O_EXCL, 0644, 1);
-    if (data_semaphore < 0)
-    {
-        shmdt(sharedMemPtr);
-        close(sock_http);
-        sem_unlink ("data_semaphore");
-        sem_close(data_semaphore);
-        print_error(__FILE__, "Can't create data semaphore");
-
-        return -1;
-    }
-
-    sem_unlink ("calib_semaphore");
-    calib_semaphore = sem_open ("calib_semaphore", O_CREAT | O_EXCL, 0644, 1);
-    if (calib_semaphore < 0)
-    {
-        shmdt(sharedMemPtr);
-        close(sock_http);
-        sem_unlink ("data_semaphore");
-        sem_close(data_semaphore);
-        sem_unlink ("calib_semaphore");
-        sem_close(calib_semaphore);
-        print_error(__FILE__, "Can't create calibration semaphore");
-
-        return -1;
-    }
-
-// -------> Set calibration data to zero <-------
-    sem_wait(calib_semaphore);
-    calibration_data->X_min = 0;
-    calibration_data->Y_min = 0;
-    calibration_data->Z_min = 0;
-    calibration_data->X_max = 0;
-    calibration_data->Y_max = 0;
-    calibration_data->Z_max = 0;
-    calibration_data->firstCalibFlag = true;
-    sem_post(calib_semaphore);
 
 // -------> Sensor process <-------
     // Start sensor values query process.
@@ -212,7 +251,7 @@ void SIGINT_handler (int signbr) {
     sem_close(calib_semaphore);
 
     printf("\n");
-    print_msg(__FILE__, "Exiting server.");
+    print_msg(__FILE__, "Exiting server. SIGINT");
 
     exit(0);
 }
