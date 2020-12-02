@@ -1,12 +1,12 @@
 #include "../inc/web_server.h"
 
-int sock_http;
+int sock_http, backlog_aux;
 void *sharedMemPtr = (void *) 0;
 sem_t *data_semaphore, *calib_semaphore, *cfg_semaphore;
 struct sensorValues *sensorValues_data;
 struct calibValues *calibration_data;
 struct configValues *configValues_data;
-bool config_flag = false;
+bool config_flag = false, max_connected = true;
 
 int main(int argc, char *argv[])
 {
@@ -110,8 +110,19 @@ int main(int argc, char *argv[])
     sem_post(calib_semaphore);
 
 // -------> Config file <-------
-    // Read config file for the first time.
-    readAndUpdateCfg();
+    // Read config file for the first time, if there is no file set the 
+    //  configuration with default data.
+    if(readAndUpdateCfg() < 0){
+        sem_wait(calib_semaphore);
+        configValues_data->backlog = 2;
+        configValues_data->current_connections = 0;
+        configValues_data->max_connections = 1000;
+        configValues_data->mean_samples = 5;
+        configValues_data->sensor_period = 1;
+        configValues_data->X_HardOffset = -116;
+        configValues_data->Y_HardOffset = 222;
+        sem_post(calib_semaphore);
+    }
 
 // -------> Socket creation <-------
     sock_http = socket(AF_INET, SOCK_STREAM,0);
@@ -153,9 +164,12 @@ int main(int argc, char *argv[])
         exit(1);
     }
         
-    // Indicar que el socket encole hasta MAX_CONN pedidos
-    // de conexion simultaneas.
-    if (listen(sock_http, MAX_CONN) < 0)
+    // Indicates the socket to heap up to "backlog" 
+    //  concurrent connections.
+    sem_wait(cfg_semaphore);
+    backlog_aux = configValues_data->backlog;
+    sem_post(cfg_semaphore);
+    if (listen(sock_http, backlog_aux) < 0)
     {
         shmdt(sharedMemPtr);
         close(sock_http);
@@ -197,11 +211,19 @@ int main(int argc, char *argv[])
                                                                 (long)argv[1]);
     
 // -------> Client process <-------
-    // Permite atender a multiples usuarios
+    // Allows serving multiple users.
     while (1)
     {
         int s_aux;
         struct sockaddr_in clientData;
+
+        sem_wait(cfg_semaphore);
+        while(max_connected){
+            max_connected = (configValues_data->current_connections >= 
+                configValues_data->max_connections) ? true : false;
+        }
+        sem_post(cfg_semaphore);
+
 
         // Update configuration values.
         if(updateConfig() < 0){
@@ -252,7 +274,19 @@ int main(int argc, char *argv[])
         }
         if (httpClient_pid == 0) // Child process.
         {
+            // Increment "current connections" count.
+            sem_wait(calib_semaphore);
+            configValues_data->current_connections++;
+            sem_post(calib_semaphore);
+            
             processClient(s_aux, &clientData, atoi(argv[1]));
+
+            // Decrement "current connections" count.
+            sem_wait(calib_semaphore);
+            (configValues_data->current_connections > 0) ? 
+                           configValues_data->current_connections-- : 
+                           0;
+            sem_post(calib_semaphore);
             
             exit(0);
         }

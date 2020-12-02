@@ -63,7 +63,6 @@ void compassAnswer(char* commBuffer)
     bool not_valid_heading;
     struct sensorValues LSM303_values;
 
-
 // -------> Compass logic. <-------
     // Set callibration first time to true.
     sem_wait(calib_semaphore);

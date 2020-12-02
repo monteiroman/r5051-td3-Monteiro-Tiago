@@ -11,6 +11,7 @@ int updateConfig(){
         if(readAndUpdateCfg() < 0){
             return -1;
         }
+        print_msg(__FILE__, "Configuration updated.");
     }
     return 0;
 }
