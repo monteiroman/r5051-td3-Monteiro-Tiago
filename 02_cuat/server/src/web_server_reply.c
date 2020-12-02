@@ -1,8 +1,9 @@
 #include "../inc/web_server_reply.h"
 
-extern sem_t *data_semaphore, *calib_semaphore;
-extern struct sensorValues *sensorValues_data, LSM303_values;
-extern struct calibValues *calibration_data, calVal;
+extern sem_t *data_semaphore, *calib_semaphore, *cfg_semaphore;
+extern struct sensorValues *sensorValues_data;
+extern struct calibValues *calibration_data;
+extern struct configValues *configValues_data;
 
 void processClient(int s_aux, struct sockaddr_in *pDireccionCliente, int puerto)
 {
@@ -12,6 +13,8 @@ void processClient(int s_aux, struct sockaddr_in *pDireccionCliente, int puerto)
     int indiceEntrada;
     char *sensorOption,*method;
     int tempValida = 0;
+    struct calibValues calVal;
+    struct sensorValues LSM303_values;
   
     strcpy(ipAddr, inet_ntoa(pDireccionCliente->sin_addr));
     Port = ntohs(pDireccionCliente->sin_port);
@@ -50,6 +53,7 @@ void processClient(int s_aux, struct sockaddr_in *pDireccionCliente, int puerto)
 
 void compassAnswer(char* commBuffer)
 {
+    int xMagHardoffset = 0, yMagHardoffset = 0; 
     float heading = 0;
     float LSM303_compass_x = 0;
     float LSM303_compass_y = 0;
@@ -57,6 +61,8 @@ void compassAnswer(char* commBuffer)
     char encabezadoHTML[4096];
     char HTML[4096];
     bool not_valid_heading;
+    struct sensorValues LSM303_values;
+
 
 // -------> Compass logic. <-------
     // Set callibration first time to true.
@@ -74,9 +80,15 @@ void compassAnswer(char* commBuffer)
     LSM303_values.Z_mag = sensorValues_data->Z_mag;
     sem_post(data_semaphore);
 
+    // Obtain ofset values.
+    sem_wait(cfg_semaphore);
+    xMagHardoffset = configValues_data->X_HardOffset;
+    yMagHardoffset = configValues_data->Y_HardOffset;
+    sem_post(cfg_semaphore);
+
     // Calculate the angle of the vector y,x
-    float X_uTesla = (float)(LSM303_values.X_mag + X_MAG_HARDOFFSET);
-    float Y_uTesla = (float)(LSM303_values.Y_mag + Y_MAG_HARDOFFSET);
+    float X_uTesla = (float)(LSM303_values.X_mag + xMagHardoffset);
+    float Y_uTesla = (float)(LSM303_values.Y_mag + yMagHardoffset);
 
     heading = ((float)(atan2(Y_uTesla, X_uTesla) * 180) / M_PI);
 
@@ -128,6 +140,7 @@ void calibAnswer(char* commBuffer, struct calibValues calVal)
     char encabezadoHTML[4096];
     char HTML[4096];
     bool first_time;
+    struct sensorValues LSM303_values;
 
 // -------> Calibration logic. <-------
     // Wait semaphore and get sensor data. 

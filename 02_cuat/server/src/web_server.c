@@ -3,9 +3,10 @@
 int sock_http;
 void *sharedMemPtr = (void *) 0;
 sem_t *data_semaphore, *calib_semaphore, *cfg_semaphore;
-struct sensorValues *sensorValues_data, LSM303_values;
-struct calibValues *calibration_data, calVal;
-struct configValues *configValues_data, cfgVal;
+struct sensorValues *sensorValues_data;
+struct calibValues *calibration_data;
+struct configValues *configValues_data;
+bool config_flag = false;
 
 int main(int argc, char *argv[])
 {
@@ -28,6 +29,7 @@ int main(int argc, char *argv[])
 // -------> Signal handlers <-------
     signal(SIGINT, SIGINT_handler);
     signal(SIGCHLD, SIGCHLD_handler);
+    signal(SIGUSR1, SIGUSR1_handler);
 
 // -------> Shared memory <-------
     // Get shmem
@@ -108,13 +110,8 @@ int main(int argc, char *argv[])
     sem_post(calib_semaphore);
 
 // -------> Config file <-------
-    cfgRead();
-
-    sem_wait(cfg_semaphore);
-    printf("%f\n", configValues_data->sensor_freq);
-    sem_post(cfg_semaphore);
-
-
+    // Read config file for the first time.
+    readAndUpdateCfg();
 
 // -------> Socket creation <-------
     sock_http = socket(AF_INET, SOCK_STREAM,0);
@@ -179,6 +176,8 @@ int main(int argc, char *argv[])
         sem_close(data_semaphore);
         sem_unlink ("calib_semaphore");
         sem_close(calib_semaphore);
+        sem_unlink ("cfg_semaphore");
+        sem_close(cfg_semaphore);
         print_error(__FILE__, "Can't open sensor process");
         
         exit(1);
@@ -203,6 +202,22 @@ int main(int argc, char *argv[])
     {
         int s_aux;
         struct sockaddr_in clientData;
+
+        // Update configuration values.
+        if(updateConfig() < 0){
+            close(sock_http);
+            sem_unlink ("data_semaphore");
+            sem_close(data_semaphore);
+            sem_unlink ("calib_semaphore");
+            sem_close(calib_semaphore);
+            sem_unlink ("cfg_semaphore");
+            sem_close(cfg_semaphore);
+            print_error(__FILE__, 
+                    "Error while trying to read data from configuration file");
+
+            exit(1);
+        }
+
         // La funcion accept rellena la estructura address con
         // informacion del cliente y pone en longDirec la longitud
         // de la estructura.
@@ -215,6 +230,8 @@ int main(int argc, char *argv[])
             sem_close(data_semaphore);
             sem_unlink ("calib_semaphore");
             sem_close(calib_semaphore);
+            sem_unlink ("cfg_semaphore");
+            sem_close(cfg_semaphore);
             print_error(__FILE__, "\"accept()\" error");
 
             exit(1);
@@ -227,7 +244,9 @@ int main(int argc, char *argv[])
             sem_close(data_semaphore);
             sem_unlink ("calib_semaphore");
             sem_close(calib_semaphore);
-            print_error(__FILE__, "Can't create process with \"fork()\"");
+            sem_unlink ("cfg_semaphore");
+            sem_close(cfg_semaphore);
+            print_error(__FILE__, "Can't create http process");
             
             exit(1);
         }
@@ -249,6 +268,8 @@ void SIGINT_handler (int signbr) {
     sem_close(data_semaphore);
     sem_unlink ("calib_semaphore");
     sem_close(calib_semaphore);
+    sem_unlink ("cfg_semaphore");
+    sem_close(cfg_semaphore);
 
     printf("\n");
     print_msg(__FILE__, "Exiting server. SIGINT");
@@ -257,10 +278,16 @@ void SIGINT_handler (int signbr) {
 }
 
 void SIGCHLD_handler (int signbr) {
-  pid_t child_pid;
-  int status_child;
-  while((child_pid = waitpid(-1, &status_child, WNOHANG)) > 0) {
-    //   print_msg_wValue(__FILE__, "Dead child PID: %d", (long)child_pid);
-  }
-  return;
+    pid_t child_pid;
+    int status_child;
+    while((child_pid = waitpid(-1, &status_child, WNOHANG)) > 0) {
+      //   print_msg_wValue(__FILE__, "Dead child PID: %d", (long)child_pid);
+    }
+    return;
+}
+
+void SIGUSR1_handler (int signbr) {
+    config_flag = true;
+    print_msg(__FILE__, "Updating configuration.");
+    return;
 }

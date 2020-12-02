@@ -1,18 +1,24 @@
-#include "../inc/sensor_query.h"
+#include "../inc/sensor_proc.h"
 
 int fd;
 extern int sock_http;
-extern sem_t *data_semaphore;
+extern sem_t *data_semaphore, *cfg_semaphore;
 extern struct sensorValues *sensorValues_data;
+extern struct configValues *configValues_data;
 
 void sensor_query (){
     int readSize = 0;
     int16_t datafromdriver[6]={0};
+    float sensor_period = 0;
 
     signal(SIGINT, SIGINT_sensor_handler);
 
     while(1)
-    {    
+    {   
+        sem_wait(cfg_semaphore);
+        sensor_period = configValues_data->sensor_period;
+        sem_post(cfg_semaphore);
+
         if((fd = open("/dev/i2c_TM", O_RDWR)) < 0){
             print_error(__FILE__, "Cannot open driver. Exit.");
 
@@ -25,11 +31,12 @@ void sensor_query (){
 
         if(readSize != sizeof(datafromdriver)){
             printf("\tReaded %d bytes. Error. Exit.\n\tExpected %d\n\n",
-                readSize, sizeof(datafromdriver));
+                                            readSize, sizeof(datafromdriver));
 
             exit(1);
         }
 
+        // Copy values to shared memory.
         sem_wait(data_semaphore);
         sensorValues_data->X_acc = datafromdriver[0];
         sensorValues_data->Y_acc = datafromdriver[1];
@@ -39,7 +46,7 @@ void sensor_query (){
         sensorValues_data->Z_mag = datafromdriver[5];
         sem_post(data_semaphore);
     
-        usleep(100000);
+        usleep((useconds_t) (sensor_period*1000000));
     }
 }
 

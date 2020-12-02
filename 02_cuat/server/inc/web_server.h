@@ -23,9 +23,6 @@
 #define LSM303ACC_G_LSB         0.0039F
 #define LSM303ACC_GRAVITY       9.80665F
 
-#define X_MAG_HARDOFFSET        -116
-#define Y_MAG_HARDOFFSET        222
-
 #define SHARED_SIZE             4096
 #define DATA_MARGIN             128
 
@@ -49,13 +46,13 @@ struct sensorValues {
 };
 
 struct configValues {
-    int backlog;                // b
-    int current_connections;    // c
-    int max_connections;        // m
-    int mean_samples;           // s
-    int X_HardOffset;           // x
-    int Y_HardOffset;           // y
-    double sensor_freq;          // f
+    int backlog;                // in conf file: b
+    int current_connections;    // in conf file: c
+    int max_connections;        // in conf file: m
+    int mean_samples;           // in conf file: s
+    int X_HardOffset;           // in conf file: x
+    int Y_HardOffset;           // in conf file: y
+    float sensor_period;        // in conf file: f 
 };
 
 void sensor_query ();
@@ -63,17 +60,21 @@ void compassAnswer (char* commBuffer);
 void calibAnswer(char* commBuffer, struct calibValues calVal);
 void processClient(int s_aux, struct sockaddr_in *pDireccionCliente,
                                                                 int puerto);
+
+// Signal handlers.
 void SIGINT_handler (int signbr);
-void SIGKILL_handler (int signbr);
+void SIGUSR1_handler (int signbr);
 void SIGCHLD_handler (int signbr);
 
-// Miscelaneous functions
+// Miscelaneous functions.
 void print_error (char* e_file, char* e_msg);
 void print_msg (char* m_file, char* m_msg);
 void print_msg_wValue (char* m_file, char* m_msg, long val);
 void print_msg_wFloatValue (char* m_file, char* m_msg, float val);
 
-// File dunctions
+// Config dunctions.
 off_t fsize(const char * path);
 unsigned char* readFile(const char* path, size_t* size);
-void cfgRead();
+int readAndUpdateCfg();
+int updateConfig();
+
