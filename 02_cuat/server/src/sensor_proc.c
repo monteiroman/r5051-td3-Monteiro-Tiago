@@ -13,14 +13,10 @@ void sensor_query (){
     int16_t datafromdriver[6]={0};
     float sensor_period = 0;
     bool mave_change = false;
-    struct sensorValues LSM303_values;
     float xAcc_prom = 0, yAcc_prom = 0, zAcc_prom = 0;
     float xMag_prom = 0, yMag_prom = 0, zMag_prom = 0;
 
     signal(SIGINT, SIGINT_sensor_handler);
-
-print_msg_wValue(__FILE__, "Linea: %d", __LINE__);
-
 
 // -------> Get moving average samples value <-------
     sem_wait(cfg_semaphore);
@@ -128,22 +124,15 @@ print_msg_wValue(__FILE__, "Linea: %d", __LINE__);
         yMag_prom /= mave_samples; 
         zMag_prom /= mave_samples;
 
-        // LSM303_values.X_acc = xAcc_prom;
-        // LSM303_values.Y_acc = yAcc_prom;
-        // LSM303_values.Z_acc = zAcc_prom;
-        // LSM303_values.X_mag = xMag_prom;
-        // LSM303_values.Y_mag = yMag_prom;
-        // LSM303_values.Z_mag = zMag_prom;
-
         // -------> Return values <-------
         // Copy values to shared memory.
         sem_wait(data_semaphore);
-        sensorValues_data->X_acc = (int16_t)floor(xAcc_prom);//LSM303_values.X_acc;
-        sensorValues_data->Y_acc = (int16_t)floor(yAcc_prom);//LSM303_values.Y_acc;
-        sensorValues_data->Z_acc = (int16_t)floor(zAcc_prom);//LSM303_values.Z_acc;
-        sensorValues_data->X_mag = (int16_t)floor(xMag_prom);//LSM303_values.X_mag;
-        sensorValues_data->Y_mag = (int16_t)floor(yMag_prom);//LSM303_values.Y_mag;
-        sensorValues_data->Z_mag = (int16_t)floor(zMag_prom);//LSM303_values.Z_mag;
+        sensorValues_data->X_acc = (int16_t)floor(xAcc_prom);
+        sensorValues_data->Y_acc = (int16_t)floor(yAcc_prom);
+        sensorValues_data->Z_acc = (int16_t)floor(zAcc_prom);
+        sensorValues_data->X_mag = (int16_t)floor(xMag_prom);
+        sensorValues_data->Y_mag = (int16_t)floor(yMag_prom);
+        sensorValues_data->Z_mag = (int16_t)floor(zMag_prom);
         sem_post(data_semaphore);
     
         usleep((useconds_t) (sensor_period * SECOND));
@@ -161,6 +150,5 @@ void SIGINT_sensor_handler (int signbr) {
     if(fd > 0) {
         close(fd);
     }
-
     exit(0);
 }

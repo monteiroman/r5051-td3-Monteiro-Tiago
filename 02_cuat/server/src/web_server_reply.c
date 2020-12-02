@@ -4,9 +4,9 @@ extern sem_t *data_semaphore, *calib_semaphore, *cfg_semaphore;
 extern struct sensorValues *sensorValues_data;
 extern struct calibValues *calibration_data;
 extern struct configValues *configValues_data;
+extern bool config_flag;
 
-void processClient(int s_aux, struct sockaddr_in *pDireccionCliente, int puerto)
-{
+void processClient(int s_aux, struct sockaddr_in *pDireccionCliente, int puerto){
     char commBuffer[4096];
     char ipAddr[20];
     int Port;
@@ -20,8 +20,7 @@ void processClient(int s_aux, struct sockaddr_in *pDireccionCliente, int puerto)
     Port = ntohs(pDireccionCliente->sin_port);
     
     // Client message.
-    if (recv(s_aux, commBuffer, sizeof(commBuffer), 0) == -1)
-    {
+    if (recv(s_aux, commBuffer, sizeof(commBuffer), 0) == -1){
         perror("Error en recv");
         exit(1);
     }
@@ -31,8 +30,7 @@ void processClient(int s_aux, struct sockaddr_in *pDireccionCliente, int puerto)
     sensorOption   = strtok(NULL, " \t");      // File name (/compass or /calib)
     
     // Check if it is a GET method.
-    if (memcmp(method, "GET", 5) == 0)
-    {
+    if (memcmp(method, "GET", 5) == 0){
         if(memcmp(sensorOption, "/compass", 7) == 0)
             compassAnswer(commBuffer);
 
@@ -41,8 +39,7 @@ void processClient(int s_aux, struct sockaddr_in *pDireccionCliente, int puerto)
     }
    
     // Reply to client.
-    if (send(s_aux, commBuffer, strlen(commBuffer), 0) == -1)
-    {
+    if (send(s_aux, commBuffer, strlen(commBuffer), 0) == -1){
         perror("Error en send");
         exit(1);
     }
@@ -51,8 +48,7 @@ void processClient(int s_aux, struct sockaddr_in *pDireccionCliente, int puerto)
     close(s_aux);
 }
 
-void compassAnswer(char* commBuffer)
-{
+void compassAnswer(char* commBuffer){
     int xMagHardoffset = 0, yMagHardoffset = 0; 
     float heading = 0;
     float LSM303_accel_x = 0;
@@ -68,7 +64,7 @@ void compassAnswer(char* commBuffer)
     sem_wait(calib_semaphore);
     calibration_data->firstCalibFlag = true;
     sem_post(calib_semaphore);
-
+    
     // Wait semaphore and get sensor data. 
     sem_wait(data_semaphore);
     LSM303_values.X_acc = sensorValues_data->X_acc;
@@ -120,8 +116,7 @@ void compassAnswer(char* commBuffer)
             heading, LSM303_accel_x, LSM303_accel_y,
             LSM303_accel_z);
 
-    if(not_valid_heading)
-    {
+    if(not_valid_heading){
         sprintf(HTML, 
             "%s<p>La informacion no es valida. Enderese el sensor</p>",HTML);
     }
@@ -134,8 +129,7 @@ void compassAnswer(char* commBuffer)
             strlen(HTML), HTML);
 }
 
-void calibAnswer(char* commBuffer, struct calibValues calVal)
-{
+void calibAnswer(char* commBuffer, struct calibValues calVal){
     char encabezadoHTML[4096];
     char HTML[4096];
     bool first_time;
@@ -156,10 +150,9 @@ void calibAnswer(char* commBuffer, struct calibValues calVal)
     sem_wait(calib_semaphore);
     first_time = calibration_data->firstCalibFlag;
 
-    if(first_time)      // If it is the first time on the callibration page 
-    {                   //  it must be set to zero..
-        calibration_data->X_min = 0;
-        calibration_data->X_max = 0;
+    if(first_time){                     // If it is the first time on the  
+        calibration_data->X_min = 0;    //  callibration page it must be set 
+        calibration_data->X_max = 0;    //  to zero.
         calibration_data->Y_min = 0;
         calibration_data->Y_max = 0;
         calibration_data->Z_min = 0;

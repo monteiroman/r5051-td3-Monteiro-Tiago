@@ -8,16 +8,14 @@ struct calibValues *calibration_data;
 struct configValues *configValues_data;
 bool config_flag = false, max_connected = true;
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]){
     struct sockaddr_in datosServidor;
     socklen_t longDirec;
     pid_t server_pid, httpClient_pid, sensor_query_pid;
     int sharedMemId;
 
 // -------> Help <-------
-    if (argc != 2)
-    {
+    if (argc != 2){
         printf("\n\nLinea de comandos: webserver Puerto\n\n");
         
         exit(1);
@@ -59,8 +57,7 @@ int main(int argc, char *argv[])
 // -------> Semaphores <-------
     sem_unlink ("data_semaphore");
     data_semaphore = sem_open ("data_semaphore", O_CREAT | O_EXCL, 0644, 1);
-    if (data_semaphore < 0)
-    {
+    if (data_semaphore < 0){
         shmdt(sharedMemPtr);
         sem_unlink ("data_semaphore");
         sem_close(data_semaphore);
@@ -71,8 +68,7 @@ int main(int argc, char *argv[])
 
     sem_unlink ("calib_semaphore");
     calib_semaphore = sem_open ("calib_semaphore", O_CREAT | O_EXCL, 0644, 1);
-    if (calib_semaphore < 0)
-    {
+    if (calib_semaphore < 0){
         shmdt(sharedMemPtr);
         sem_unlink ("data_semaphore");
         sem_close(data_semaphore);
@@ -85,8 +81,7 @@ int main(int argc, char *argv[])
 
     sem_unlink ("cfg_semaphore");
     cfg_semaphore = sem_open ("cfg_semaphore", O_CREAT | O_EXCL, 0644, 1);
-    if (cfg_semaphore < 0)
-    {
+    if (cfg_semaphore < 0){
         shmdt(sharedMemPtr);
         sem_unlink ("data_semaphore");
         sem_close(data_semaphore);
@@ -127,8 +122,7 @@ int main(int argc, char *argv[])
 
 // -------> Socket creation <-------
     sock_http = socket(AF_INET, SOCK_STREAM,0);
-    if (sock_http == -1)
-    {
+    if (sock_http == -1){
         shmdt(sharedMemPtr);
         print_error(__FILE__, "Socket not created");
         
@@ -157,8 +151,7 @@ int main(int argc, char *argv[])
 
     // Obtiene el puerto para este proceso.
     if( bind(sock_http, (struct sockaddr*)&datosServidor,
-                                                sizeof(datosServidor)) == -1)
-    {
+                                                sizeof(datosServidor)) == -1){
         shmdt(sharedMemPtr);
         close(sock_http);
         print_error(__FILE__, "Can't bind to requested port");
@@ -171,8 +164,7 @@ int main(int argc, char *argv[])
     sem_wait(cfg_semaphore);
     backlog_aux = configValues_data->backlog;
     sem_post(cfg_semaphore);
-    if (listen(sock_http, backlog_aux) < 0)
-    {
+    if (listen(sock_http, backlog_aux) < 0){
         shmdt(sharedMemPtr);
         close(sock_http);
         print_error(__FILE__, "Error in listen");
@@ -184,8 +176,7 @@ int main(int argc, char *argv[])
     // Start sensor values query process.
     sensor_query_pid = fork();
 
-    if (sensor_query_pid < 0)
-    {
+    if (sensor_query_pid < 0){
         shmdt(sharedMemPtr);
         close(sock_http);
         sem_unlink ("data_semaphore");
@@ -198,8 +189,7 @@ int main(int argc, char *argv[])
         
         exit(1);
     }
-    if (sensor_query_pid == 0) // Child process.
-    {       
+    if (sensor_query_pid == 0){ // Child process.       
         sensor_query();
         
         exit(0);
@@ -214,8 +204,7 @@ int main(int argc, char *argv[])
     
 // -------> Client process <-------
     // Allows serving multiple users.
-    while (1)
-    {
+    while (1){
         int s_aux;
         struct sockaddr_in clientData;
 
@@ -225,7 +214,6 @@ int main(int argc, char *argv[])
                 configValues_data->max_connections) ? true : false;
         }
         sem_post(cfg_semaphore);
-
 
         // Update configuration values.
         if(updateConfig() < 0){
@@ -247,8 +235,7 @@ int main(int argc, char *argv[])
         // de la estructura.
         longDirec = sizeof(clientData);
         s_aux = accept(sock_http, (struct sockaddr*) &clientData, &longDirec);
-        if (s_aux < 0)
-        {
+        if (s_aux < 0){
             close(sock_http);
             sem_unlink ("data_semaphore");
             sem_close(data_semaphore);
@@ -261,8 +248,7 @@ int main(int argc, char *argv[])
             exit(1);
         }
         httpClient_pid = fork();
-        if (httpClient_pid < 0)
-        {
+        if (httpClient_pid < 0){
             close(sock_http);
             sem_unlink ("data_semaphore");
             sem_close(data_semaphore);
@@ -274,8 +260,7 @@ int main(int argc, char *argv[])
             
             exit(1);
         }
-        if (httpClient_pid == 0) // Child process.
-        {
+        if (httpClient_pid == 0){ // Child process.
             // Increment "current connections" count.
             sem_wait(calib_semaphore);
             configValues_data->current_connections++;
