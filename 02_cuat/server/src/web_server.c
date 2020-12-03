@@ -6,7 +6,7 @@ sem_t *data_semaphore, *calib_semaphore, *cfg_semaphore;
 struct sensorValues *sensorValues_data;
 struct calibValues *calibration_data;
 struct configValues *configValues_data;
-bool config_flag = false, max_connected = true;
+bool config_flag = false, max_connected = true, exit_flag = false;
 
 int main(int argc, char *argv[]){
     struct sockaddr_in datosServidor;
@@ -204,7 +204,7 @@ int main(int argc, char *argv[]){
     
 // -------> Client process <-------
     // Allows serving multiple users.
-    while (1){
+    while (!exit_flag){
         int s_aux;
         struct sockaddr_in clientData;
 
@@ -280,9 +280,6 @@ int main(int argc, char *argv[]){
         close(s_aux);  // El proceso padre debe cerrar el socket
                    // que usa el hijo.
     }
-}
-
-void SIGINT_handler (int signbr) {
     shmdt(sharedMemPtr);
     close(sock_http);
     sem_unlink ("data_semaphore");
@@ -291,11 +288,12 @@ void SIGINT_handler (int signbr) {
     sem_close(calib_semaphore);
     sem_unlink ("cfg_semaphore");
     sem_close(cfg_semaphore);
+}
 
+void SIGINT_handler (int signbr) {
+    exit_flag = true;
     printf("\n");
-    print_msg(__FILE__, "Exiting server. SIGINT");
-
-    exit(0);
+    print_msg(__FILE__, "Exiting server.");
 }
 
 void SIGCHLD_handler (int signbr) {

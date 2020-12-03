@@ -7,6 +7,7 @@ extern struct sensorValues *sensorValues_data;
 extern struct configValues *configValues_data;
 size_t mave_array_sz = 0;
 float *mave_array = NULL;
+extern bool exit_flag;
 
 void sensor_query (){
     int readSize = 0, mave_samples = 0, idx = 0;
@@ -34,7 +35,7 @@ void sensor_query (){
     mave_array_sz = (size_t) (6*mave_samples*sizeof(float));
 
 // -------> Sensor logic <-------
-    while(1)
+    while(!exit_flag)
     {   
         sem_wait(cfg_semaphore);
         sensor_period = configValues_data->sensor_period;
@@ -140,9 +141,6 @@ void sensor_query (){
     
         usleep((useconds_t) (sensor_period * SECOND));
     }
-}
-
-void SIGINT_sensor_handler (int signbr) {
     close(sock_http);
 
     if(mave_array != NULL){
@@ -153,5 +151,9 @@ void SIGINT_sensor_handler (int signbr) {
     if(fd > 0) {
         close(fd);
     }
-    exit(0);
+}
+
+void SIGINT_sensor_handler (int signbr) {
+    exit_flag = true;
+    print_msg(__FILE__, "Closing sensor process.");
 }
