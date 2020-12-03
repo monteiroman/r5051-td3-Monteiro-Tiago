@@ -48,6 +48,9 @@ void sensor_query (){
             if(mave_samples != configValues_data->mean_samples){
                 mave_samples = configValues_data->mean_samples;
                 mave_change = true;
+                print_msg_wValue(__FILE__, 
+                        "New value of samples set (%d samples).", mave_samples);
+
             }
         }
         sem_post(cfg_semaphore); 

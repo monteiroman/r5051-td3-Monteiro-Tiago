@@ -55,12 +55,12 @@ struct configValues {
     float sensor_period;        // in conf file: f 
 };
 
+// System functions
 void sensor_query ();
 void compassAnswer (char* commBuffer);
 void calibAnswer(char* commBuffer, struct calibValues calVal);
 void processClient(int s_aux, struct sockaddr_in *pDireccionCliente,
                                                                 int puerto);
-
 // Signal handlers.
 void SIGINT_handler (int signbr);
 void SIGUSR1_handler (int signbr);
