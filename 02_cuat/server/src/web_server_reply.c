@@ -13,7 +13,6 @@ void processClient(int s_aux, struct sockaddr_in *pDireccionCliente, int puerto)
     int indiceEntrada;
     char *sensorOption,*method;
     int tempValida = 0;
-    struct calibValues calVal;
     struct sensorValues LSM303_values;
   
     strcpy(ipAddr, inet_ntoa(pDireccionCliente->sin_addr));
@@ -31,11 +30,17 @@ void processClient(int s_aux, struct sockaddr_in *pDireccionCliente, int puerto)
     
     // Check if it is a GET method.
     if (memcmp(method, "GET", 5) == 0){
-        if(memcmp(sensorOption, "/compass", 7) == 0)
+        if(memcmp(sensorOption, "/index", 6) == 0){
+            indexAnswer(commBuffer);
+        }else if(memcmp(sensorOption, "/compass", 8) == 0){
             compassAnswer(commBuffer);
-
-        if(memcmp(sensorOption, "/calib", 5) == 0)
-            calibAnswer(commBuffer, calVal);
+        }else if(memcmp(sensorOption, "/calib", 6) == 0){
+            calibAnswer(commBuffer);
+        }else if(memcmp(sensorOption, "/data_compass", 13) == 0){
+            compassDataAnswer(commBuffer);
+        }else if(memcmp(sensorOption, "/data_calib", 11) == 0){
+            calibDataAnswer(commBuffer);
+        }
     }
    
     // Reply to client.
@@ -48,16 +53,47 @@ void processClient(int s_aux, struct sockaddr_in *pDireccionCliente, int puerto)
     close(s_aux);
 }
 
+void indexAnswer(char* commBuffer){
+    char *HTML;
+    size_t html_size = 0;
+
+    HTML = readFile(INDEX_PATH, &html_size);
+            
+    sprintf(commBuffer,
+            "HTTP/1.1 200 OK\n"
+            "Content-Length: %d\n"
+            "Content-Type: text/html; charset=utf-8\n"
+            "Connection: Closed\n\n%s",
+            html_size, HTML);
+    free(HTML);
+}
+
 void compassAnswer(char* commBuffer){
+    char *HTML;
+    size_t html_size = 0;
+
+    HTML = readFile(COMPASS_PATH, &html_size);
+            
+    sprintf(commBuffer,
+            "HTTP/1.1 200 OK\n"
+            "Content-Length: %d\n"
+            "Content-Type: text/html; charset=utf-8\n"
+            "Connection: Closed\n\n%s",
+            html_size, HTML);
+    free(HTML);
+}
+
+void compassDataAnswer(char* commBuffer){
     int xMagHardoffset = 0, yMagHardoffset = 0; 
     float heading = 0;
     float LSM303_accel_x = 0;
     float LSM303_accel_y = 0;
     float LSM303_accel_z = 0;
     char encabezadoHTML[4096];
-    char HTML[4096];
+    char *HTML;
     bool not_valid_heading;
     struct sensorValues LSM303_values;
+    size_t html_size = 0;
 
 // -------> Compass logic. <-------
     // Set callibration first time to true.
@@ -100,40 +136,41 @@ void compassAnswer(char* commBuffer){
                                                             LSM303ACC_GRAVITY;
     
     // If sensor is not straight the heading measure is wrong.
-    not_valid_heading = (LSM303_accel_z < STRAIGHT_SENSOR_G) ? true : false;
+    not_valid_heading = (LSM303_accel_z < STRAIGHT_SENSOR_G) ? true : false; 
 
-// -------> HTML reply. <-------
-    sprintf(encabezadoHTML, "<html><head><title>Brujula</title>"
-            "<meta name=\"viewport\" "
-            "content=\"width=device-width, initial-scale=1.0\">"
-            "<meta http-equiv=\"refresh\" content=\"1\">"
-            "</head>"
-            "<h1>Brujula</h1>");
-    
-    sprintf(HTML, "%s<p> El sensor esta apuntando a: %.2f°</p>"
-            "<p>Aceleracion:</p><p> X: %.2fm/s^2 "
-            "Y: %.2fm/s^2 Z: %.2fm/s^2</p>", encabezadoHTML, 
-            heading, LSM303_accel_x, LSM303_accel_y,
-            LSM303_accel_z);
+    sprintf(commBuffer,
+            "HTTP/1.1 200 OK\n"
+            "Content-Type: text/event-stream\n"
+            "Cache-Control: no-cache\n"
+            "Connection: keep-alive\n"
+            "Retry: 1000\n"
+            "\n"
+            "data: %.2f %.2f %.2f %.2f\n\n",
+            heading, LSM303_accel_x, LSM303_accel_y, LSM303_accel_z);
+}
 
-    if(not_valid_heading){
-        sprintf(HTML, 
-            "%s<p>La informacion no es valida. Enderese el sensor</p>",HTML);
-    }
+void calibAnswer(char* commBuffer){
+    char *HTML;
+    size_t html_size = 0;
+
+    HTML = readFile(CALIBRATION_PATH, &html_size);
             
     sprintf(commBuffer,
             "HTTP/1.1 200 OK\n"
             "Content-Length: %d\n"
             "Content-Type: text/html; charset=utf-8\n"
             "Connection: Closed\n\n%s",
-            strlen(HTML), HTML);
+            html_size, HTML);
+    free(HTML);
 }
 
-void calibAnswer(char* commBuffer, struct calibValues calVal){
+void calibDataAnswer(char* commBuffer){
     char encabezadoHTML[4096];
-    char HTML[4096];
+    char *HTML;
     bool first_time;
     struct sensorValues LSM303_values;
+    size_t html_size = 0;
+    struct calibValues calVal;
 
 // -------> Calibration logic. <-------
     // Wait semaphore and get sensor data. 
@@ -199,23 +236,13 @@ void calibAnswer(char* commBuffer, struct calibValues calVal){
     calibration_data->Z_max = calVal.Z_max;
     sem_post(calib_semaphore);
 
-// -------> HTML reply. <-------
-    sprintf(encabezadoHTML, "<html><head><title>Brujula</title>"
-            "<meta name=\"viewport\" "
-            "content=\"width=device-width, initial-scale=1.0\">"
-            "<meta http-equiv=\"refresh\" content=\"1\">"
-            "</head>"
-            "<h1>Brujula</h1>");
-    
-    sprintf(HTML, "%s<p> Calibracion:</p>"
-            "<p> Xmed: %.2f"
-            "Ymed: %.2f Z: %.2f</p>", encabezadoHTML, 
-            midX, midY, midZ);
-            
     sprintf(commBuffer,
             "HTTP/1.1 200 OK\n"
-            "Content-Length: %d\n"
-            "Content-Type: text/html; charset=utf-8\n"
-            "Connection: Closed\n\n%s",
-            strlen(HTML), HTML);
+            "Content-Type: text/event-stream\n"
+            "Cache-Control: no-cache\n"
+            "Connection: keep-alive\n"
+            "Retry: 1000\n"
+            "\n"
+            "data: %+.0f %+.0f %+.0f\n\n",
+            midX, midY, midZ);
 }

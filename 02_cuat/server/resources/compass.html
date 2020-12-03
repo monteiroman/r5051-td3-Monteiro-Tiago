@@ -1,0 +1,28 @@
+<html>
+    <head>
+        <title>TP2 Tiago Monteiro 142035-5</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script>
+            if(typeof(EventSource) !== "undefined") {
+                var source = new EventSource("data_compass");
+                source.onmessage = function(event) {
+                    var res = event.data.split(" ");
+                    document.getElementById("heading").innerHTML = "El sensor esta apuntando a: " + res[0] + "°";
+                    document.getElementById("acc").innerHTML = "X: " + res[1] + " m/s^2  Y: " + res[2] + " m/s^2  Z: " + res[3] + " m/s^2";
+                };
+            } else {
+                document.getElementById("result").innerHTML = "Sorry, your browser does not support server-sent events...";
+            }
+        </script>
+    </head>
+    <body>
+        <h1>TP2 Tiago Monteiro 142035-5</h1>
+        <h2>Brújula electrónica</h2>
+        <div id=result></div>
+        <p id="heading"></p>
+        <p>Aceleracion:</p>
+        <p id="acc"></p>
+        <a href="index.html">Volver al inicio.</a>
+    </body>
+</html>
+            

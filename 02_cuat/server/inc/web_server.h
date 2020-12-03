@@ -58,9 +58,14 @@ struct configValues {
 // System functions
 void sensor_query ();
 void compassAnswer (char* commBuffer);
-void calibAnswer(char* commBuffer, struct calibValues calVal);
+void calibAnswer(char* commBuffer);
 void processClient(int s_aux, struct sockaddr_in *pDireccionCliente,
                                                                 int puerto);
+void compassDataAnswer(char* commBuffer);
+void calibDataAnswer(char* commBuffer);
+void indexAnswer(char* commBuffer);
+
+
 // Signal handlers.
 void SIGINT_handler (int signbr);
 void SIGUSR1_handler (int signbr);
