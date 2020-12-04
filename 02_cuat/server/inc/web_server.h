@@ -17,6 +17,9 @@
 #include <sys/shm.h>
 #include <semaphore.h>
 #include <sys/stat.h>
+#include <sys/select.h>
+#include <sys/sendfile.h>
+
 
 #define MAX_CONN 10 //Nro maximo de conexiones en espera
 
@@ -64,7 +67,7 @@ void processClient(int s_aux, struct sockaddr_in *pDireccionCliente,
 void compassDataAnswer(char* commBuffer);
 void calibDataAnswer(char* commBuffer);
 void indexAnswer(char* commBuffer);
-
+void faviconAnswer(char* commBuffer);
 
 // Signal handlers.
 void SIGINT_handler (int signbr);
@@ -82,4 +85,6 @@ off_t fsize(const char * path);
 unsigned char* readFile(const char* path, size_t* size);
 int readAndUpdateCfg();
 int updateConfig();
+unsigned char* readBinFile(const char* path, size_t* size);
+
 

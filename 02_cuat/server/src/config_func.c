@@ -112,6 +112,32 @@ unsigned char* readFile(const char* path, size_t* size){
     return buffer;
 }
 
+unsigned char* readBinFile(const char* path, size_t* size){
+    // Get file size.
+    size_t _size = fsize(path);
+    if(_size < 1){
+        return NULL;
+    }
+
+    // Open file.
+    FILE* fp = fopen(path, "rb");
+    if(fp == NULL){
+        return NULL;
+    }
+
+    // Alloc memory.
+    unsigned char* buffer = calloc(_size, sizeof(unsigned char));
+
+    // Read file.
+    if(fread(buffer, sizeof(unsigned char), _size, fp) < 0){
+        return NULL;
+    } 
+    fclose(fp);
+
+    *size = _size;
+    return buffer;
+}
+
 off_t fsize(const char * path) {
 	struct stat st;
 

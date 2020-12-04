@@ -155,5 +155,4 @@ void sensor_query (){
 
 void SIGINT_sensor_handler (int signbr) {
     exit_flag = true;
-    print_msg(__FILE__, "Closing sensor process.");
 }

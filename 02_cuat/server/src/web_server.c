@@ -12,7 +12,9 @@ int main(int argc, char *argv[]){
     struct sockaddr_in datosServidor;
     socklen_t longDirec;
     pid_t server_pid, httpClient_pid, sensor_query_pid;
-    int sharedMemId;
+    int sharedMemId, sret;
+    fd_set readfds;
+    struct timeval timeout;
 
 // -------> Help <-------
     if (argc != 2){
@@ -208,6 +210,7 @@ int main(int argc, char *argv[]){
         int s_aux;
         struct sockaddr_in clientData;
 
+        // If there are to many requests, waits until someone ends.
         sem_wait(cfg_semaphore);
         while(max_connected){
             max_connected = (configValues_data->current_connections >= 
@@ -230,55 +233,67 @@ int main(int argc, char *argv[]){
             exit(1);
         }
 
-        // La funcion accept rellena la estructura address con
-        // informacion del cliente y pone en longDirec la longitud
-        // de la estructura.
-        longDirec = sizeof(clientData);
-        s_aux = accept(sock_http, (struct sockaddr*) &clientData, &longDirec);
-        if (s_aux < 0){
-            close(sock_http);
-            sem_unlink ("data_semaphore");
-            sem_close(data_semaphore);
-            sem_unlink ("calib_semaphore");
-            sem_close(calib_semaphore);
-            sem_unlink ("cfg_semaphore");
-            sem_close(cfg_semaphore);
-            print_error(__FILE__, "\"accept()\" error");
+        // If there are no clients, the server should not be blocked by 
+        // accept(). With select () a timer waits for new data on the socket, 
+        // if there is no data on the socket the server skips from accept ().
+        FD_ZERO(&readfds);
+        FD_SET(sock_http, &readfds);
 
-            exit(1);
-        }
-        httpClient_pid = fork();
-        if (httpClient_pid < 0){
-            close(sock_http);
-            sem_unlink ("data_semaphore");
-            sem_close(data_semaphore);
-            sem_unlink ("calib_semaphore");
-            sem_close(calib_semaphore);
-            sem_unlink ("cfg_semaphore");
-            sem_close(cfg_semaphore);
-            print_error(__FILE__, "Can't create http process");
-            
-            exit(1);
-        }
-        if (httpClient_pid == 0){ // Child process.
-            // Increment "current connections" count.
-            sem_wait(calib_semaphore);
-            configValues_data->current_connections++;
-            sem_post(calib_semaphore);
-            
-            processClient(s_aux, &clientData, atoi(argv[1]));
+        timeout.tv_sec = 1;
+        timeout.tv_usec = 0;
 
-            // Decrement "current connections" count.
-            sem_wait(calib_semaphore);
-            (configValues_data->current_connections > 0) ? 
-                           configValues_data->current_connections-- : 
-                           0;
-            sem_post(calib_semaphore);
-            
-            exit(0);
+        sret = select(8, &readfds, NULL, NULL, &timeout);
+        if(sret > 0){
+            // accept() fills up the addres structure with the client 
+            // information and places the struct length in longDirec  
+            longDirec = sizeof(clientData);
+            s_aux = accept(sock_http, (struct sockaddr*) &clientData, &longDirec);
+            if (s_aux < 0){
+                close(sock_http);
+                sem_unlink ("data_semaphore");
+                sem_close(data_semaphore);
+                sem_unlink ("calib_semaphore");
+                sem_close(calib_semaphore);
+                sem_unlink ("cfg_semaphore");
+                sem_close(cfg_semaphore);
+                print_error(__FILE__, "\"accept()\" error");
+
+                exit(1);
+            }
+
+            httpClient_pid = fork();
+
+            if (httpClient_pid < 0){
+                close(sock_http);
+                sem_unlink ("data_semaphore");
+                sem_close(data_semaphore);
+                sem_unlink ("calib_semaphore");
+                sem_close(calib_semaphore);
+                sem_unlink ("cfg_semaphore");
+                sem_close(cfg_semaphore);
+                print_error(__FILE__, "Can't create http process");
+
+                exit(1);
+            }
+            if (httpClient_pid == 0){ // Child process.
+                // Increment "current connections" count.
+                sem_wait(calib_semaphore);
+                configValues_data->current_connections++;
+                sem_post(calib_semaphore);
+
+                processClient(s_aux, &clientData, atoi(argv[1]));
+
+                // Decrement "current connections" count.
+                sem_wait(calib_semaphore);
+                (configValues_data->current_connections > 0) ? 
+                               configValues_data->current_connections-- : 
+                               0;
+                sem_post(calib_semaphore);
+
+                exit(0);
+            }
+            close(s_aux);  // The parent process must close childs socket.
         }
-        close(s_aux);  // El proceso padre debe cerrar el socket
-                   // que usa el hijo.
     }
     shmdt(sharedMemPtr);
     close(sock_http);
@@ -293,7 +308,7 @@ int main(int argc, char *argv[]){
 void SIGINT_handler (int signbr) {
     exit_flag = true;
     printf("\n");
-    print_msg(__FILE__, "Exiting server.");
+    print_msg(__FILE__, "Exiting server and closing sensor process.");
 }
 
 void SIGCHLD_handler (int signbr) {

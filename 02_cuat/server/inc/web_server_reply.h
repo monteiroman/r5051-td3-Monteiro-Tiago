@@ -4,3 +4,4 @@
 #define COMPASS_PATH            "server/resources/compass.html"
 #define CALIBRATION_PATH        "server/resources/calibration.html"
 #define INDEX_PATH              "server/resources/index.html"
+#define FAVICON_PATH            "server/resources/favicon.ico"

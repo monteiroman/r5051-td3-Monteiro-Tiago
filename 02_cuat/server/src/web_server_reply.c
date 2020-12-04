@@ -14,6 +14,7 @@ void processClient(int s_aux, struct sockaddr_in *pDireccionCliente, int puerto)
     char *sensorOption,*method;
     int tempValida = 0;
     struct sensorValues LSM303_values;
+    bool is_favicon = false;
   
     strcpy(ipAddr, inet_ntoa(pDireccionCliente->sin_addr));
     Port = ntohs(pDireccionCliente->sin_port);
@@ -40,6 +41,9 @@ void processClient(int s_aux, struct sockaddr_in *pDireccionCliente, int puerto)
             compassDataAnswer(commBuffer);
         }else if(memcmp(sensorOption, "/data_calib", 11) == 0){
             calibDataAnswer(commBuffer);
+        }else if(memcmp(sensorOption, "/favicon.ico", 12) == 0){
+            faviconAnswer(commBuffer);
+            is_favicon = true;
         }
     }
    
@@ -47,6 +51,17 @@ void processClient(int s_aux, struct sockaddr_in *pDireccionCliente, int puerto)
     if (send(s_aux, commBuffer, strlen(commBuffer), 0) == -1){
         perror("Error en send");
         exit(1);
+    }
+
+    if(is_favicon){
+        size_t _size = fsize(FAVICON_PATH);
+        int fp = open(FAVICON_PATH, O_RDONLY);
+
+        if(sendfile(s_aux, fp, NULL, _size) == -1){
+            perror("Error en send");
+            exit(1);
+        }
+        close(fp);
     }
     
     // Close actual client connection.
@@ -66,6 +81,17 @@ void indexAnswer(char* commBuffer){
             "Connection: Closed\n\n%s",
             html_size, HTML);
     free(HTML);
+}
+
+void faviconAnswer(char* commBuffer){
+    size_t html_size = fsize(FAVICON_PATH);
+
+    sprintf(commBuffer,
+            "HTTP/1.1 200 OK\n"
+            "Content-Length: %d\n"
+            "Content-Type: image/x-icon\n"
+            "Connection: Closed\n\n",
+            html_size);
 }
 
 void compassAnswer(char* commBuffer){
