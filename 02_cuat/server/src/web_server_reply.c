@@ -21,7 +21,7 @@ void processClient(int s_aux, struct sockaddr_in *pDireccionCliente, int puerto)
     
     // Client message.
     if (recv(s_aux, commBuffer, sizeof(commBuffer), 0) == -1){
-        perror("Error en recv");
+        print_error(__FILE__, "recv() fails");
         exit(1);
     }
   
@@ -49,7 +49,7 @@ void processClient(int s_aux, struct sockaddr_in *pDireccionCliente, int puerto)
    
     // Reply to client.
     if (send(s_aux, commBuffer, strlen(commBuffer), 0) == -1){
-        perror("Error en send");
+        print_error(__FILE__, "send() fails");
         exit(1);
     }
 
@@ -58,12 +58,11 @@ void processClient(int s_aux, struct sockaddr_in *pDireccionCliente, int puerto)
         int fp = open(FAVICON_PATH, O_RDONLY);
 
         if(sendfile(s_aux, fp, NULL, _size) == -1){
-            perror("Error en send");
+            print_error(__FILE__, "sendfile() fails");
             exit(1);
         }
         close(fp);
-    }
-    
+    } 
     // Close actual client connection.
     close(s_aux);
 }
