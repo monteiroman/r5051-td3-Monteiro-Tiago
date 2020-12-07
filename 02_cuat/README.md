@@ -7,6 +7,8 @@
 <img src="/02_cuat/Readme_docs/img/server.gif" width="30%"></img>
 </div>
 
+## El enunciado del Proyecto puede verse [acá.](/02_cuat/Readme_docs/gtp_td3_2020_2_v1_1.pdf)
+
 ## Para compilar y correr el proyecto
         
         cd 02_cuat
