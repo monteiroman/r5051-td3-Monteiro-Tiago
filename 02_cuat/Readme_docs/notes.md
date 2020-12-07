@@ -14,3 +14,5 @@ Esto se puede ver con:
     sudo i2cdetect -y -r 2
 
 Cuando se encuentra presente el driver del Linux, es decir, con el device tree original.
+
+#### [Volver al Readme principal](/02_cuat/README.md)
