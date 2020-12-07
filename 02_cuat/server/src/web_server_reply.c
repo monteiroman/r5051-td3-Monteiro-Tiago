@@ -44,6 +44,8 @@ void processClient(int s_aux, struct sockaddr_in *pDireccionCliente, int puerto)
         }else if(memcmp(sensorOption, "/favicon.ico", 12) == 0){
             faviconAnswer(commBuffer);
             is_favicon = true;
+        }else{
+            error404(commBuffer);
         }
     }
    
@@ -271,4 +273,19 @@ void calibDataAnswer(char* commBuffer){
             "\n"
             "data: %+.0f %+.0f %+.0f\n\n",
             midX, midY, midZ);
+}
+
+void error404(char* commBuffer){
+    char *HTML;
+    size_t html_size = 0;
+
+    HTML = readFile(ERROR404_PATH, &html_size);
+            
+    sprintf(commBuffer,
+            "HTTP/1.1 200 OK\n"
+            "Content-Length: %d\n"
+            "Content-Type: text/html; charset=utf-8\n"
+            "Connection: Closed\n\n%s",
+            html_size, HTML);
+    free(HTML);
 }

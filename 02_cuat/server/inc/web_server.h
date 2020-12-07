@@ -64,10 +64,13 @@ void compassAnswer (char* commBuffer);
 void calibAnswer(char* commBuffer);
 void processClient(int s_aux, struct sockaddr_in *pDireccionCliente,
                                                                 int puerto);
+
+// Server reply
 void compassDataAnswer(char* commBuffer);
 void calibDataAnswer(char* commBuffer);
 void indexAnswer(char* commBuffer);
 void faviconAnswer(char* commBuffer);
+void error404(char* commBuffer);
 
 // Signal handlers.
 void SIGINT_handler (int signbr);

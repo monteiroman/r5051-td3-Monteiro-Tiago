@@ -5,3 +5,4 @@
 #define CALIBRATION_PATH        "server/resources/calibration.html"
 #define INDEX_PATH              "server/resources/index.html"
 #define FAVICON_PATH            "server/resources/favicon.ico"
+#define ERROR404_PATH           "server/resources/error404.html"
