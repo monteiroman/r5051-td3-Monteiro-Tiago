@@ -2,6 +2,11 @@
 	
 ## Tiago Monteiro - Legajo: 142035-5
 
+<div align="center">
+
+<img src="/02_cuat/Readme_docs/img/server.gif" width="30%"></img> 
+</div>
+
 ### Descripción de puntos importantes del proyecto
 
 En este proyecto se programó un driver I2C que comuniqua la placa de desarrollo BeagleBone Black con un sensor a elección del alumno. En particular, en este proyecto de eligió el LSM303DLHC de ST,
