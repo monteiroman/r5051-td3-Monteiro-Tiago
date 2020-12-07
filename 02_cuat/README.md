@@ -31,6 +31,4 @@ A continuación se intenta explicar cómo está diagramado el proyecto:
 
 ### [Scripts secundarios](/02_cuat/Readme_docs/my_scripts.md)
 
-### [Tareas pendientes](/02_cuat/Readme_docs/TODO.md)
-
 ### [Notas](/02_cuat/Readme_docs/notes.md)
