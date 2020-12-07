@@ -5,7 +5,7 @@ Hay dos formas de calibrar el dispositivo.
 
 * **La primera** es la que se explica en la sección pertinente de [Servidor de archivos HTML](/02_cuat/Readme_docs/server.md).
 
-* **La segunda** es usando el programa de calibración que se encuentra en i2c_driver/test/. Este programa imprime en consola los valores medios de campo magnético medidos por el sensor a medida que se lo va moviendo en todas las direcciones. Luego de obtener los valores, y para un correcto funcionamiento del sensor, se deben poner los mismos en el archivo "server.cfg" en las líneas X e Y según corresponda con sus signos cambiados.
+* **La segunda** es usando el programa de calibración que se encuentra en i2c_driver/test/. Este programa imprime en consola los valores medios de campo magnético medidos por el sensor a medida que se lo va moviendo en todas las direcciones. Luego de obtener los valores, y para un correcto funcionamiento del servidor, se deben colocar los mismos en el archivo "server.cfg" en las líneas X e Y según corresponda con sus signos cambiados.
 
 Se puede ver mas información en [este artículo](https://learn.adafruit.com/lsm303-accelerometer-slash-compass-breakout?view=all) del fabricante del sensor
 
