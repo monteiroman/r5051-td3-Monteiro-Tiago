@@ -15,4 +15,4 @@ Ya que la intención es lograr un compás electrónico básico en esta instancia
 
 Cabe aclarar que los ejes que se usaron para el cálculo del rumbo son el X e Y y que el rumbo es señalado por X.
 
-#### [Volver al Readme principal](/02_cuat/RADME.md)
+#### [Volver al Readme principal](/02_cuat/README.md)
