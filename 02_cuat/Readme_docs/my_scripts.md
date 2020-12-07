@@ -5,7 +5,7 @@ Estos scripts se utilizaron para hacer mas simple la conección a la BBB durante
 
 * **scp_BBB**: Se encarga de pasar archivos desde y hacia la BBB con valores por defecto que permiten hacer el trabajo mas fácil.
 
-* **ssh_BBB**: Se encarga de conectar la PC a la BBB con valores por defecto, también puede apagar la BBB y setear la hora de la placa para poder compilar en ella. Este script necesita un poco mas de configuración, para poder apagar la BBB y setear su hora hay que editar el archivo:
+* **ssh_BBB**: Se encarga de conectar la PC a la BBB con valores por defecto, también puede apagar la BBB y setear la hora de la placa para poder compilar en ella. Este script necesita un poco mas de configuración. Para poder apagar la BBB y setear su hora hay que editar el archivo:
 
         /etc/sudoers
 
