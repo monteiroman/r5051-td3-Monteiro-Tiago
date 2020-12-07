@@ -72,6 +72,15 @@
                     document.getElementById("acc_X").innerHTML = res[1];
                     document.getElementById("acc_Y").innerHTML = res[2];
                     document.getElementById("acc_Z").innerHTML = res[3];
+                    not_valid = res[4];
+
+                    if(res[4] == 1){
+                        document.getElementById("not_valid_print").innerHTML = 
+                    "La medicion no es valida, por favor enderese el sensor.";
+                    }else{
+                        document.getElementById("not_valid_print").innerHTML = 
+                        "";
+                    }
                 };
             } else {
                 document.getElementById("result").innerHTML = 
@@ -206,8 +215,9 @@
               <td>m/s<sup>2</sup></td>
             </tr>
         </table>
+        <p id="not_valid_print" style="color:red;"></p>
         <button class="button button" onclick="location.href = 'index.html';">
-                                                    Volver al inicio.</button>
+                                                    Volver al inicio</button>
         <div id="chartdiv"></div>
     </body>
 </html>

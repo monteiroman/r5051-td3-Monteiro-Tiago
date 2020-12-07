@@ -116,7 +116,7 @@ void compassDataAnswer(char* commBuffer){
     float LSM303_accel_z = 0;
     char encabezadoHTML[4096];
     char *HTML;
-    bool not_valid_heading;
+    int not_valid_heading;
     struct sensorValues LSM303_values;
     size_t html_size = 0;
 
@@ -161,7 +161,7 @@ void compassDataAnswer(char* commBuffer){
                                                             LSM303ACC_GRAVITY;
     
     // If sensor is not straight the heading measure is wrong.
-    not_valid_heading = (LSM303_accel_z < STRAIGHT_SENSOR_G) ? true : false; 
+    not_valid_heading = (LSM303_accel_z < STRAIGHT_SENSOR_G) ? 1 : 0; 
 
     sprintf(commBuffer,
             "HTTP/1.1 200 OK\n"
@@ -170,8 +170,9 @@ void compassDataAnswer(char* commBuffer){
             "Connection: keep-alive\n"
             "Retry: 1000\n"
             "\n"
-            "data: %.2f %.2f %.2f %.2f\n\n",
-            heading, LSM303_accel_x, LSM303_accel_y, LSM303_accel_z);
+            "data: %.2f %.2f %.2f %.2f %d\n\n",
+            heading, LSM303_accel_x, LSM303_accel_y, LSM303_accel_z, 
+            not_valid_heading);
 }
 
 void calibAnswer(char* commBuffer){

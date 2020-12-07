@@ -58,7 +58,8 @@
                     document.getElementById("med_Z").innerHTML = res[2];
                 };
             } else {
-                document.getElementById("result").innerHTML = "Sorry, your browser does not support server-sent events...";
+                document.getElementById("result").innerHTML = 
+                "Sorry, your browser does not support server-sent events...";
             }
         </script>
     </head>
@@ -85,6 +86,10 @@
               <td><p id="med_Z"></p></td>
             </tr>
         </table>
+        <p>Una vez que los valores de media no varíen, edite el archivo 
+            "server.cfg" </br> con los valores de "X media" e "Y media" en los 
+            campos correspondientes </br> cambiando sus signos y envíe la señal 
+            SIGUSR1 al proceso del servidor </br> para setearlos.</p>
         <button class="button button" onclick="location.href = 'index.html';">
                                                     Volver al inicio.</button>
     </body>
