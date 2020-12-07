@@ -34,3 +34,5 @@ Reiniciar la terminal.
 
 #### Notas
 Cada script viene con su texto de ayuda en la opción __-h__.
+
+#### [Volver al Readme principal](/02_cuat/README.md)
