@@ -2,11 +2,36 @@
     <head>
         <title>TP2 Tiago Monteiro 142035-5</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            .button {
+                border: none;
+                color: white;
+                padding: 16px 32px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 4px 2px;
+                transition-duration: 0.4s;
+                cursor: pointer;
+            }
+            .button {
+                background-color: white; 
+                color: black; 
+                border: 2px solid #008CBA;
+            }
+            .button:hover {
+                background-color: #008CBA;
+                color: white;
+            }
+        </style>
     </head>
     <body>
         <h1>TP2 Tiago Monteiro 142035-5</h1>
         <h2>Brújula electrónica</h2>
-        <p><a href="compass">Compás</a></p>
-        <p><a href="calib">Calibración</a></p>
+        <button class="button button" onclick="location.href = 'compass';">
+                                                                Compás</button>
+        <button class="button button" onclick="location.href = 'calib';">
+                                                            Calibración</button>
     </body>
 </html>

@@ -7,7 +7,7 @@ extern struct configValues *configValues_data;
 extern bool config_flag;
 
 void processClient(int s_aux, struct sockaddr_in *pDireccionCliente, int puerto){
-    char commBuffer[4096];
+    char commBuffer[8192];
     char ipAddr[20];
     int Port;
     int indiceEntrada;
