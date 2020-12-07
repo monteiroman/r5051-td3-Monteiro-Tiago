@@ -4,8 +4,14 @@
 
 <div align="center">
 
-<img src="/02_cuat/Readme_docs/img/server.gif" width="30%"></img> 
+<img src="/02_cuat/Readme_docs/img/server.gif" width="30%"></img>
 </div>
+
+## Para compilar y correr el proyecto
+        
+        cd 02_cuat
+        make
+        make run_server
 
 ### Descripción de puntos importantes del proyecto
 
