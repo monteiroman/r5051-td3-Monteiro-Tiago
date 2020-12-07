@@ -14,3 +14,5 @@ Se puede ver mas información en [este artículo](https://learn.adafruit.com/lsm
 Ya que la intención es lograr un compás electrónico básico en esta instancia del proyecto, al acelerómetro solamente se utilizó para informar si la medición del rumbo es válida o no. Si el valor de aceleración de la gravedad para el eje Z es menor a 9m/s<sup>2</sup> se considera que el rumbo es erróneo y se muestra un texto indicando tal caso.
 
 Cabe aclarar que los ejes que se usaron para el cálculo del rumbo son el X e Y y que el rumbo es señalado por X.
+
+#### [Volver al Readme principal](/02_cuat/RADME.md)
