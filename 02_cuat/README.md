@@ -5,7 +5,7 @@
 ### Descripción de puntos importantes del proyecto
 
 En este proyecto se programó un driver I2C que comuniqua la placa de desarrollo BeagleBone Black con un sensor a elección del alumno. En particular, en este proyecto de eligió el LSM303DLHC de ST,
-se trata de un acelerómetro y sensor magnético de tres ejes. La hoja de datos del mismo se puede ver [acá](https://cdn-shop.adafruit.com/datasheets/LSM303DLHC.PDF) y la información de la placa donde éste 
+se trata de un acelerómetro y sensor magnético de tres ejes. La hoja de datos del mismo se puede ver [**acá**](https://cdn-shop.adafruit.com/datasheets/LSM303DLHC.PDF) y la información de la placa donde éste 
 está soldado se puede ver [acá.](https://learn.adafruit.com/lsm303-accelerometer-slash-compass-breakout/downloads)
 
 A continuación se intenta explicar cómo está diagramado el proyecto:
