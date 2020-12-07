@@ -16,10 +16,10 @@ A continuación se intenta explicar cómo está diagramado el proyecto:
 
 ### [Device Tree](/02_cuat/Readme_docs/device_tree.md)
 
-### [Servidor de archivos HTML](/02_cuat/Readme_docs/sensor.md)
+### [Servidor de archivos HTML](/02_cuat/Readme_docs/server.md)
 
 ### [Scripts secundarios](/02_cuat/Readme_docs/my_scripts.md)
 
-### [Tareas pendientes](/02_cuat/Readme_docs/sensor.md)
+### [Tareas pendientes](/02_cuat/Readme_docs/TODO.md)
 
-### [Notas](/02_cuat/Readme_docs/sensor.md)
+### [Notas](/02_cuat/Readme_docs/notes.md)
