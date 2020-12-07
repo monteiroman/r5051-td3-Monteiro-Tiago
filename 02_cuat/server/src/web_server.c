@@ -199,9 +199,7 @@ int main(int argc, char *argv[]){
 
 // -------> User info. <-------
     print_msg(__FILE__, "Go to this path in your browser:");
-    print_msg_wValue(__FILE__, "\thttp://server_ip_addr:%s/callib", 
-                                                                (long)argv[1]);
-    print_msg_wValue(__FILE__, "\tor http://server_ip_addr:%s/compass\n", 
+    print_msg_wValue(__FILE__, "\thttp://server_ip_addr:%s/index", 
                                                                 (long)argv[1]);
     
 // -------> Client process <-------
