@@ -193,6 +193,16 @@ int main(int argc, char *argv[]){
     }
     if (sensor_query_pid == 0){ // Child process.       
         sensor_query();
+
+        // Release resources.
+        shmdt(sharedMemPtr);
+        close(sock_http);
+        sem_unlink ("data_semaphore");
+        sem_close(data_semaphore);
+        sem_unlink ("calib_semaphore");
+        sem_close(calib_semaphore);
+        sem_unlink ("cfg_semaphore");
+        sem_close(cfg_semaphore);
         
         exit(0);
     }
