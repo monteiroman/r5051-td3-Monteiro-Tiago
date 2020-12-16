@@ -12,3 +12,6 @@ Se debe tener una una estructura de tipo wait_queue_head_t la cual se puede decl
 
 Existe otra versión de wait event que pone al proceso en estado UNINTERRUPTIBLE. Pero se nos recomendó que la misma no sea utilizada.
 
+******
+* OK *
+******
