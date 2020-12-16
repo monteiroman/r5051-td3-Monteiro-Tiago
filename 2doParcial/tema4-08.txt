@@ -18,3 +18,25 @@ a) 	4 vias
 b) Numero de sets = 2 ^12 / 4 = 1024 sets
 
 e) Numero de lineas = 32KB/8B = 4096 lineas
+
+
+*******************************************************************************************************************
+Corrección
+a. OK
+
+b. Regular-. De donde sale  2 ^12 ? En tal caso es 2^13 ya que la vía tiene 8Kbytes. Asumo que el 4 de la fórmula es la cantidad de líneas por set
+ 
+c. No respondida:
+    |          Vía #0                             | |             Vía#1                         |  LRU (Codificados para ahorrar bits)
+    +---------------------------------------------+ +-------------------------------------------+  +-+
+    |          Tag               ||M|M||V||L|L|L|L| |          Tag              ||M|M||V|L|L|L|L|  | |
+
+MM = Bits M.E.S.I.
+LLLL = Bits de validez de la línea
+V = Bit de validez del tag
+
+d. No respondida
+
+e. MAL. Termina calculando un valor que es dato del problema.
+        Se pide líneas por cada tag
+        En general es igual a Número de líneas por sets.ya que el set de líneas responde al mismo tag 
